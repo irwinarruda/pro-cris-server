@@ -10,6 +10,8 @@ type Env struct {
 	WhatsAppUrl       string `env:"API_WHATSAPP_URL"`
 	WhatsAppPhoneId   string `env:"API_WHATSAPP_PHONE_ID"`
 	WhatsAppChallenge string `env:"API_WHATSAPP_VERIFY_TOKEN"`
+	OpenAiUrl         string `env:"API_OPENAI_URL"`
+	OpenAiAuthToken   string `env:"API_OPENAI_AUTH_TOKEN"`
 }
 
 var env *Env

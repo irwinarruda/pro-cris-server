@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
-	"time"
 
 	"github.com/irwinarruda/pro-cris-server/libs/prohttp"
 	"github.com/irwinarruda/pro-cris-server/libs/wa"
@@ -14,7 +13,7 @@ import (
 
 func SendMessage(body *wa.ReqMessage) error {
 	env := configs.GetEnv()
-	req, err := prohttp.NewRequest(prohttp.Config[wa.ReqMessage]{
+	res, err := prohttp.DoRequest[interface{}](prohttp.RequestConfig[wa.ReqMessage]{
 		Url:    fmt.Sprintf("%v/%v/messages", env.WhatsAppUrl, env.WhatsAppPhoneId),
 		Method: http.MethodPost,
 		Body:   body,
@@ -25,14 +24,9 @@ func SendMessage(body *wa.ReqMessage) error {
 	})
 	utils.AssertErr(err)
 
-	client := http.Client{
-		Timeout: 30 * time.Second,
-	}
-	res, err := client.Do(req)
-	utils.AssertErr(err)
-
-	if res.StatusCode < 200 || res.StatusCode > 299 {
-		return errors.New(fmt.Sprintf("Error with the status: %v", res.StatusCode))
+	if !res.IsOk() {
+		fmt.Println(res.RawBody())
+		return errors.New("Could not send message")
 	}
 	return nil
 }

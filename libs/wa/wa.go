@@ -1,7 +1,5 @@
 package wa
 
-import "errors"
-
 const (
 	MessagingProduct = "whatsapp"
 	RecipientType    = "individual"
@@ -39,7 +37,7 @@ type ResEntry struct {
 	Changes []ResChange `json:"changes"`
 }
 
-type ResData struct {
+type ResInfo struct {
 	Entry []ResEntry `json:"entry"`
 }
 
@@ -56,26 +54,25 @@ type ReqMessage struct {
 	Text             *ReqText    `json:"text"`
 }
 
-type ReqData = ReqMessage
-
-func NewReqTextMessage(to string, message *ReqText) (*ReqData, error) {
-	if message == nil {
-		return nil, errors.New("[WA]: You must pass a ReqText as an argument")
-	}
-	return &ReqMessage{
+func NewReqTextMessage(to string, message string) ReqMessage {
+	return ReqMessage{
 		MessagingProduct: MessagingProduct,
 		RecipientType:    RecipientType,
 		To:               to,
 		Type:             TypeText,
-		Text:             message,
-	}, nil
+		Text: &ReqText{
+			Body:       message,
+			PreviewUrl: false,
+		},
+	}
 }
 
-func GetResMessage(resData *ResData) *ResMessage {
-	value := (*resData).Entry[0].Changes[0].Value
-	if value.Messages == nil {
-		return nil
+func GetResMessage(resData *ResInfo) (message ResMessage, ok bool) {
+	res := *resData
+	value := res.Entry[0].Changes[0].Value
+	if value.Messages == nil || len(value.Messages) == 0 {
+		return ResMessage{}, false
 	}
-	message := value.Messages[0]
-	return &message
+	message = value.Messages[0]
+	return message, true
 }
