@@ -46,6 +46,7 @@ func DoRequest[S any, T any](reqConfig RequestConfig[T]) (ResponseConfig[S], err
 	if err != nil {
 		return ResponseConfig[S]{}, errors.New("[prohttp]: Request could not be created")
 	}
+	req.Header.Set("Content-Type", "application/json")
 	if len(reqConfig.Headers) != 0 {
 		for key, value := range reqConfig.Headers {
 			req.Header.Set(key, value)

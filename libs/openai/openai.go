@@ -1,5 +1,13 @@
 package openai
 
+import (
+	"errors"
+	"fmt"
+	"net/http"
+
+	"github.com/irwinarruda/pro-cris-server/libs/prohttp"
+)
+
 type AiModel = string
 type ChatRole = string
 
@@ -57,4 +65,35 @@ func NewMessage(role ChatRole, content string) Message {
 		Role:    role,
 		Content: content,
 	}
+}
+
+type Client struct {
+	Url       string
+	AuthToken string
+	Model     AiModel
+	System    []string
+}
+
+func (c *Client) SendPrompt(prompt string) (ResChat, error) {
+	messages := []Message{}
+	for _, message := range c.System {
+		messages = append(messages, NewMessage(ChatRoleUser, message))
+	}
+	chat := NewReqChat(c.Model, messages)
+	res, err := prohttp.DoRequest[ResChat](prohttp.RequestConfig[ReqChat]{
+		Url:    fmt.Sprintf("%v/v1/chat/completions", c.Url),
+		Method: http.MethodPost,
+		Headers: map[string]string{
+			"Authorization": fmt.Sprintf("Bearer %v", c.AuthToken),
+		},
+		Body: &chat,
+	})
+	body := ResChat{}
+	if err != nil {
+		return body, err
+	}
+	if !res.IsOk() || !res.ParseBody(&body) {
+		return body, errors.New(res.RawBody())
+	}
+	return body, nil
 }
