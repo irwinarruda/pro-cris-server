@@ -11,7 +11,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
-func runServer() {
+func main() {
 	env := configs.GetEnv()
 	wa := whatsapp.Client{
 		Url:       env.WhatsAppUrl,
@@ -25,12 +25,13 @@ func runServer() {
 		Model:     openai.AiModelGpt35Turbo,
 		System: []string{
 			"You are a personal trainter with focus on food science",
-			"Respond with medium to small messages",
+			"Respond with small messages",
 		},
 	}
 	doPrompts := false
 
 	app := gin.New()
+
 	app.GET("/message", func(c *gin.Context) {
 		if challenge, ok := wa.ValidateWAWebhookGin(c); ok {
 			c.String(http.StatusOK, challenge)
@@ -38,8 +39,9 @@ func runServer() {
 		}
 		c.String(http.StatusNotFound, "")
 	})
+
 	app.POST("/message", func(c *gin.Context) {
-		resMessage, err := whatsapp.GetResMessageGin(c)
+		resMessage, err := wa.GetResMessageGin(c)
 		if err != nil {
 			c.String(http.StatusNoContent, "")
 			return
@@ -63,20 +65,22 @@ func runServer() {
 				c.String(http.StatusNoContent, "")
 				return
 			}
-			body := whatsapp.NewReqTextMessage("5562982584840", "Pensando...")
-			err := wa.SendMessage(&body)
-			if err != nil {
-				fmt.Println(err.Error())
-				c.String(http.StatusNoContent, "")
-				return
-			}
+			go func() {
+				body := whatsapp.NewReqTextMessage("5562982584840", "Pensando...")
+				err := wa.SendMessage(&body)
+				if err != nil {
+					fmt.Println(err.Error())
+					c.String(http.StatusNoContent, "")
+					return
+				}
+			}()
 			resChat, err := oa.SendPrompt(resMessage.Text.Body)
 			if err != nil {
 				fmt.Println(err.Error())
 				c.String(http.StatusNoContent, "")
 				return
 			}
-			body = whatsapp.NewReqTextMessage("5562982584840", resChat.Choices[0].Message.Content)
+			body := whatsapp.NewReqTextMessage("5562982584840", resChat.Choices[0].Message.Content)
 			err = wa.SendMessage(&body)
 			if err != nil {
 				fmt.Println(err.Error())
@@ -87,9 +91,6 @@ func runServer() {
 		c.String(http.StatusNoContent, "")
 		return
 	})
-	app.Run()
-}
 
-func main() {
-	runServer()
+	app.Run()
 }

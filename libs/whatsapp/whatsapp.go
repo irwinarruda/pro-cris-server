@@ -76,14 +76,6 @@ func NewReqTextMessage(to string, message string) ReqMessage {
 	}
 }
 
-func GetResMessageGin(c *gin.Context) (ResMessage, error) {
-	resBody := ResInfo{}
-	if err := c.Bind(&resBody); err != nil {
-		return ResMessage{}, err
-	}
-	return ParseResInfo(&resBody)
-}
-
 func ParseResInfo(resData *ResInfo) (ResMessage, error) {
 	value := (*resData).Entry[0].Changes[0].Value
 	if value.Messages == nil || len(value.Messages) == 0 {
@@ -125,4 +117,12 @@ func (w Client) SendMessage(body *ReqMessage) error {
 		return errors.New(res.RawBody())
 	}
 	return nil
+}
+
+func (_ Client) GetResMessageGin(c *gin.Context) (ResMessage, error) {
+	resBody := ResInfo{}
+	if err := c.Bind(&resBody); err != nil {
+		return ResMessage{}, err
+	}
+	return ParseResInfo(&resBody)
 }

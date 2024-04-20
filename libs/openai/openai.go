@@ -77,9 +77,11 @@ type Client struct {
 func (c *Client) SendPrompt(prompt string) (ResChat, error) {
 	messages := []Message{}
 	for _, message := range c.System {
-		messages = append(messages, NewMessage(ChatRoleUser, message))
+		messages = append(messages, NewMessage(ChatRoleSystem, message))
 	}
+	messages = append(messages, NewMessage(ChatRoleUser, prompt))
 	chat := NewReqChat(c.Model, messages)
+	fmt.Println(chat)
 	res, err := prohttp.DoRequest[ResChat](prohttp.RequestConfig[ReqChat]{
 		Url:    fmt.Sprintf("%v/v1/chat/completions", c.Url),
 		Method: http.MethodPost,
