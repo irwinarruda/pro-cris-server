@@ -4,14 +4,11 @@ import (
 	"errors"
 	"os"
 	"reflect"
-
-	"github.com/joho/godotenv"
 )
 
 func LoadEnv[T interface{}](finalEnv *T) error {
-	err := godotenv.Load()
-	if err != nil {
-		return errors.New("[proenv]: You must have a .env file for the env variables to be loaded")
+	if finalEnv == nil {
+		return errors.New("[proenv]: finalEnv cannot be a nil pointer")
 	}
 	envType := reflect.TypeOf(*finalEnv)
 	envEditable := reflect.ValueOf(finalEnv).Elem()

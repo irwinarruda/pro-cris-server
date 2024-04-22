@@ -57,7 +57,7 @@ func DoRequest[S any, T any](reqConfig RequestConfig[T]) (ResponseConfig[S], err
 	}
 	res, err := client.Do(req)
 	if err != nil {
-		return ResponseConfig[S]{}, errors.New("[prohttp]: Could not complete the request")
+		return ResponseConfig[S]{}, errors.New("[prohttp]: Could not execute the request")
 	}
 	defer res.Body.Close()
 	byteBody, err := io.ReadAll(res.Body)

@@ -3,6 +3,7 @@ package configs
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/proenv"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
+	"github.com/joho/godotenv"
 )
 
 type Env struct {
@@ -18,6 +19,8 @@ var env *Env
 
 func GetEnv() Env {
 	if env == nil {
+		err := godotenv.Load()
+		utils.AssertErr(err)
 		env = &Env{}
 	}
 	err := proenv.LoadEnv(env)

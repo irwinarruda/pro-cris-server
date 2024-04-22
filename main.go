@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"strings"
@@ -9,9 +10,10 @@ import (
 	"github.com/irwinarruda/pro-cris-server/libs/openai"
 	"github.com/irwinarruda/pro-cris-server/libs/whatsapp"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
+	"github.com/irwinarruda/pro-cris-server/templates"
 )
 
-func main() {
+func chatbotServer() {
 	env := configs.GetEnv()
 	wa := whatsapp.Client{
 		Url:       env.WhatsAppUrl,
@@ -93,4 +95,18 @@ func main() {
 	})
 
 	app.Run()
+}
+
+func templateServer() {
+	app := gin.New()
+	app.GET("/", func(c *gin.Context) {
+		component := templates.App("Some Name")
+		component.Render(context.Background(), c.Writer)
+	})
+	app.Run()
+}
+
+func main() {
+	// runServer()
+	templateServer()
 }
