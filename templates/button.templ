@@ -1,0 +1,23 @@
+package templates
+
+templ Button(title string, attrs templ.Attributes) {
+	<style>
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: auto;
+    height: 2.25rem;
+    padding: 0rem 0.625rem;
+    border: none;
+    border-radius: 0.313rem;
+    background-color: #4285f4;
+    color: white;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+  }
+</style>
+	<button class="btn" type="button" { attrs... }>{ title }</button>
+}

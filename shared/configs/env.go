@@ -13,6 +13,8 @@ type Env struct {
 	WhatsAppChallenge string `env:"API_WHATSAPP_VERIFY_TOKEN"`
 	OpenAiUrl         string `env:"API_OPENAI_URL"`
 	OpenAiAuthToken   string `env:"API_OPENAI_AUTH_TOKEN"`
+	GoogleClientId    string `env:"API_GOOGLE_CLIENT_ID"`
+	GoogleSecretKey   string `env:"API_GOOGLE_SECRET_KEY"`
 }
 
 var env *Env
