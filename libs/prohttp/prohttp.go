@@ -41,7 +41,7 @@ func DoRequest[S any, T any](reqConfig RequestConfig[T]) (ResponseConfig[S], err
 	if err != nil {
 		return ResponseConfig[S]{}, errors.New("[prohttp]: Could not serialize JSON body")
 	}
-	bodyReader := bytes.NewReader([]byte(jsonBody))
+	bodyReader := bytes.NewReader(jsonBody)
 	req, err := http.NewRequest(reqConfig.Method, reqConfig.Url, bodyReader)
 	if err != nil {
 		return ResponseConfig[S]{}, errors.New("[prohttp]: Request could not be created")
