@@ -1,40 +1,28 @@
 package students
 
-import "time"
+import (
+	"time"
 
-type Coordinate struct {
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-}
+	"github.com/irwinarruda/pro-cris-server/shared/entities"
+)
 
 type Student struct {
-	Id                int         `json:"id"`
-	Name              string      `json:"name"`
-	BirthDay          *string     `json:"birthDay"`
-	DisplayColor      string      `json:"displayColor"`
-	Picture           *string     `json:"picture"`
-	ParentName        *string     `json:"parentName"`
-	ParentPhoneNumber *string     `json:"parentPhoneNumber"`
-	HouseAddress      *string     `json:"houseAddress"`
-	HouseIdentifier   *string     `json:"hoseInfo"`
-	HouseCoordinate   *Coordinate `json:"houseCoordinate"`
-	BasePrice         float64     `json:"basePrice"`
-	IsDeleted         bool        `json:"isDeleted"`
-	CreatedAt         time.Time   `json:"createdAt"`
-	UpdatedAt         time.Time   `json:"updatedAt"`
+	Id                int                  `json:"id"`
+	Name              string               `json:"name"`
+	BirthDay          *string              `json:"birthDay"`
+	DisplayColor      string               `json:"displayColor"`
+	Picture           *string              `json:"picture"`
+	ParentName        *string              `json:"parentName"`
+	ParentPhoneNumber *string              `json:"parentPhoneNumber"`
+	HouseAddress      *string              `json:"houseAddress"`
+	HouseIdentifier   *string              `json:"hoseInfo"`
+	HouseCoordinate   *entities.Coordinate `json:"houseCoordinate"`
+	BasePrice         float64              `json:"basePrice"`
+	Routine           []Routine            `json:"routine"`
+	IsDeleted         bool                 `json:"isDeleted"`
+	CreatedAt         time.Time            `json:"createdAt"`
+	UpdatedAt         time.Time            `json:"updatedAt"`
 }
-
-type WeekDay = string
-
-const (
-	Monday    WeekDay = "Monday"
-	Tuesday   WeekDay = "Tuesday"
-	Wednesday WeekDay = "Wednesday"
-	Thursday  WeekDay = "Thursday"
-	Friday    WeekDay = "Friday"
-	Saturday  WeekDay = "Saturday"
-	Sunday    WeekDay = "Sunday"
-)
 
 type Day struct {
 	Id                int    `json:"id"`
@@ -65,11 +53,11 @@ type Holiday struct {
 }
 
 type Routine struct {
-	IdStudent string  `json:"idStudent"`
-	WeekDay   WeekDay `json:"weekDay"`
-	StartHour string  `json:"startHour"`
-	Duration  int     `json:"duration"` // milisseconds
-	Price     float64 `json:"price"`
+	IdStudent string           `json:"idStudent"`
+	WeekDay   entities.WeekDay `json:"weekDay"`
+	StartHour string           `json:"startHour"`
+	Duration  int              `json:"duration"` // milisseconds
+	Price     float64          `json:"price"`
 }
 
 type ScheduleDay struct {

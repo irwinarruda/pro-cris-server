@@ -30,12 +30,12 @@ func androidServer() {
 		}
 		c.JSON(http.StatusOK, user)
 	})
-	routes.CreateRoutes(app)
 	app.Run()
 }
 
 func main() {
 	app := gin.New()
-	routes.CreateRoutes(app)
+	v1 := app.Group("/api/v1")
+	routes.CreateRoutes(v1)
 	app.Run()
 }

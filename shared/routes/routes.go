@@ -1,11 +1,8 @@
 package routes
 
-import (
-	"github.com/gin-gonic/gin"
+import "github.com/gin-gonic/gin"
 
-	"github.com/irwinarruda/pro-cris-server/modules/students"
-)
-
-func CreateRoutes(app *gin.Engine) {
-	app.POST("/students", students.CreateStudent)
+func CreateRoutes(group *gin.RouterGroup) {
+	CreateStatusRoutes(group)
+	CreateStudentRoutes(group)
 }

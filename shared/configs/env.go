@@ -7,6 +7,8 @@ import (
 )
 
 type Env struct {
+	BaseUrl           string `env:"PRO_CRIS_BASE_URL"`
+	Port              string `env:"PRO_CRIS_SERVER_PORT"`
 	WhatsAppAuthToken string `env:"API_WHATSAPP_AUTH_TOKEN"`
 	WhatsAppUrl       string `env:"API_WHATSAPP_URL"`
 	WhatsAppPhoneId   string `env:"API_WHATSAPP_PHONE_ID"`
@@ -19,9 +21,9 @@ type Env struct {
 
 var env *Env
 
-func GetEnv() Env {
+func GetEnv(filenames ...string) Env {
 	if env == nil {
-		err := godotenv.Load()
+		err := godotenv.Load(filenames...)
 		utils.AssertErr(err)
 		env = &Env{}
 	}
