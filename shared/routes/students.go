@@ -4,9 +4,11 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/irwinarruda/pro-cris-server/modules/students"
+	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
 func CreateStudentRoutes(app *gin.RouterGroup) {
-	app.POST("/students", students.CreateStudent)
-	app.GET("/students", students.CreateStudent)
+	studentsCtrl := configs.ResolveCtrl(&students.StudentCtrl{})
+	app.POST("/students", studentsCtrl.CreateStudent)
+	app.GET("/students", studentsCtrl.CreateStudent)
 }

@@ -5,9 +5,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
-func GetStatus(c *gin.Context) {
+type StatusCtrl struct {
+	Env      configs.Env      `ctrl:"env"`
+	Validate configs.Validate `ctrl:"validate"`
+}
+
+func (s StatusCtrl) GetStatus(c *gin.Context) {
 	status := GetStatusDTO{
 		UpdatedAt: time.Now(),
 		Dependencies: GetStatusDependenciesDTO{
@@ -18,5 +24,6 @@ func GetStatus(c *gin.Context) {
 			},
 		},
 	}
+	s.Validate.Struct(status)
 	c.JSON(http.StatusOK, status)
 }

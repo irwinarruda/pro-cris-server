@@ -24,7 +24,7 @@ type CreateStudentDTO struct {
 	HouseIdentifier   *string              `json:"hoseInfo"`
 	HouseCoordinate   *entities.Coordinate `json:"houseCoordinate"`
 	BasePrice         float64              `json:"basePrice" validate:"required"`
-	Routine           []Routine            `json:"routine" validate:"required"`
+	Routine           []Routine            `json:"routine"`
 }
 
 func (c *CreateStudentDTO) ToStudent() Student {

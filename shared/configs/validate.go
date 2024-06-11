@@ -9,6 +9,8 @@ import (
 
 var validate *validator.Validate
 
+type Validate = validator.Validate
+
 func GetValidate() validator.Validate {
 	if validate == nil {
 		validate = validator.New()

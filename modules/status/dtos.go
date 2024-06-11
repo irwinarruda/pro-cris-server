@@ -4,8 +4,8 @@ import "time"
 
 type GetStatusDatabaseDTO struct {
 	Version         string `json:"version" validate:"required"`
-	MaxConnections  int    `json:"max_connections" validate:"number"`
-	OpenConnections int    `json:"open_connections" validate:"number"`
+	MaxConnections  int    `json:"max_connections"`
+	OpenConnections int    `json:"open_connections"`
 }
 
 type GetStatusDependenciesDTO struct {

@@ -5,23 +5,27 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/go-playground/validator/v10"
+	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
 var id = 0
 var studentsArr = []Student{}
 
-func CreateStudent(c *gin.Context) {
+type StudentCtrl struct {
+	Env      configs.Env      `ctrl:"env"`
+	Validate configs.Validate `ctrl:"validate"`
+}
+
+func (s StudentCtrl) CreateStudent(c *gin.Context) {
 	studentDTO := CreateStudentDTO{}
 	err := c.Bind(&studentDTO)
 	if err != nil {
-		c.String(404, err.Error())
+		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	validate := validator.New(validator.WithRequiredStructEnabled())
-	err = validate.Struct(&studentDTO)
+	err = s.Validate.Struct(studentDTO)
 	if err != nil {
-		c.String(400, err.Error())
+		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
 
@@ -31,6 +35,5 @@ func CreateStudent(c *gin.Context) {
 
 	studentsArr = append(studentsArr, student)
 
-	fmt.Println(studentsArr)
 	c.JSON(http.StatusCreated, studentsArr)
 }

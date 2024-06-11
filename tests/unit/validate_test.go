@@ -34,9 +34,13 @@ func TestValidateWeekDay(t *testing.T) {
 	wrong := struct {
 		Other  string `validate:"weekday"`
 		Other1 string `validate:"weekday"`
+		Other2 int    `validate:"weekday"`
+		Other3 bool   `validate:"weekday"`
 	}{
 		Other:  "other",
 		Other1: "monday",
+		Other2: 1,
+		Other3: true,
 	}
 	err = validate.Struct(wrong)
 	if err == nil {
