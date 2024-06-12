@@ -9,6 +9,7 @@ import (
 func ResolveCtrl[T interface{}](ctrl *T) *T {
 	env := GetEnv()
 	validate := GetValidate()
+	db := GetDb()
 
 	envType := reflect.TypeOf(*ctrl)
 	envEditable := reflect.ValueOf(ctrl).Elem()
@@ -17,7 +18,7 @@ func ResolveCtrl[T interface{}](ctrl *T) *T {
 		field := envType.Field(i)
 		tag := field.Tag.Get("ctrl")
 		utils.Assert(tag != "", "[Configs]: All Controller properties must have a `ctrl` tag")
-		utils.Assert(tag != "env" || tag != "validate", "[Configs]: Invalid `ctrl` value")
+		utils.Assert(tag == "env" || tag == "validate" || tag == "db", "[Configs]: Invalid `ctrl` value")
 		fieldValue := envEditable.FieldByName(field.Name)
 		if fieldValue.IsValid() && fieldValue.CanSet() {
 			if tag == "env" {
@@ -25,6 +26,9 @@ func ResolveCtrl[T interface{}](ctrl *T) *T {
 			}
 			if tag == "validate" {
 				fieldValue.Set(reflect.ValueOf(validate))
+			}
+			if tag == "db" {
+				fieldValue.Set(reflect.ValueOf(db))
 			}
 		}
 	}

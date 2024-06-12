@@ -9,19 +9,15 @@ import (
 )
 
 type StatusCtrl struct {
-	Env      configs.Env      `ctrl:"env"`
 	Validate configs.Validate `ctrl:"validate"`
+	Db       configs.Db       `ctrl:"db"`
 }
 
 func (s StatusCtrl) GetStatus(c *gin.Context) {
 	status := GetStatusDTO{
 		UpdatedAt: time.Now(),
 		Dependencies: GetStatusDependenciesDTO{
-			Database: GetStatusDatabaseDTO{
-				Version:         "16",
-				MaxConnections:  0,
-				OpenConnections: 1,
-			},
+			Database: GetStatusDatabaseDTO{},
 		},
 	}
 	s.Validate.Struct(status)

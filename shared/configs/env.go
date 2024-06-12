@@ -17,6 +17,7 @@ type Env struct {
 	OpenAiAuthToken   string `env:"API_OPENAI_AUTH_TOKEN"`
 	GoogleClientId    string `env:"API_GOOGLE_CLIENT_ID"`
 	GoogleSecretKey   string `env:"API_GOOGLE_SECRET_KEY"`
+	DatabaseUrl       string `env:"DATABASE_URL"`
 }
 
 var env *Env
