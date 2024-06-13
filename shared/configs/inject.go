@@ -6,19 +6,19 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
-func ResolveCtrl[T interface{}](ctrl *T) *T {
+func ResolveInject[T interface{}](instance *T) *T {
 	env := GetEnv()
 	validate := GetValidate()
 	db := GetDb()
 
-	envType := reflect.TypeOf(*ctrl)
-	envEditable := reflect.ValueOf(ctrl).Elem()
+	envType := reflect.TypeOf(*instance)
+	envEditable := reflect.ValueOf(instance).Elem()
 
 	for i := 0; i < envType.NumField(); i++ {
 		field := envType.Field(i)
-		tag := field.Tag.Get("ctrl")
-		utils.Assert(tag != "", "[Configs]: All Controller properties must have a `ctrl` tag")
-		utils.Assert(tag == "env" || tag == "validate" || tag == "db", "[Configs]: Invalid `ctrl` value")
+		tag := field.Tag.Get("inject")
+		utils.Assert(tag != "", "[Configs]: All Controller properties must have a `inject` tag")
+		utils.Assert(tag == "env" || tag == "validate" || tag == "db", "[Configs]: Invalid `inject` value")
 		fieldValue := envEditable.FieldByName(field.Name)
 		if fieldValue.IsValid() && fieldValue.CanSet() {
 			if tag == "env" {
@@ -32,5 +32,5 @@ func ResolveCtrl[T interface{}](ctrl *T) *T {
 			}
 		}
 	}
-	return ctrl
+	return instance
 }

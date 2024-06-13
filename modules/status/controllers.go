@@ -9,15 +9,29 @@ import (
 )
 
 type StatusCtrl struct {
-	Validate configs.Validate `ctrl:"validate"`
-	Db       configs.Db       `ctrl:"db"`
+	Validate configs.Validate `inject:"validate"`
+	Db       configs.Db       `inject:"db"`
+	Env      configs.Env      `inject:"env"`
 }
 
 func (s StatusCtrl) GetStatus(c *gin.Context) {
+	databaseResults := struct {
+		ServerVersion  string
+		MaxConnections int
+		Count          int
+	}{}
+	s.Db.Raw("SHOW SERVER_VERSION;").Scan(&databaseResults)
+	s.Db.Raw("SHOW MAX_CONNECTIONS;").Scan(&databaseResults)
+	s.Db.Raw("SELECT COUNT(*) FROM PG_STAT_ACTIVITY WHERE datname = ?;", s.Env.DatabaseName).Scan(&databaseResults)
+
 	status := GetStatusDTO{
 		UpdatedAt: time.Now(),
 		Dependencies: GetStatusDependenciesDTO{
-			Database: GetStatusDatabaseDTO{},
+			Database: GetStatusDatabaseDTO{
+				Version:         databaseResults.ServerVersion,
+				MaxConnections:  databaseResults.MaxConnections,
+				OpenConnections: databaseResults.Count,
+			},
 		},
 	}
 	s.Validate.Struct(status)

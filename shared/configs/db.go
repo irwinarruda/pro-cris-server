@@ -6,15 +6,15 @@ import (
 	"gorm.io/gorm"
 )
 
-type Db = gorm.DB
+type Db = *gorm.DB
 
-var db *Db
+var db Db
 
-func GetDb() *Db {
-	env := GetEnv()
+func GetDb() Db {
 	if db == nil {
+		env := GetEnv()
 		var err error = nil
-		db, err = gorm.Open(postgres.Open(env.DatabaseUrl), &gorm.Config{})
+		db, err = gorm.Open(postgres.Open(env.DatabaseDsn), &gorm.Config{})
 		utils.AssertErr(err)
 	}
 	return db

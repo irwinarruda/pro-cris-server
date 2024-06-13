@@ -16,7 +16,7 @@ func TestGetReturnOK(t *testing.T) {
 		Method: "GET",
 	})
 	if err != nil {
-		t.Fatal("GET should not throw an error")
+		t.Fatalf("GET should not throw an error %v", err)
 	}
 	if !res.IsOk() {
 		t.Fatal("GET should return good status codes")
@@ -32,16 +32,16 @@ func TestGetReturnOK(t *testing.T) {
 	}
 
 	database := body.Dependencies.Database
-	if database.Version != "16" {
-		t.Fatal("Database version should be 16")
+	if database.Version != "16.0" {
+		t.Fatal("Database version should be 16.0")
 	}
 	if database.MaxConnections < 0 {
 		t.Fatal("Database max connections should greater than or equal to 0")
 	}
 	if database.OpenConnections != 1 {
-		t.Fatal("Database max connections should be 1")
+		t.Fatal("Database open connections should be 1")
 	}
-	if database.OpenConnections <= database.MaxConnections {
+	if database.OpenConnections > database.MaxConnections {
 		t.Fatal("Database open connections should be less than or equal to max connections")
 	}
 }

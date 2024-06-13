@@ -11,8 +11,8 @@ var id = 0
 var studentsArr = []Student{}
 
 type StudentCtrl struct {
-	Env      configs.Env      `ctrl:"env"`
-	Validate configs.Validate `ctrl:"validate"`
+	Env      configs.Env      `inject:"env"`
+	Validate configs.Validate `inject:"validate"`
 }
 
 func (s StudentCtrl) CreateStudent(c *gin.Context) {

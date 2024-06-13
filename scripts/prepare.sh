@@ -17,6 +17,11 @@ fi
 
 echo "✅ Air version $air_required is installed"
 
+echo "📝 Installing Gow"
+go install github.com/mitranim/gow@latest
+
+echo "✅ Gow version is installed"
+
 goose_required="v3.20.0"
 goose_version=$(goose --version)
 if [[ $goose_version != *$goose_required* ]]; then

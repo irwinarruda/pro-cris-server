@@ -9,14 +9,14 @@ import (
 
 var validate *validator.Validate
 
-type Validate = validator.Validate
+type Validate = *validator.Validate
 
-func GetValidate() validator.Validate {
+func GetValidate() Validate {
 	if validate == nil {
 		validate = validator.New()
 		validate.RegisterValidation("weekday", ValidateWeekDay)
 	}
-	return *validate
+	return validate
 }
 
 func ValidateWeekDay(fl validator.FieldLevel) bool {
