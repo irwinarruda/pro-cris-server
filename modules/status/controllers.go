@@ -9,9 +9,8 @@ import (
 )
 
 type StatusCtrl struct {
-	Validate configs.Validate `inject:"validate"`
-	Db       configs.Db       `inject:"db"`
-	Env      configs.Env      `inject:"env"`
+	Db  configs.Db  `inject:"db"`
+	Env configs.Env `inject:"env"`
 }
 
 func (s StatusCtrl) GetStatus(c *gin.Context) {
@@ -34,6 +33,5 @@ func (s StatusCtrl) GetStatus(c *gin.Context) {
 			},
 		},
 	}
-	s.Validate.Struct(status)
 	c.JSON(http.StatusOK, status)
 }

@@ -3,17 +3,17 @@ goose_start = source .env && GOOSE_DRIVER=$$GOOSE_DRIVER GOOSE_DBSTRING=$$GOOSE_
 prepare:
 	bash ./scripts/prepare.sh
 dev:
-	air .
+	gow -c -v run .
 dev-templ:
 	templ generate --watch --proxy="http://localhost:8080" --cmd="go run ."
 test-unit:
-	gow test -v ./tests/unit
+	gow -c -v test ./tests/unit
 test-integration:
-	gow test -v ./tests/integration
+	gow -c -v test -v ./tests/integration
 services-up:
 	docker compose up -d
 services-down:
-	docker compose down -d
+	docker compose down
 migration-create:
 	$(goose_start) create $(name) sql
 migration-up:

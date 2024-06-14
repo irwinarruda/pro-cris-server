@@ -7,11 +7,8 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
-var id = 0
-var studentsArr = []Student{}
-
 type StudentCtrl struct {
-	Env      configs.Env      `inject:"env"`
+	Db       configs.Db       `inject:"db"`
 	Validate configs.Validate `inject:"validate"`
 }
 
@@ -27,12 +24,31 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
+	var latitude *float64 = nil
+	var longitude *float64 = nil
+	if studentDTO.HouseCoordinate != nil {
+		latitude = &studentDTO.HouseCoordinate.Latitude
+		longitude = &studentDTO.HouseCoordinate.Longitude
+	}
 
-	id++
-	student := studentDTO.ToStudent()
-	student.Id = id
+	s.Db.Exec(`
+    INSERT INTO students(
+      name,
+      birth_day,
+      display_color,
+      picture,
+      parent_name,
+      parent_phone_number,
+      house_address,
+      house_identifier,
+      house_coordinate_latitude,
+      house_coordinate_longitude,
+      base_price,
+      is_deleted
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+  `, studentDTO.Name, studentDTO.BirthDay, studentDTO.DisplayColor, studentDTO.Picture, studentDTO.ParentName, studentDTO.ParentPhoneNumber, studentDTO.HouseAddress, studentDTO.HouseIdentifier, latitude, longitude, studentDTO.BasePrice, false)
 
-	studentsArr = append(studentsArr, student)
-
+	studentsArr := []Student{}
+	s.Db.Raw("SELECT * FROM students;").Scan(&studentsArr)
 	c.JSON(http.StatusCreated, studentsArr)
 }

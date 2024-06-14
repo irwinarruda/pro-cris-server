@@ -7,21 +7,23 @@ import (
 )
 
 type Student struct {
-	Id                int                  `json:"id"`
-	Name              string               `json:"name"`
-	BirthDay          *string              `json:"birthDay"`
-	DisplayColor      string               `json:"displayColor"`
-	Picture           *string              `json:"picture"`
-	ParentName        *string              `json:"parentName"`
-	ParentPhoneNumber *string              `json:"parentPhoneNumber"`
-	HouseAddress      *string              `json:"houseAddress"`
-	HouseIdentifier   *string              `json:"hoseInfo"`
-	HouseCoordinate   *entities.Coordinate `json:"houseCoordinate"`
-	BasePrice         float64              `json:"basePrice"`
-	Routine           []Routine            `json:"routine"`
-	IsDeleted         bool                 `json:"isDeleted"`
-	CreatedAt         time.Time            `json:"createdAt"`
-	UpdatedAt         time.Time            `json:"updatedAt"`
+	ID                       int                  `json:"id"`
+	Name                     string               `json:"name"`
+	BirthDay                 *string              `json:"birthDay"`
+	DisplayColor             string               `json:"displayColor"`
+	Picture                  *string              `json:"picture"`
+	ParentName               *string              `json:"parentName"`
+	ParentPhoneNumber        *string              `json:"parentPhoneNumber"`
+	HouseAddress             *string              `json:"houseAddress"`
+	HouseIdentifier          *string              `json:"hoseIdentifier"`
+	HouseCoordinate          *entities.Coordinate `json:"houseCoordinate"`
+	BasePrice                float64              `json:"basePrice"`
+	Routine                  []Routine            `json:"routine"`
+	IsDeleted                bool                 `json:"isDeleted"`
+	CreatedAt                time.Time            `json:"createdAt"`
+	UpdatedAt                time.Time            `json:"updatedAt"`
+	HouseCoordinateLatitude  *float64             `json:"houseCoordinateLatitude,omitempty"`
+	HouseCoordinateLongitude *float64             `json:"houseCoordinateLongitude,omitempty"`
 }
 
 type Day struct {
