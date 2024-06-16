@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
-	"github.com/irwinarruda/pro-cris-server/shared/entities"
+	"github.com/irwinarruda/pro-cris-server/shared/models"
 )
 
 func TestValidateWeekDay(t *testing.T) {
@@ -18,13 +18,13 @@ func TestValidateWeekDay(t *testing.T) {
 		Saturday  string `validate:"weekday"`
 		Sunday    string `validate:"weekday"`
 	}{
-		Monday:    entities.Monday,
-		Tuesday:   entities.Tuesday,
-		Wednesday: entities.Wednesday,
-		Thursday:  entities.Thursday,
-		Friday:    entities.Friday,
-		Saturday:  entities.Saturday,
-		Sunday:    entities.Sunday,
+		Monday:    models.Monday,
+		Tuesday:   models.Tuesday,
+		Wednesday: models.Wednesday,
+		Thursday:  models.Thursday,
+		Friday:    models.Friday,
+		Saturday:  models.Saturday,
+		Sunday:    models.Sunday,
 	}
 	err := validate.Struct(correct)
 	if err != nil {

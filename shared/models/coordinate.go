@@ -1,4 +1,4 @@
-package entities
+package models
 
 type Coordinate struct {
 	Latitude  float64 `json:"latitude" validate:"latitude"`

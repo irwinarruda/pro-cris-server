@@ -17,7 +17,9 @@ func ResolveInject[T interface{}](instance *T) *T {
 	for i := 0; i < envType.NumField(); i++ {
 		field := envType.Field(i)
 		tag := field.Tag.Get("inject")
-		utils.Assert(tag != "", "[Configs]: All Controller properties must have a `inject` tag")
+		if tag == "" {
+			continue
+		}
 		utils.Assert(tag == "env" || tag == "validate" || tag == "db", "[Configs]: Invalid `inject` value")
 		fieldValue := envEditable.FieldByName(field.Name)
 		if fieldValue.IsValid() && fieldValue.CanSet() {

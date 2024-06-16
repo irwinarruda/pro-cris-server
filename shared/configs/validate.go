@@ -4,7 +4,7 @@ import (
 	"slices"
 
 	"github.com/go-playground/validator/v10"
-	"github.com/irwinarruda/pro-cris-server/shared/entities"
+	"github.com/irwinarruda/pro-cris-server/shared/models"
 )
 
 var validate *validator.Validate
@@ -20,7 +20,7 @@ func GetValidate() Validate {
 }
 
 func ValidateWeekDay(fl validator.FieldLevel) bool {
-	weekDays := entities.GetWeekDays()
+	weekDays := models.GetWeekDays()
 	input := fl.Field().String()
 	return slices.Contains(weekDays, input)
 }
