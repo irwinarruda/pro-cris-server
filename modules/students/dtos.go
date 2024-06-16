@@ -1,6 +1,8 @@
 package students
 
 import (
+	"time"
+
 	"github.com/irwinarruda/pro-cris-server/shared/models"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
@@ -51,5 +53,60 @@ func (c *CreateStudentDTO) ToStudent() Student {
 				Price:     *price,
 			}
 		}),
+	}
+}
+
+type UpdateStudentRoutineDTO struct {
+	ID        *int            `json:"id"`
+	WeekDay   *models.WeekDay `json:"weekDay" validate:"required_ifid,weekday_ifid"`
+	StartHour *int            `json:"startHour" validate:"required_ifid"`
+	Duration  *int            `json:"duration" validate:"required_ifid"`
+	Price     *float64        `json:"price" validate:"required_ifid"`
+}
+
+func (c *UpdateStudentRoutineDTO) ToRoutinePlanEntity(idStudent int) routinePlanEntity {
+	if c.ID == nil {
+		return routinePlanEntity{
+			ID:        nil,
+			IdStudent: idStudent,
+			WeekDay:   *c.WeekDay,
+			StartHour: *c.StartHour,
+			Duration:  *c.Duration,
+			Price:     *c.Price,
+		}
+	}
+	return routinePlanEntity{
+		ID: c.ID,
+	}
+}
+
+type UpdateStudentDTO struct {
+	CreateStudentDTO
+	ID      int                       `json:"id" validate:"required"`
+	Routine []UpdateStudentRoutineDTO `json:"routine" validate:"required"`
+}
+
+func (c *UpdateStudentDTO) ToStudentEntity() studentEntity {
+	var latitude *float64
+	var longitude *float64
+	if c.HouseCoordinate != nil {
+		latitude = &c.HouseCoordinate.Latitude
+		longitude = &c.HouseCoordinate.Longitude
+
+	}
+	return studentEntity{
+		ID:                       c.ID,
+		Name:                     c.Name,
+		BirthDay:                 c.BirthDay,
+		DisplayColor:             c.DisplayColor,
+		Picture:                  c.Picture,
+		ParentName:               c.ParentName,
+		ParentPhoneNumber:        c.ParentPhoneNumber,
+		HouseAddress:             c.HouseAddress,
+		HouseIdentifier:          c.HouseIdentifier,
+		HouseCoordinateLatitude:  latitude,
+		HouseCoordinateLongitude: longitude,
+		BasePrice:                c.BasePrice,
+		UpdatedAt:                time.Now(),
 	}
 }

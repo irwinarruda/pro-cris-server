@@ -56,8 +56,8 @@ func (s *studentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
 }
 
 type routinePlanEntity struct {
-	ID        int
-	idStudent int
+	ID        *int
+	IdStudent int
 	WeekDay   models.WeekDay
 	StartHour int
 	Duration  int
@@ -67,8 +67,12 @@ type routinePlanEntity struct {
 }
 
 func (r *routinePlanEntity) ToRoutinePlan() RoutinePlan {
+	var id *int
+	if r.ID != nil {
+		id = r.ID
+	}
 	return RoutinePlan{
-		ID:        r.ID,
+		ID:        *id,
 		WeekDay:   r.WeekDay,
 		StartHour: r.StartHour,
 		Duration:  r.Duration,
@@ -89,7 +93,7 @@ func newStudentRepository() *studentRepository {
 func (r *studentRepository) GetAllStudents() []Student {
 	studentsArr := []studentEntity{}
 	students := []Student{}
-	r.Db.Raw("SELECT * FROM student;").Scan(&studentsArr)
+	r.Db.Raw("SELECT * FROM student WHERE student.is_deleted = false;").Scan(&studentsArr)
 	for _, studentE := range studentsArr {
 		routineE := []routinePlanEntity{}
 		r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ?;", studentE.ID).Scan(&routineE)
@@ -147,7 +151,7 @@ func (r *studentRepository) CreateStudent(student Student) int {
       start_hour,
       duration,
       price
-    )VALUES`
+    ) VALUES`
 
 	orderedValues := []interface{}{}
 	for index, routinePlan := range student.Routine {
@@ -167,6 +171,109 @@ func (r *studentRepository) CreateStudent(student Student) int {
 	}
 	sql += ";"
 	r.Db.Exec(sql, orderedValues...)
+
+	return studentE.ID
+}
+
+func (r *studentRepository) UpdateStudent(student UpdateStudentDTO) int {
+	studentE := student.ToStudentEntity()
+	sql := `
+    UPDATE student
+    SET
+      name = ?,
+      birth_day = ?,
+      display_color = ?,
+      picture = ?,
+      parent_name = ?,
+      parent_phone_number = ?,
+      house_address = ?,
+      house_identifier = ?,
+      house_coordinate_latitude = ?,
+      house_coordinate_longitude = ?,
+      base_price = ?
+    WHERE id = ?;`
+	r.Db.Raw(
+		sql,
+		studentE.Name,
+		studentE.BirthDay,
+		studentE.DisplayColor,
+		studentE.Picture,
+		studentE.ParentName,
+		studentE.ParentPhoneNumber,
+		studentE.HouseAddress,
+		studentE.HouseIdentifier,
+		studentE.HouseCoordinateLatitude,
+		studentE.HouseCoordinateLongitude,
+		studentE.BasePrice,
+		studentE.ID,
+	)
+
+	sql = `
+    INSERT INTO routine_plan(
+      id_student,
+      week_day,
+      start_hour,
+      duration,
+      price
+    ) VALUES
+  `
+	routineExists := []interface{}{studentE.ID}
+	orderedValues := []interface{}{}
+	for _, routinePlan := range student.Routine {
+		routinePlanE := routinePlan.ToRoutinePlanEntity(studentE.ID)
+		if routinePlanE.ID != nil {
+			routineExists = append(routineExists, *routinePlanE.ID)
+			continue
+		}
+		if len(orderedValues) > 0 {
+			sql = sql + ","
+		}
+		sql = sql + "\n(?, ?, ?, ?, ?)"
+		orderedValues = append(
+			orderedValues,
+			studentE.ID,
+			routinePlanE.WeekDay,
+			routinePlanE.StartHour,
+			routinePlanE.Duration,
+			routinePlanE.Price,
+		)
+	}
+	if len(orderedValues) > 0 {
+		sql += ";"
+		r.Db.Exec(sql, orderedValues...)
+	}
+
+	sql = `
+    SELECT id FROM routine_plan
+    WHERE id_student = ?
+    AND id NOT IN (`
+	for index := range routineExists {
+		if index > 0 {
+			sql = sql + ", "
+		}
+		sql = sql + "?"
+	}
+	sql += ");"
+	deletedRoutines := []int{}
+	r.Db.Raw(sql, routineExists...).Scan(&deletedRoutines)
+
+	sql = `
+    UPDATE routine_plan
+    SET is_deleted = true
+    WHERE id IN (`
+
+	genericDeletedRoutines := []interface{}{}
+	for index := range deletedRoutines {
+		genericDeletedRoutines = append(genericDeletedRoutines, deletedRoutines[index])
+		if index > 0 {
+			sql = sql + ", "
+		}
+		sql = sql + "?"
+	}
+	if len(deletedRoutines) > 0 {
+		sql += ");"
+		r.Db.Exec(sql, genericDeletedRoutines...)
+	}
 
 	return studentE.ID
 }
