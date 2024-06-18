@@ -9,7 +9,8 @@ import (
 
 func CreateStudentRoutes(app *gin.RouterGroup) {
 	studentsCtrl := configs.ResolveInject(&students.StudentCtrl{})
-	app.POST("/students", studentsCtrl.CreateStudent)
 	app.GET("/students", studentsCtrl.GetStudents)
+	app.GET("/students/:id", studentsCtrl.GetStudent)
+	app.POST("/students", studentsCtrl.CreateStudent)
 	app.PUT("/students/:id", studentsCtrl.UpdateSudent)
 }

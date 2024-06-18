@@ -1,6 +1,7 @@
 package students
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
@@ -93,26 +94,27 @@ func newStudentRepository() *studentRepository {
 func (r *studentRepository) GetAllStudents() []Student {
 	studentsArr := []studentEntity{}
 	students := []Student{}
-	r.Db.Raw("SELECT * FROM student WHERE student.is_deleted = false;").Scan(&studentsArr)
+	r.Db.Raw("SELECT * FROM student WHERE is_deleted = false;").Scan(&studentsArr)
 	for _, studentE := range studentsArr {
 		routineE := []routinePlanEntity{}
-		r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ?;", studentE.ID).Scan(&routineE)
+		r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", studentE.ID).Scan(&routineE)
 		student := studentE.ToStudent(routineE)
 		students = append(students, student)
 	}
 	return students
 }
 
-func (r *studentRepository) GetStudentById(id int) Student {
+func (r *studentRepository) GetStudentByID(id int) Student {
 	studentsE := studentEntity{}
-	students := Student{}
-	r.Db.Raw("SELECT * FROM student WHERE student.id = ?;", id).Scan(&studentsE)
-	return students
+	routineE := []routinePlanEntity{}
+	r.Db.Raw("SELECT * FROM student WHERE id = ?;", id).Scan(&studentsE)
+	r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", id).Scan(&routineE)
+	return studentsE.ToStudent(routineE)
 }
 
 func (r *studentRepository) CreateStudent(student Student) int {
 	studentE := student.ToStudentEntity()
-	sql := `
+	sql := fmt.Sprintf(`
     INSERT INTO student(
       name,
       birth_day,
@@ -126,8 +128,10 @@ func (r *studentRepository) CreateStudent(student Student) int {
       house_coordinate_longitude,
       base_price
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    RETURNING id;`
+    %s
+    RETURNING id;`,
+		utils.SqlValues(1, 11),
+	)
 
 	r.Db.Raw(
 		sql,
@@ -144,33 +148,12 @@ func (r *studentRepository) CreateStudent(student Student) int {
 		studentE.BasePrice,
 	).Scan(&studentE.ID)
 
-	sql = `
-    INSERT INTO routine_plan(
-      id_student,
-      week_day,
-      start_hour,
-      duration,
-      price
-    ) VALUES`
-
-	orderedValues := []interface{}{}
-	for index, routinePlan := range student.Routine {
-		if index > 0 {
-			sql = sql + ","
-		}
-		sql = sql + "\n(?, ?, ?, ?, ?)"
-		routinePlanE := routinePlan.ToRoutinePlanEntity(studentE.ID)
-		orderedValues = append(
-			orderedValues,
-			studentE.ID,
-			routinePlanE.WeekDay,
-			routinePlanE.StartHour,
-			routinePlanE.Duration,
-			routinePlanE.Price,
-		)
-	}
-	sql += ";"
-	r.Db.Exec(sql, orderedValues...)
+	r.CreateRoutineByIDStudent(
+		studentE.ID,
+		utils.Map(student.Routine, func(rp RoutinePlan) routinePlanEntity {
+			return rp.ToRoutinePlanEntity(studentE.ID)
+		}),
+	)
 
 	return studentE.ID
 }
@@ -190,9 +173,10 @@ func (r *studentRepository) UpdateStudent(student UpdateStudentDTO) int {
       house_identifier = ?,
       house_coordinate_latitude = ?,
       house_coordinate_longitude = ?,
-      base_price = ?
+      base_price = ?,
+      updated_at = now()
     WHERE id = ?;`
-	r.Db.Raw(
+	r.Db.Exec(
 		sql,
 		studentE.Name,
 		studentE.BirthDay,
@@ -208,72 +192,109 @@ func (r *studentRepository) UpdateStudent(student UpdateStudentDTO) int {
 		studentE.ID,
 	)
 
+	r.UpdateRoutineByIDStudent(
+		studentE.ID,
+		utils.Map(student.Routine, func(rp UpdateStudentRoutineDTO) routinePlanEntity {
+			return rp.ToRoutinePlanEntity(studentE.ID)
+		}),
+	)
+
+	return studentE.ID
+}
+
+func (r *studentRepository) DeleteStudentByID(id int) {
+	sql := `
+    UPDATE student
+    SET is_deleted = true
+    WHERE id = ?;`
+	r.Db.Exec(sql, id)
 	sql = `
+    UPDATE routine_plan
+    SET is_deleted = true
+    WHERE id_student = ?;`
+	r.Db.Exec(sql, id)
+}
+
+func (r *studentRepository) CreateRoutineByIDStudent(idStudent int, routine []routinePlanEntity) {
+	orderedValues := []interface{}{}
+	sql := fmt.Sprintf(`
     INSERT INTO routine_plan(
       id_student,
       week_day,
       start_hour,
       duration,
       price
-    ) VALUES
-  `
-	routineExists := []interface{}{studentE.ID}
+    ) %s;`,
+		utils.SqlValues(len(routine), 5, func(index int) {
+			routinePlanE := routine[index]
+			orderedValues = append(
+				orderedValues,
+				idStudent,
+				routinePlanE.WeekDay,
+				routinePlanE.StartHour,
+				routinePlanE.Duration,
+				routinePlanE.Price,
+			)
+		}),
+	)
+	r.Db.Exec(sql, orderedValues...)
+}
+
+func (r *studentRepository) UpdateRoutineByIDStudent(idStudent int, routine []routinePlanEntity) {
 	orderedValues := []interface{}{}
-	for _, routinePlan := range student.Routine {
-		routinePlanE := routinePlan.ToRoutinePlanEntity(studentE.ID)
-		if routinePlanE.ID != nil {
-			routineExists = append(routineExists, *routinePlanE.ID)
+	routineExists := []interface{}{idStudent}
+	for index := range routine {
+		routinePlanE := routine[index]
+		if routinePlanE.ID == nil {
+			orderedValues = append(
+				orderedValues,
+				idStudent,
+				routinePlanE.WeekDay,
+				routinePlanE.StartHour,
+				routinePlanE.Duration,
+				routinePlanE.Price,
+			)
 			continue
 		}
-		if len(orderedValues) > 0 {
-			sql = sql + ","
-		}
-		sql = sql + "\n(?, ?, ?, ?, ?)"
-		orderedValues = append(
-			orderedValues,
-			studentE.ID,
-			routinePlanE.WeekDay,
-			routinePlanE.StartHour,
-			routinePlanE.Duration,
-			routinePlanE.Price,
-		)
-	}
-	if len(orderedValues) > 0 {
-		sql += ";"
-		r.Db.Exec(sql, orderedValues...)
+		routineExists = append(routineExists, *routinePlanE.ID)
 	}
 
-	sql = `
-    SELECT id FROM routine_plan
-    WHERE id_student = ?
-    AND id NOT IN (`
-	for index := range routineExists {
-		if index > 0 {
-			sql = sql + ", "
-		}
-		sql = sql + "?"
+	sql := `
+      SELECT id FROM routine_plan
+      WHERE id_student = ?`
+	if len(routineExists) > 1 {
+		sql += " AND id NOT IN "
+		sql += utils.SqlArray(len(routineExists) - 1)
 	}
-	sql += ");"
-	deletedRoutines := []int{}
+	sql += ";"
+	deletedRoutines := []interface{}{}
 	r.Db.Raw(sql, routineExists...).Scan(&deletedRoutines)
 
-	sql = `
-    UPDATE routine_plan
-    SET is_deleted = true
-    WHERE id IN (`
-
-	genericDeletedRoutines := []interface{}{}
-	for index := range deletedRoutines {
-		genericDeletedRoutines = append(genericDeletedRoutines, deletedRoutines[index])
-		if index > 0 {
-			sql = sql + ", "
-		}
-		sql = sql + "?"
-	}
 	if len(deletedRoutines) > 0 {
-		sql += ");"
+		genericDeletedRoutines := []interface{}{}
+		sql = fmt.Sprintf(`
+      UPDATE routine_plan
+      SET is_deleted = true
+      WHERE id IN %s;`,
+			utils.SqlArray(len(deletedRoutines), func(index int) {
+				genericDeletedRoutines = append(genericDeletedRoutines, deletedRoutines[index])
+			}),
+		)
+		sql += ";"
 		r.Db.Exec(sql, genericDeletedRoutines...)
 	}
 
-	return studentE.ID
+	if len(orderedValues) > 0 {
+		sql = fmt.Sprintf(`
+      INSERT INTO routine_plan(
+        id_student,
+        week_day,
+        start_hour,
+        duration,
+        price
+      ) %s;`,
+			utils.SqlValues(len(orderedValues), 5),
+		)
+		r.Db.Exec(sql, orderedValues...)
+	}
 }
