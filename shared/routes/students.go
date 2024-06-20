@@ -13,4 +13,5 @@ func CreateStudentRoutes(app *gin.RouterGroup) {
 	app.GET("/students/:id", studentsCtrl.GetStudent)
 	app.POST("/students", studentsCtrl.CreateStudent)
 	app.PUT("/students/:id", studentsCtrl.UpdateSudent)
+	app.DELETE("/students/:id", studentsCtrl.DeleteStudent)
 }

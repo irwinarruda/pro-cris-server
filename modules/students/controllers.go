@@ -43,7 +43,7 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 	}
 
 	studentRepository := newStudentRepository()
-	id := studentRepository.CreateStudent(studentDTO.ToStudent())
+	id := studentRepository.CreateStudent(studentDTO)
 	c.JSON(http.StatusCreated, struct {
 		Id int `json:"id"`
 	}{Id: id})

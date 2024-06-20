@@ -20,6 +20,8 @@ migration-up:
 	$(goose_start) up
 migration-down:
 	$(goose_start) down
+migration-reset:
+	$(goose_start) reset
 migration-status:
 	$(goose_start) status
 
