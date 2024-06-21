@@ -1,7 +1,5 @@
 package students
 
-import "github.com/irwinarruda/pro-cris-server/shared/utils"
-
 type StudentService struct {
 }
 
@@ -26,7 +24,7 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) int {
 
 func (s *StudentService) UpdateStudent(student UpdateStudentDTO) int {
 	studentsRepository := newStudentRepository()
-	id := studentsRepository.UpdateStudent1(student)
+	idStudent := studentsRepository.UpdateStudent(student)
 	mustCreateRoutine := []CreateStudentRoutinePlanDTO{}
 	existingRoutine := []int{}
 	for _, routinePlan := range student.Routine {
@@ -41,24 +39,19 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) int {
 			Price:     routinePlan.Price,
 		})
 	}
-	shouldDeleteRoutine := studentsRepository.GetRoutineByIDStudent1(id, &existingRoutine)
+	shouldDeleteRoutine := studentsRepository.GetRoutineID(idStudent, existingRoutine...)
 	if len(shouldDeleteRoutine) > 0 {
-		studentsRepository.DeleteRoutinePlanByIDStudent1(id, utils.Map(
-			shouldDeleteRoutine,
-			func(rp RoutinePlan) int {
-				return rp.ID
-			}),
-		)
+		studentsRepository.DeleteRoutinePlan(idStudent, shouldDeleteRoutine...)
 	}
 
 	if len(mustCreateRoutine) > 0 {
-		studentsRepository.CreateRoutinePlanByIDStudent1(id, mustCreateRoutine)
+		studentsRepository.CreateRoutinePlan(idStudent, mustCreateRoutine...)
 	}
 
-	return id
+	return idStudent
 }
 
 func (s *StudentService) DeleteStudent(id int) {
 	studentsRepository := newStudentRepository()
-	studentsRepository.DeleteStudentByID(id)
+	studentsRepository.DeleteStudent(id)
 }

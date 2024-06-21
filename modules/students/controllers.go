@@ -13,8 +13,8 @@ type StudentCtrl struct {
 }
 
 func (s StudentCtrl) GetStudents(c *gin.Context) {
-	studentRepository := newStudentRepository()
-	students := studentRepository.GetAllStudents()
+	studentService := NewStudentService()
+	students := studentService.GetAllStudents()
 	c.JSON(http.StatusOK, students)
 }
 
@@ -24,8 +24,8 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	studentRepository := newStudentRepository()
-	student := studentRepository.GetStudentByID(id)
+	studentService := NewStudentService()
+	student := studentService.GetStudentByID(id)
 	c.JSON(http.StatusOK, student)
 }
 
@@ -42,8 +42,8 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 		return
 	}
 
-	studentRepository := newStudentRepository()
-	id := studentRepository.CreateStudent(studentDTO)
+	studentService := NewStudentService()
+	id := studentService.CreateStudent(studentDTO)
 	c.JSON(http.StatusCreated, struct {
 		Id int `json:"id"`
 	}{Id: id})
@@ -66,8 +66,8 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
-	studentRepository := newStudentRepository()
-	id = studentRepository.UpdateStudent(studentDTO)
+	studentService := NewStudentService()
+	id = studentService.UpdateStudent(studentDTO)
 	c.JSON(http.StatusCreated, struct {
 		Id int `json:"id"`
 	}{Id: id})
@@ -79,8 +79,8 @@ func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 		c.String(http.StatusBadRequest, err.Error())
 		return
 	}
-	studentRepository := newStudentRepository()
-	studentRepository.DeleteStudentByID(id)
+	studentService := NewStudentService()
+	studentService.DeleteStudent(id)
 	c.JSON(http.StatusOK, struct {
 		Id int `json:"id"`
 	}{Id: id})
