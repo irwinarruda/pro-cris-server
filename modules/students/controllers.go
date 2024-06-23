@@ -66,6 +66,7 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, err.Error())
 		return
 	}
+	studentDTO.ID = id
 	studentService := NewStudentService()
 	id = studentService.UpdateStudent(studentDTO)
 	c.JSON(http.StatusCreated, struct {

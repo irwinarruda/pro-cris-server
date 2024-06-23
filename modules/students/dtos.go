@@ -24,7 +24,7 @@ type CreateStudentRoutinePlanDTO struct {
 }
 
 type UpdateStudentDTO struct {
-	ID                int                           `json:"id" validate:"required"`
+	ID                int                           `json:"id"`
 	Name              string                        `json:"name" validate:"required"`
 	BirthDay          *string                       `json:"birthDay" validate:"omitempty,datetime"`
 	DisplayColor      string                        `json:"displayColor" validate:"omitempty,hexcolor"`

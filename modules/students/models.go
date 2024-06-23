@@ -24,14 +24,14 @@ type Student struct {
 	UpdatedAt         time.Time          `json:"updatedAt"`
 }
 
-func (s *Student) ToStudentEntity() studentEntity {
+func (s *Student) ToStudentEntity() StudentEntity {
 	var latitude *float64
 	var longitude *float64
 	if s.HouseCoordinate != nil {
 		latitude = &s.HouseCoordinate.Latitude
 		longitude = &s.HouseCoordinate.Longitude
 	}
-	return studentEntity{
+	return StudentEntity{
 		ID:                       s.ID,
 		Name:                     s.Name,
 		BirthDay:                 s.BirthDay,

@@ -7,16 +7,16 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
-type studentRepository struct {
+type StudentRepository struct {
 	Db configs.Db `inject:"db"`
 }
 
-func newStudentRepository() *studentRepository {
-	return configs.ResolveInject(&studentRepository{})
+func NewStudentRepository() *StudentRepository {
+	return configs.ResolveInject(&StudentRepository{})
 }
 
-func (r *studentRepository) GetAllStudents() []Student {
-	studentsArr := []studentEntity{}
+func (r *StudentRepository) GetAllStudents() []Student {
+	studentsArr := []StudentEntity{}
 	students := []Student{}
 	r.Db.Raw("SELECT * FROM student WHERE is_deleted = false;").Scan(&studentsArr)
 	for _, studentE := range studentsArr {
@@ -28,18 +28,20 @@ func (r *studentRepository) GetAllStudents() []Student {
 	return students
 }
 
-func (r *studentRepository) GetStudentByID(id int) Student {
-	studentsE := studentEntity{}
-	routineE := []routinePlanEntity{}
+func (r *StudentRepository) GetStudentByID(id int) (Student, error) {
+	studentsE := []StudentEntity{}
 	r.Db.Raw("SELECT * FROM student WHERE id = ? AND is_deleted = false;", id).Scan(&studentsE)
+	if len(studentsE) == 0 {
+		return Student{}, utils.NewAppError("Student not found.", true)
+	}
+	routineE := []routinePlanEntity{}
 	r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", id).Scan(&routineE)
-	return studentsE.ToStudent(routineE)
+	return studentsE[0].ToStudent(routineE), nil
 }
 
-func (r *studentRepository) CreateStudent(student CreateStudentDTO) int {
-	studentE := studentEntity{}
+func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
+	studentE := StudentEntity{}
 	studentE.FromCreateStudent(student)
-
 	sql := fmt.Sprintf(`
     INSERT INTO student(
       name,
@@ -58,7 +60,6 @@ func (r *studentRepository) CreateStudent(student CreateStudentDTO) int {
     RETURNING id;`,
 		utils.SqlValues(1, 11),
 	)
-
 	r.Db.Raw(
 		sql,
 		studentE.Name,
@@ -73,14 +74,13 @@ func (r *studentRepository) CreateStudent(student CreateStudentDTO) int {
 		studentE.HouseCoordinateLongitude,
 		studentE.BasePrice,
 	).Scan(&studentE.ID)
-
-	r.CreateRoutinePlan(studentE.ID, student.Routine...)
-
+	r.CreateRoutine(studentE.ID, student.Routine...)
 	return studentE.ID
 }
 
-func (r *studentRepository) UpdateStudent(student UpdateStudentDTO) int {
-	studentE := studentEntity{}
+func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error) {
+	var id int
+	studentE := StudentEntity{}
 	studentE.FromUpdateStudent(student)
 	sql := `
     UPDATE student
@@ -97,8 +97,9 @@ func (r *studentRepository) UpdateStudent(student UpdateStudentDTO) int {
       house_coordinate_longitude = ?,
       base_price = ?,
       updated_at = now()
-    WHERE id = ?;`
-	r.Db.Exec(
+    WHERE id = ?
+    RETURNING id;`
+	r.Db.Raw(
 		sql,
 		studentE.Name,
 		studentE.BirthDay,
@@ -112,31 +113,40 @@ func (r *studentRepository) UpdateStudent(student UpdateStudentDTO) int {
 		studentE.HouseCoordinateLongitude,
 		studentE.BasePrice,
 		studentE.ID,
-	)
-	return studentE.ID
+	).Scan(&id)
+	if studentE.ID != id {
+		return 0, utils.NewAppError("Student not found.", true)
+	}
+	return studentE.ID, nil
 }
 
-func (r *studentRepository) DeleteStudent(id int) {
+func (r *StudentRepository) DeleteStudent(id int) error {
+	var idStudent int
 	sql := `
     UPDATE student
     SET is_deleted = true
-    WHERE id = ?;`
-	r.Db.Exec(sql, id)
+    WHERE id = ?
+    RETURNING id;`
+	r.Db.Raw(sql, id).Scan(&idStudent)
+	if id != idStudent {
+		return utils.NewAppError("Student not found.", true)
+	}
 	sql = `
     UPDATE routine_plan
     SET is_deleted = true
     WHERE id_student = ?;`
 	r.Db.Exec(sql, id)
+	return nil
 }
 
 // Get Routine from a student.
 //
 // 'excluded' is a list of ids that should be excluded ([]int).
-func (r *studentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
+func (r *StudentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
 	routine := []int{}
 	args := []interface{}{idStudent}
 	sql := "SELECT id FROM routine_plan WHERE id_student = ? AND is_deleted = false"
-	if excluded != nil {
+	if excluded != nil && len(excluded) > 0 {
 		sql += " AND id NOT IN "
 		sql += utils.SqlArray(len(excluded))
 		for _, id := range excluded {
@@ -151,7 +161,11 @@ func (r *studentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
 // Create a list of RoutinePlan from a student.
 //
 // 'routinePlan' can be either one or more items.
-func (r *studentRepository) CreateRoutinePlan(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO) {
+func (r *StudentRepository) CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO) {
+	if len(routinePlan) == 0 {
+		return
+	}
+
 	orderedValues := []interface{}{}
 	sql := fmt.Sprintf(`
     INSERT INTO routine_plan(
@@ -179,7 +193,7 @@ func (r *studentRepository) CreateRoutinePlan(idStudent int, routinePlan ...Crea
 // Delete a list of RoutinePlan from a student.
 //
 // 'routine' is a list of ids that should be deleted.
-func (r *studentRepository) DeleteRoutinePlan(idStudent int, routine ...int) {
+func (r *StudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 	sql := fmt.Sprintf(`
     UPDATE routine_plan
     SET is_deleted = true

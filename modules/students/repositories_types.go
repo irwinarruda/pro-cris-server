@@ -7,7 +7,18 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
-type studentEntity struct {
+type IStudentRepository interface {
+	GetAllStudents() []Student
+	GetStudentByID(id int) (Student, error)
+	CreateStudent(student CreateStudentDTO) int
+	UpdateStudent(student UpdateStudentDTO) (int, error)
+	DeleteStudent(id int) error
+	GetRoutineID(idStudent int, excluded ...int) []int
+	CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO)
+	DeleteRoutine(idStudent int, routine ...int)
+}
+
+type StudentEntity struct {
 	ID                       int
 	Name                     string
 	BirthDay                 *string
@@ -25,7 +36,7 @@ type studentEntity struct {
 	UpdatedAt                time.Time
 }
 
-func (s *studentEntity) FromCreateStudent(student CreateStudentDTO) {
+func (s *StudentEntity) FromCreateStudent(student CreateStudentDTO) {
 	var latitude *float64
 	var longitude *float64
 	if student.HouseCoordinate != nil {
@@ -45,7 +56,7 @@ func (s *studentEntity) FromCreateStudent(student CreateStudentDTO) {
 	s.BasePrice = student.BasePrice
 }
 
-func (s *studentEntity) FromUpdateStudent(student UpdateStudentDTO) {
+func (s *StudentEntity) FromUpdateStudent(student UpdateStudentDTO) {
 	var latitude *float64
 	var longitude *float64
 	if student.HouseCoordinate != nil {
@@ -67,7 +78,7 @@ func (s *studentEntity) FromUpdateStudent(student UpdateStudentDTO) {
 	s.UpdatedAt = time.Now()
 }
 
-func (s *studentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
+func (s *StudentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
 	var coordinate *models.Coordinate
 	if s.HouseCoordinateLatitude != nil && s.HouseCoordinateLongitude != nil {
 		coordinate = &models.Coordinate{

@@ -1,5 +1,7 @@
 package students
 
+import "fmt"
+
 type StudentService struct {
 }
 
@@ -8,23 +10,28 @@ func NewStudentService() *StudentService {
 }
 
 func (s *StudentService) GetAllStudents() []Student {
-	studentsRepository := newStudentRepository()
+	studentsRepository := NewStudentRepository()
 	return studentsRepository.GetAllStudents()
 }
 
 func (s *StudentService) GetStudentByID(id int) Student {
-	studentsRepository := newStudentRepository()
-	return studentsRepository.GetStudentByID(id)
+	studentsRepository := NewStudentRepository()
+	student, err := studentsRepository.GetStudentByID(id)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return student
 }
 
 func (s *StudentService) CreateStudent(student CreateStudentDTO) int {
-	studentsRepository := newStudentRepository()
-	return studentsRepository.CreateStudent(student)
+	studentsRepository := NewStudentRepository()
+	id := studentsRepository.CreateStudent(student)
+	return id
 }
 
 func (s *StudentService) UpdateStudent(student UpdateStudentDTO) int {
-	studentsRepository := newStudentRepository()
-	idStudent := studentsRepository.UpdateStudent(student)
+	studentsRepository := NewStudentRepository()
+	idStudent, _ := studentsRepository.UpdateStudent(student)
 	mustCreateRoutine := []CreateStudentRoutinePlanDTO{}
 	existingRoutine := []int{}
 	for _, routinePlan := range student.Routine {
@@ -41,17 +48,15 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) int {
 	}
 	shouldDeleteRoutine := studentsRepository.GetRoutineID(idStudent, existingRoutine...)
 	if len(shouldDeleteRoutine) > 0 {
-		studentsRepository.DeleteRoutinePlan(idStudent, shouldDeleteRoutine...)
+		studentsRepository.DeleteRoutine(idStudent, shouldDeleteRoutine...)
 	}
-
 	if len(mustCreateRoutine) > 0 {
-		studentsRepository.CreateRoutinePlan(idStudent, mustCreateRoutine...)
+		studentsRepository.CreateRoutine(idStudent, mustCreateRoutine...)
 	}
-
 	return idStudent
 }
 
 func (s *StudentService) DeleteStudent(id int) {
-	studentsRepository := newStudentRepository()
+	studentsRepository := NewStudentRepository()
 	studentsRepository.DeleteStudent(id)
 }
