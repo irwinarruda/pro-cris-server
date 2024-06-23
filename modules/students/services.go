@@ -1,7 +1,5 @@
 package students
 
-import "fmt"
-
 type StudentService struct {
 }
 
@@ -14,24 +12,22 @@ func (s *StudentService) GetAllStudents() []Student {
 	return studentsRepository.GetAllStudents()
 }
 
-func (s *StudentService) GetStudentByID(id int) Student {
+func (s *StudentService) GetStudentByID(id int) (Student, error) {
 	studentsRepository := NewStudentRepository()
-	student, err := studentsRepository.GetStudentByID(id)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return student
+	return studentsRepository.GetStudentByID(id)
 }
 
 func (s *StudentService) CreateStudent(student CreateStudentDTO) int {
 	studentsRepository := NewStudentRepository()
-	id := studentsRepository.CreateStudent(student)
-	return id
+	return studentsRepository.CreateStudent(student)
 }
 
-func (s *StudentService) UpdateStudent(student UpdateStudentDTO) int {
+func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	studentsRepository := NewStudentRepository()
-	idStudent, _ := studentsRepository.UpdateStudent(student)
+	idStudent, err := studentsRepository.UpdateStudent(student)
+	if err != nil {
+		return 0, err
+	}
 	mustCreateRoutine := []CreateStudentRoutinePlanDTO{}
 	existingRoutine := []int{}
 	for _, routinePlan := range student.Routine {
@@ -53,10 +49,10 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) int {
 	if len(mustCreateRoutine) > 0 {
 		studentsRepository.CreateRoutine(idStudent, mustCreateRoutine...)
 	}
-	return idStudent
+	return idStudent, nil
 }
 
-func (s *StudentService) DeleteStudent(id int) {
+func (s *StudentService) DeleteStudent(id int) (int, error) {
 	studentsRepository := NewStudentRepository()
-	studentsRepository.DeleteStudent(id)
+	return studentsRepository.DeleteStudent(id)
 }

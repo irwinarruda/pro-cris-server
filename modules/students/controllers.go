@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
+	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type StudentCtrl struct {
@@ -25,7 +26,11 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 		return
 	}
 	studentService := NewStudentService()
-	student := studentService.GetStudentByID(id)
+	student, err := studentService.GetStudentByID(id)
+	if err, ok := err.(utils.AppError); ok {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
 	c.JSON(http.StatusOK, student)
 }
 
@@ -68,7 +73,11 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 	}
 	studentDTO.ID = id
 	studentService := NewStudentService()
-	id = studentService.UpdateStudent(studentDTO)
+	id, err = studentService.UpdateStudent(studentDTO)
+	if err, ok := err.(utils.AppError); ok {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
 	c.JSON(http.StatusCreated, struct {
 		Id int `json:"id"`
 	}{Id: id})
@@ -81,7 +90,11 @@ func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 		return
 	}
 	studentService := NewStudentService()
-	studentService.DeleteStudent(id)
+	id, err = studentService.DeleteStudent(id)
+	if err, ok := err.(utils.AppError); ok {
+		c.JSON(http.StatusBadRequest, err)
+		return
+	}
 	c.JSON(http.StatusOK, struct {
 		Id int `json:"id"`
 	}{Id: id})
