@@ -5,9 +5,11 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/models"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateWeekDay(t *testing.T) {
+	var assert = assert.New(t)
 	validate := configs.GetValidate()
 	correct := struct {
 		Monday    string `validate:"weekday"`
@@ -27,9 +29,7 @@ func TestValidateWeekDay(t *testing.T) {
 		Sunday:    models.Sunday,
 	}
 	err := validate.Struct(correct)
-	if err != nil {
-		t.Fatalf("it should not throw an error with correct weekdays")
-	}
+	assert.NoError(err, "it should not throw an error with correct weekdays")
 
 	wrong := struct {
 		Other  string `validate:"weekday"`
@@ -43,7 +43,5 @@ func TestValidateWeekDay(t *testing.T) {
 		Other3: true,
 	}
 	err = validate.Struct(wrong)
-	if err == nil {
-		t.Fatalf("it should throw an error with wrong weekdays")
-	}
+	assert.Error(err, "it should throw an error with wrong weekdays")
 }

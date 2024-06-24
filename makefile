@@ -7,9 +7,11 @@ dev:
 dev-templ:
 	templ generate --watch --proxy="http://localhost:8080" --cmd="go run ."
 test-unit:
-	gow -c -v test ./tests/unit
+	gow -c -v test -v -count=1 ./tests/unit
 test-integration:
-	gow -c -v test -v ./tests/integration
+	gow -c -v test -v -count=1 ./tests/integration
+test-e2e:
+	gow -c -v test -v -count=1 ./tests/e2e
 services-up:
 	docker compose up -d
 services-down:

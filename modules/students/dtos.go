@@ -20,7 +20,7 @@ type CreateStudentRoutinePlanDTO struct {
 	WeekDay   models.WeekDay `json:"weekDay" validate:"required,weekday"`
 	StartHour int            `json:"startHour" validate:"required"`
 	Duration  int            `json:"duration" validate:"required"`
-	Price     *float64       `json:"price" validate:"required"`
+	Price     *float64       `json:"price"`
 }
 
 type UpdateStudentDTO struct {

@@ -11,10 +11,6 @@ type StudentRepository struct {
 	Db configs.Db `inject:"db"`
 }
 
-func NewStudentRepository() *StudentRepository {
-	return configs.ResolveInject(&StudentRepository{})
-}
-
 func (r *StudentRepository) GetAllStudents() []Student {
 	studentsArr := []StudentEntity{}
 	students := []Student{}

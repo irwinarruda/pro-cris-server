@@ -12,7 +12,7 @@ type IStudentRepository interface {
 	GetStudentByID(id int) (Student, error)
 	CreateStudent(student CreateStudentDTO) int
 	UpdateStudent(student UpdateStudentDTO) (int, error)
-	DeleteStudent(id int) error
+	DeleteStudent(id int) (int, error)
 	GetRoutineID(idStudent int, excluded ...int) []int
 	CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO)
 	DeleteRoutine(idStudent int, routine ...int)
@@ -101,7 +101,7 @@ func (s *StudentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
 		IsDeleted:         s.IsDeleted,
 		CreatedAt:         s.CreatedAt,
 		UpdatedAt:         s.UpdatedAt,
-		Routine: utils.Map(routineEntity, func(rp routinePlanEntity) RoutinePlan {
+		Routine: utils.Map(routineEntity, func(rp routinePlanEntity, _ int) RoutinePlan {
 			return rp.ToRoutinePlan()
 		}),
 	}
@@ -116,32 +116,6 @@ type routinePlanEntity struct {
 	Price     float64
 	IsDeleted bool
 	CreatedAt time.Time
-}
-
-func (r *routinePlanEntity) FromCreateStudentRoutinePlan(routine CreateStudentRoutinePlanDTO, idStudent int, basePrice float64) {
-	if routine.Price != nil {
-		basePrice = *routine.Price
-	}
-	r.IdStudent = idStudent
-	r.WeekDay = routine.WeekDay
-	r.StartHour = routine.StartHour
-	r.Duration = routine.Duration
-	r.Price = basePrice
-	r.CreatedAt = time.Now()
-}
-
-func (r *routinePlanEntity) FromUpdateStudentRoutinePlan(routine UpdateStudentRoutinePlanDTO, idStudent int) {
-	if routine.ID != nil {
-		r.ID = routine.ID
-		return
-	}
-	r.ID = nil
-	r.IdStudent = idStudent
-	r.WeekDay = *routine.WeekDay
-	r.StartHour = *routine.StartHour
-	r.Duration = *routine.Duration
-	r.Price = *routine.Price
-	r.CreatedAt = time.Now()
 }
 
 func (r *routinePlanEntity) ToRoutinePlan() RoutinePlan {

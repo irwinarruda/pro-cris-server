@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/irwinarruda/pro-cris-server/libs/google"
+	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/routes"
 )
@@ -34,6 +35,10 @@ func androidServer() {
 }
 
 func main() {
+	configs.RegisterInject(
+		"students_repository",
+		configs.ResolveInject(&students.StudentRepository{}),
+	)
 	app := gin.New()
 	v1 := app.Group("/api/v1")
 	routes.CreateRoutes(v1)

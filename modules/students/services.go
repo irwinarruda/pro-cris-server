@@ -1,30 +1,38 @@
 package students
 
+import (
+	"github.com/irwinarruda/pro-cris-server/shared/configs"
+	"github.com/irwinarruda/pro-cris-server/shared/utils"
+)
+
 type StudentService struct {
+	StudentsRepository IStudentRepository `inject:"students_repository"`
 }
 
 func NewStudentService() *StudentService {
-	return &StudentService{}
+	return configs.ResolveInject(&StudentService{})
 }
 
 func (s *StudentService) GetAllStudents() []Student {
-	studentsRepository := NewStudentRepository()
-	return studentsRepository.GetAllStudents()
+	return s.StudentsRepository.GetAllStudents()
 }
 
 func (s *StudentService) GetStudentByID(id int) (Student, error) {
-	studentsRepository := NewStudentRepository()
-	return studentsRepository.GetStudentByID(id)
+	return s.StudentsRepository.GetStudentByID(id)
 }
 
 func (s *StudentService) CreateStudent(student CreateStudentDTO) int {
-	studentsRepository := NewStudentRepository()
-	return studentsRepository.CreateStudent(student)
+	student.Routine = utils.Map(student.Routine, func(s CreateStudentRoutinePlanDTO, _ int) CreateStudentRoutinePlanDTO {
+		if s.Price == nil {
+			s.Price = &student.BasePrice
+		}
+		return s
+	})
+	return s.StudentsRepository.CreateStudent(student)
 }
 
 func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
-	studentsRepository := NewStudentRepository()
-	idStudent, err := studentsRepository.UpdateStudent(student)
+	idStudent, err := s.StudentsRepository.UpdateStudent(student)
 	if err != nil {
 		return 0, err
 	}
@@ -35,24 +43,27 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 			existingRoutine = append(existingRoutine, *routinePlan.ID)
 			continue
 		}
+		price := &student.BasePrice
+		if routinePlan.Price != nil {
+			price = routinePlan.Price
+		}
 		mustCreateRoutine = append(mustCreateRoutine, CreateStudentRoutinePlanDTO{
 			WeekDay:   *routinePlan.WeekDay,
 			Duration:  *routinePlan.Duration,
 			StartHour: *routinePlan.StartHour,
-			Price:     routinePlan.Price,
+			Price:     price,
 		})
 	}
-	shouldDeleteRoutine := studentsRepository.GetRoutineID(idStudent, existingRoutine...)
+	shouldDeleteRoutine := s.StudentsRepository.GetRoutineID(idStudent, existingRoutine...)
 	if len(shouldDeleteRoutine) > 0 {
-		studentsRepository.DeleteRoutine(idStudent, shouldDeleteRoutine...)
+		s.StudentsRepository.DeleteRoutine(idStudent, shouldDeleteRoutine...)
 	}
 	if len(mustCreateRoutine) > 0 {
-		studentsRepository.CreateRoutine(idStudent, mustCreateRoutine...)
+		s.StudentsRepository.CreateRoutine(idStudent, mustCreateRoutine...)
 	}
 	return idStudent, nil
 }
 
 func (s *StudentService) DeleteStudent(id int) (int, error) {
-	studentsRepository := NewStudentRepository()
-	return studentsRepository.DeleteStudent(id)
+	return s.StudentsRepository.DeleteStudent(id)
 }
