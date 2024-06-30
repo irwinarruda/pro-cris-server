@@ -40,7 +40,7 @@ func main() {
 		configs.ResolveInject(&students.StudentRepository{}),
 	)
 	app := gin.New()
-	v1 := app.Group("/api/v1")
-	routes.CreateRoutes(v1)
+	v1 := app.Group("/api")
+	routes.CreateApiRoutes(v1)
 	app.Run()
 }

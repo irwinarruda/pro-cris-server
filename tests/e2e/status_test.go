@@ -12,7 +12,7 @@ import (
 
 func TestGetReturnOK(t *testing.T) {
 	time.Sleep(1 * time.Second)
-	assert := assert.New(t)
+	var assert = assert.New(t)
 	var env = configs.GetEnv("../../.env")
 	var validate = configs.GetValidate()
 	res, err := prohttp.DoRequest[status.GetStatusDTO](prohttp.RequestConfig[any]{

@@ -2,7 +2,6 @@ package integration
 
 import (
 	"testing"
-	"time"
 
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
@@ -12,145 +11,13 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-type FakeStudentRepository struct {
-	Students      []students.Student
-	IDStudents    int
-	IDRoutinePlan int
-}
+func TestStudentServiceHappyPath(t *testing.T) {
+	setupTests()
 
-func (f *FakeStudentRepository) GetAllStudents() []students.Student {
-	return f.Students
-}
-
-func (f *FakeStudentRepository) GetStudentByID(id int) (students.Student, error) {
-	for _, student := range f.Students {
-		if student.ID == id {
-			return student, nil
-		}
-	}
-	return students.Student{}, utils.NewAppError("Student not found.", true, nil)
-}
-
-func (f *FakeStudentRepository) CreateStudent(studentDTO students.CreateStudentDTO) int {
-	f.IDStudents++
-	student := students.Student{
-		ID:                f.IDStudents,
-		Name:              studentDTO.Name,
-		BirthDay:          studentDTO.BirthDay,
-		DisplayColor:      studentDTO.DisplayColor,
-		Picture:           studentDTO.Picture,
-		ParentName:        studentDTO.ParentName,
-		ParentPhoneNumber: studentDTO.ParentPhoneNumber,
-		HouseAddress:      studentDTO.HouseAddress,
-		HouseIdentifier:   studentDTO.HouseIdentifier,
-		HouseCoordinate:   studentDTO.HouseCoordinate,
-		BasePrice:         studentDTO.BasePrice,
-		IsDeleted:         false,
-		CreatedAt:         time.Now(),
-		UpdatedAt:         time.Now(),
-	}
-	for _, routinePlan := range studentDTO.Routine {
-		f.IDRoutinePlan++
-		student.Routine = append(student.Routine, students.RoutinePlan{
-			ID:        f.IDRoutinePlan,
-			StartHour: routinePlan.StartHour,
-			Duration:  routinePlan.Duration,
-			WeekDay:   routinePlan.WeekDay,
-			Price:     *routinePlan.Price,
-			CreatedAt: time.Now(),
-			IsDeleted: false,
-		})
-	}
-	f.Students = append(f.Students, student)
-	return f.IDStudents
-}
-
-func (f *FakeStudentRepository) UpdateStudent(studentDTO students.UpdateStudentDTO) (int, error) {
-	for i := range f.Students {
-		student := &f.Students[i]
-		if student.ID == studentDTO.ID {
-			student.Name = studentDTO.Name
-			student.BirthDay = studentDTO.BirthDay
-			student.DisplayColor = studentDTO.DisplayColor
-			student.Picture = studentDTO.Picture
-			student.ParentName = studentDTO.ParentName
-			student.ParentPhoneNumber = studentDTO.ParentPhoneNumber
-			student.HouseAddress = studentDTO.HouseAddress
-			student.HouseIdentifier = studentDTO.HouseIdentifier
-			student.HouseCoordinate = studentDTO.HouseCoordinate
-			student.BasePrice = studentDTO.BasePrice
-			student.UpdatedAt = time.Now()
-			return student.ID, nil
-		}
-	}
-	return 0, utils.NewAppError("Student not found.", true, nil)
-}
-
-func (f *FakeStudentRepository) DeleteStudent(id int) (int, error) {
-	return 0, nil
-}
-
-func (f *FakeStudentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
-	routine := []int{}
-	for _, student := range f.Students {
-		if student.ID == idStudent {
-			for _, routinePlan := range student.Routine {
-				if !utils.Includes(excluded, routinePlan.ID) {
-					routine = append(routine, routinePlan.ID)
-				}
-			}
-		}
-	}
-	return routine
-}
-
-func (f *FakeStudentRepository) CreateRoutine(idStudent int, routinePlan ...students.CreateStudentRoutinePlanDTO) {
-	for _, student := range f.Students {
-		if student.ID == idStudent {
-			for _, r := range routinePlan {
-				f.IDRoutinePlan++
-				student.Routine = append(student.Routine, students.RoutinePlan{
-					ID:        f.IDRoutinePlan,
-					StartHour: r.StartHour,
-					Duration:  r.Duration,
-					WeekDay:   r.WeekDay,
-					Price:     *r.Price,
-					CreatedAt: time.Now(),
-					IsDeleted: false,
-				})
-			}
-		}
-	}
-}
-
-func (f *FakeStudentRepository) DeleteRoutine(idStudent int, routine ...int) {
-	for _, student := range f.Students {
-		if student.ID == idStudent {
-			for i := 0; i < len(student.Routine); i++ {
-				routinePlan := student.Routine[i]
-				if utils.Includes(routine, routinePlan.ID) {
-					student.Routine = append(student.Routine[:i], student.Routine[i+1:]...)
-					i--
-				}
-			}
-		}
-	}
-}
-
-func TestStudentService(t *testing.T) {
 	var assert = assert.New(t)
-	configs.GetEnv("../../.env")
-	configs.RegisterInject(
-		"students_repository",
-		&FakeStudentRepository{
-			Students:      []students.Student{},
-			IDStudents:    0,
-			IDRoutinePlan: 0,
-		},
-	)
+	var studentService = students.NewStudentService()
 
-	studentsService := students.NewStudentService()
-	id1 := studentsService.CreateStudent(students.CreateStudentDTO{
+	id1 := studentService.CreateStudent(students.CreateStudentDTO{
 		Name:              "John Doe",
 		BirthDay:          utils.StringPointer("1990-01-01"),
 		DisplayColor:      "#000000",
@@ -161,26 +28,20 @@ func TestStudentService(t *testing.T) {
 		HouseIdentifier:   utils.StringPointer("Apt 1"),
 		HouseCoordinate:   &models.Coordinate{Latitude: 20, Longitude: 20},
 		BasePrice:         120,
-		Routine: utils.Map(make([]students.CreateStudentRoutinePlanDTO, 2), func(_ students.CreateStudentRoutinePlanDTO, i int) students.CreateStudentRoutinePlanDTO {
-			var weekday models.WeekDay = models.Monday
-			var price *float64 = nil
-			if i == 1 {
-				weekday = models.Tuesday
-				price = utils.Float64Pointer(100)
-			}
-			return students.CreateStudentRoutinePlanDTO{
-				WeekDay:   weekday,
-				Duration:  60,
-				StartHour: 8,
-				Price:     price,
-			}
-		}),
+		Routine: []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: nil},
+			{WeekDay: models.Tuesday, Duration: 60, StartHour: 8, Price: utils.Float64Pointer(100)},
+		},
 	})
 	// Testing the fake repository
-	student1, err := studentsService.GetStudentByID(id1)
+	student1, err := studentService.GetStudentByID(id1)
 	assert.NoError(err, "Should return a student with the same ID as the one created\n%v", tests.ExpectString(id1, student1.ID))
 	assert.Len(student1.Routine, 2, "Student should have 2 routine plans")
+	mondayRoutineId := 0
 	for _, routinePlan := range student1.Routine {
+		if routinePlan.WeekDay == models.Monday {
+			mondayRoutineId = routinePlan.ID
+		}
 		assert.NotEqual(routinePlan.ID, 0, "Routine plan ID should not be 0")
 		assert.Condition(
 			func() bool { return routinePlan.WeekDay != models.Monday || routinePlan.Price == 120 },
@@ -193,7 +54,7 @@ func TestStudentService(t *testing.T) {
 	}
 
 	// Testing update logic
-	id2, err := studentsService.UpdateStudent(students.UpdateStudentDTO{
+	id2, err := studentService.UpdateStudent(students.UpdateStudentDTO{
 		ID:                id1,
 		Name:              "Jane Doe Updated",
 		BirthDay:          utils.StringPointer("1990-01-02"),
@@ -206,20 +67,15 @@ func TestStudentService(t *testing.T) {
 		HouseCoordinate:   &models.Coordinate{Latitude: 30, Longitude: 30},
 		BasePrice:         200,
 		Routine: []students.UpdateStudentRoutinePlanDTO{
-			{ID: utils.IntPointer(1)},
-			{
-				ID:        nil,
-				WeekDay:   utils.StringPointer(models.Friday),
-				StartHour: utils.IntPointer(9),
-				Duration:  utils.IntPointer(90),
-			},
+			{ID: utils.IntPointer(mondayRoutineId)},
+			{ID: nil, WeekDay: utils.StringPointer(models.Friday), StartHour: utils.IntPointer(9), Duration: utils.IntPointer(90)},
 		},
 	})
 
 	assert.NoError(err, "Should be able to update student")
 	assert.Equal(id1, id2, "Should return the same ID as the one updated")
 
-	student2, err := studentsService.GetStudentByID(id2)
+	student2, err := studentService.GetStudentByID(id2)
 	assert.NoError(err, "Should return a student with the same ID as the one created\n%v", tests.ExpectString(id2, student2.ID))
 	assert.Equal("Jane Doe Updated", student2.Name, "Name should be updated")
 	assert.Equal("1990-01-02", *student2.BirthDay, "BirthDay should be updated")
@@ -235,6 +91,7 @@ func TestStudentService(t *testing.T) {
 	assert.Len(student2.Routine, 2, "Student should have 2 routine plans")
 	for _, routinePlan := range student2.Routine {
 		assert.NotEqual(routinePlan.ID, 0, "Routine plan ID should not be 0")
+		assert.NotEqual(routinePlan.WeekDay, models.Tuesday, "Routine plan on Tuesday should be deleted")
 		assert.Condition(
 			func() bool { return routinePlan.WeekDay != models.Monday || routinePlan.Price == 120 },
 			"Routine plan price on Monday should be equal to the base price",
@@ -244,4 +101,34 @@ func TestStudentService(t *testing.T) {
 			"Routine plan price on Friday should be equal to 200",
 		)
 	}
+
+	allStudents := studentService.GetAllStudents()
+	assert.Len(allStudents, 1, "Should return a list of students with 1 student after creating/updating")
+
+	studentService.DeleteStudent(id2)
+
+	allStudents = studentService.GetAllStudents()
+	assert.Len(allStudents, 0, "Should return an empty list of students after deleting")
+}
+
+func TestStudentServiceErrorPath(t *testing.T) {
+	setupTests()
+	var assert = assert.New(t)
+	var studentService = students.NewStudentService()
+
+	_, err := studentService.UpdateStudent(students.UpdateStudentDTO{ID: 7})
+	assert.Error(err, "Should return an error when trying to update a student that does not exist")
+
+	_, err = studentService.GetStudentByID(1)
+	assert.Error(err, "Should return an error when trying to get a student that does not exist")
+
+	_, err = studentService.DeleteStudent(0)
+	assert.Error(err, "Should return an error when trying to delete a student that does not exist")
+}
+
+func setupTests() {
+	configs.GetEnv("../../.env")
+	var studentRepository = configs.ResolveInject(&students.StudentRepository{})
+	configs.RegisterInject("students_repository", studentRepository)
+	studentRepository.ResetStudents()
 }

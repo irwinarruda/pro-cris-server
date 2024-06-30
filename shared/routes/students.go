@@ -9,9 +9,9 @@ import (
 
 func CreateStudentRoutes(app *gin.RouterGroup) {
 	studentsCtrl := configs.ResolveInject(&students.StudentCtrl{})
-	app.GET("/students", studentsCtrl.GetStudents)
-	app.GET("/students/:id", studentsCtrl.GetStudent)
-	app.POST("/students", studentsCtrl.CreateStudent)
-	app.PUT("/students/:id", studentsCtrl.UpdateSudent)
-	app.DELETE("/students/:id", studentsCtrl.DeleteStudent)
+	app.GET("/v1/students", studentsCtrl.GetStudents)
+	app.GET("/v1/students/:id", studentsCtrl.GetStudent)
+	app.POST("/v1/students", studentsCtrl.CreateStudent)
+	app.PUT("/v1/students/:id", studentsCtrl.UpdateSudent)
+	app.DELETE("/v1/students/:id", studentsCtrl.DeleteStudent)
 }

@@ -9,7 +9,7 @@ dev-templ:
 test-unit:
 	gow -c -v test -v -count=1 ./tests/unit
 test-integration:
-	gow -c -v test -v -count=1 ./tests/integration
+	make migration-reset && make migration-up && gow -c -v test -v -count=1 ./tests/integration
 test-e2e:
 	gow -c -v test -v -count=1 ./tests/e2e
 services-up:

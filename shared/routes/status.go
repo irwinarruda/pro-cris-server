@@ -8,5 +8,5 @@ import (
 
 func CreateStatusRoutes(app *gin.RouterGroup) {
 	statusCtrl := configs.ResolveInject(&status.StatusCtrl{})
-	app.GET("/status", statusCtrl.GetStatus)
+	app.GET("/v1/status", statusCtrl.GetStatus)
 }

@@ -75,7 +75,7 @@ func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
 }
 
 func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error) {
-	var id int
+	var id *int
 	studentE := StudentEntity{}
 	studentE.FromUpdateStudent(student)
 	sql := `
@@ -110,21 +110,21 @@ func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error)
 		studentE.BasePrice,
 		studentE.ID,
 	).Scan(&id)
-	if studentE.ID != id {
+	if id == nil {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
-	return studentE.ID, nil
+	return *id, nil
 }
 
 func (r *StudentRepository) DeleteStudent(id int) (int, error) {
-	var idStudent int
+	var idStudent *int
 	sql := `
     UPDATE student
     SET is_deleted = true
     WHERE id = ?
     RETURNING id;`
 	r.Db.Raw(sql, id).Scan(&idStudent)
-	if id != idStudent {
+	if idStudent == nil {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
 	sql = `
@@ -201,4 +201,9 @@ func (r *StudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 		args = append(args, id)
 	}
 	r.Db.Exec(sql, args...)
+}
+
+func (r *StudentRepository) ResetStudents() {
+	sql := "DELETE FROM student;"
+	r.Db.Exec(sql)
 }

@@ -3,7 +3,7 @@
 CREATE TABLE IF NOT EXISTS student(
   id serial PRIMARY KEY,
   name varchar(80) NOT NULL,
-  birth_day date,
+  birth_day varchar(10) NOT NULL,
   display_color varchar(7) NOT NULL DEFAULT '#fefefe',
   picture text,
   parent_name varchar(80),
