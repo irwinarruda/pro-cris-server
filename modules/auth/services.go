@@ -15,7 +15,7 @@ func NewAuthService() *AuthService {
 	return proinject.Resolve(&AuthService{})
 }
 
-func (a *AuthService) Login(credentials LoginTeacherDTO) (User, error) {
+func (a *AuthService) Login(credentials LoginDTO) (User, error) {
 	if credentials.Provider != Google {
 		return User{}, utils.NewAppError("Invalid provider.", true, nil)
 	}

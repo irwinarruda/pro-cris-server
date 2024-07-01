@@ -2,13 +2,11 @@ package routes
 
 import (
 	"github.com/gin-gonic/gin"
-
-	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 )
 
 func CreateStudentRoutes(app *gin.RouterGroup) {
-	studentsCtrl := proinject.Resolve(&students.StudentCtrl{})
+	var studentsCtrl = students.NewStudentCtrl()
 	app.GET("/v1/students", studentsCtrl.GetStudents)
 	app.GET("/v1/students/:id", studentsCtrl.GetStudent)
 	app.POST("/v1/students", studentsCtrl.CreateStudent)

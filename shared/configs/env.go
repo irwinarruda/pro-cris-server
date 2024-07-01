@@ -6,7 +6,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-type Env struct {
+type EnvConfig struct {
 	BaseUrl           string `env:"PRO_CRIS_BASE_URL"`
 	Port              string `env:"PRO_CRIS_SERVER_PORT"`
 	WhatsAppAuthToken string `env:"API_WHATSAPP_AUTH_TOKEN"`
@@ -21,13 +21,15 @@ type Env struct {
 	DatabaseName      string `env:"POSTGRES_DB"`
 }
 
-var env *Env
+type Env = *EnvConfig
 
-func GetEnv(filenames ...string) *Env {
+var env Env
+
+func GetEnv(filenames ...string) Env {
 	if env == nil {
 		err := godotenv.Load(filenames...)
 		utils.AssertErr(err)
-		env = &Env{}
+		env = &EnvConfig{}
 		err = proenv.LoadEnv(env)
 		utils.AssertErr(err)
 	}

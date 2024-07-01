@@ -5,12 +5,17 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
 type StatusCtrl struct {
 	Db  configs.Db  `inject:"db"`
 	Env configs.Env `inject:"env"`
+}
+
+func NewStatusCtrl() *StatusCtrl {
+	return proinject.Resolve(&StatusCtrl{})
 }
 
 func (s StatusCtrl) GetStatus(c *gin.Context) {

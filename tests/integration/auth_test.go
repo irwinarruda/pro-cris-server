@@ -15,7 +15,7 @@ func TestAuthServiceHappyPath(t *testing.T) {
 	setupTestsAuth()
 	var assert = assert.New(t)
 	var authService = auth.NewAuthService()
-	user1, _ := authService.Login(auth.LoginTeacherDTO{
+	user1, _ := authService.Login(auth.LoginDTO{
 		Provider: auth.Google,
 		Token:    "valid",
 	})
@@ -39,24 +39,24 @@ func TestAuthServiceErrorPath(t *testing.T) {
 	setupTestsAuth()
 	var assert = assert.New(t)
 	var authService = auth.NewAuthService()
-	_, err := authService.Login(auth.LoginTeacherDTO{
+	_, err := authService.Login(auth.LoginDTO{
 		Provider: auth.Google,
 		Token:    "invalid",
 	})
 	assert.Error(err, "Should return an error with invalid access token.")
 
-	_, err = authService.Login(auth.LoginTeacherDTO{
+	_, err = authService.Login(auth.LoginDTO{
 		Provider: "invalid_provider",
 		Token:    "invalid",
 	})
 	assert.Error(err, "Should return an error with invalid provider.")
 
-	u1, err := authService.Login(auth.LoginTeacherDTO{
+	u1, err := authService.Login(auth.LoginDTO{
 		Provider: auth.Google,
 		Token:    "valid",
 	})
 	assert.NoError(err, "Should not return error when login with new User.")
-	u2, err := authService.Login(auth.LoginTeacherDTO{
+	u2, err := authService.Login(auth.LoginDTO{
 		Provider: auth.Google,
 		Token:    "valid",
 	})

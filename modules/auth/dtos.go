@@ -1,6 +1,6 @@
 package auth
 
-type LoginTeacherDTO struct {
+type LoginDTO struct {
 	Provider LoginProvider `json:"provider" validate:"required,eq=Google"`
 	Token    string        `json:"token" validate:"required,jwt"`
 }

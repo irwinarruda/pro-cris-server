@@ -5,12 +5,17 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type StudentCtrl struct {
 	Validate configs.Validate `inject:"validate"`
+}
+
+func NewStudentCtrl() *StudentCtrl {
+	return proinject.Resolve(&StudentCtrl{})
 }
 
 func (s StudentCtrl) GetStudents(c *gin.Context) {
