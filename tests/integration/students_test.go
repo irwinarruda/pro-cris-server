@@ -12,7 +12,7 @@ import (
 )
 
 func TestStudentServiceHappyPath(t *testing.T) {
-	setupTests()
+	setupTestsStudents()
 
 	var assert = assert.New(t)
 	var studentService = students.NewStudentService()
@@ -33,7 +33,6 @@ func TestStudentServiceHappyPath(t *testing.T) {
 			{WeekDay: models.Tuesday, Duration: 60, StartHour: 8, Price: utils.Float64Pointer(100)},
 		},
 	})
-	// Testing the fake repository
 	student1, err := studentService.GetStudentByID(id1)
 	assert.NoError(err, "Should return a student with the same ID as the one created\n%v", tests.ExpectString(id1, student1.ID))
 	assert.Len(student1.Routine, 2, "Student should have 2 routine plans")
@@ -53,7 +52,6 @@ func TestStudentServiceHappyPath(t *testing.T) {
 		)
 	}
 
-	// Testing update logic
 	id2, err := studentService.UpdateStudent(students.UpdateStudentDTO{
 		ID:                id1,
 		Name:              "Jane Doe Updated",
@@ -112,7 +110,7 @@ func TestStudentServiceHappyPath(t *testing.T) {
 }
 
 func TestStudentServiceErrorPath(t *testing.T) {
-	setupTests()
+	setupTestsStudents()
 	var assert = assert.New(t)
 	var studentService = students.NewStudentService()
 
@@ -126,8 +124,9 @@ func TestStudentServiceErrorPath(t *testing.T) {
 	assert.Error(err, "Should return an error when trying to delete a student that does not exist")
 }
 
-func setupTests() {
-	configs.GetEnv("../../.env")
+func setupTestsStudents() {
+	configs.RegisterInject("env", configs.GetEnv("../../.env"))
+	configs.RegisterInject("db", configs.GetDb())
 	var studentRepository = configs.ResolveInject(&students.StudentRepository{})
 	configs.RegisterInject("students_repository", studentRepository)
 	studentRepository.ResetStudents()

@@ -23,13 +23,13 @@ type Env struct {
 
 var env *Env
 
-func GetEnv(filenames ...string) Env {
+func GetEnv(filenames ...string) *Env {
 	if env == nil {
 		err := godotenv.Load(filenames...)
 		utils.AssertErr(err)
 		env = &Env{}
+		err = proenv.LoadEnv(env)
+		utils.AssertErr(err)
 	}
-	err := proenv.LoadEnv(env)
-	utils.AssertErr(err)
-	return *env
+	return env
 }

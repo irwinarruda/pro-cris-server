@@ -13,10 +13,6 @@ func RegisterInject[T interface{}](key string, value *T) {
 }
 
 func ResolveInject[T interface{}](instance *T) *T {
-	env := GetEnv()
-	validate := GetValidate()
-	db := GetDb()
-
 	envType := reflect.TypeOf(*instance)
 	envEditable := reflect.ValueOf(instance).Elem()
 
@@ -33,21 +29,9 @@ func ResolveInject[T interface{}](instance *T) *T {
 				break
 			}
 		}
-		utils.Assert(tag == "env" || tag == "validate" || tag == "db" || !invalidTag, "[Configs]: Invalid `inject` value")
+		utils.Assert(!invalidTag, "[Configs]: Invalid `inject` value")
 		fieldValue := envEditable.FieldByName(field.Name)
 		if fieldValue.IsValid() && fieldValue.CanSet() {
-			if tag == "env" {
-				fieldValue.Set(reflect.ValueOf(env))
-				continue
-			}
-			if tag == "validate" {
-				fieldValue.Set(reflect.ValueOf(validate))
-				continue
-			}
-			if tag == "db" {
-				fieldValue.Set(reflect.ValueOf(db))
-				continue
-			}
 			fieldValue.Set(reflect.ValueOf(registeredInjects[tag]))
 		}
 	}
