@@ -1,13 +1,19 @@
 package auth
 
+import "time"
+
 type User struct {
 	ID              int              `json:"id"`
 	Name            string           `json:"name"`
 	Email           string           `json:"email"`
-	Picutre         *string          `json:"picture"`
+	Picture         *string          `json:"picture"`
 	EmailVerified   bool             `json:"emailVerified"`
+	Provider        LoginProvider    `json:"provider"`
 	Permissions     []Permission     `json:"permissions"`
 	TeacherFeatures *TeacherFeatures `json:"teacherFeatures"`
+	IsDeleted       bool             `json:"isDeleted"`
+	CreatedAt       time.Time        `json:"createdAt"`
+	UpdatedAt       time.Time        `json:"updatedAt"`
 }
 
 type TeacherFeatures struct {
@@ -23,3 +29,15 @@ const (
 	Admin   Permission = "Admin"
 	Teacher Permission = "Teacher"
 )
+
+type LoginProvider = string
+
+const (
+	Google LoginProvider = "Google"
+)
+
+func GetLoginProviders() []LoginProvider {
+	return []LoginProvider{
+		Google,
+	}
+}

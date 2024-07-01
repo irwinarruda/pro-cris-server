@@ -1,18 +1,17 @@
-package configs
+package proinject
 
 import (
+	"log"
 	"reflect"
-
-	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 var registeredInjects = make(map[string]interface{})
 
-func RegisterInject[T interface{}](key string, value *T) {
+func Register[T interface{}](key string, value *T) {
 	registeredInjects[key] = value
 }
 
-func ResolveInject[T interface{}](instance *T) *T {
+func Resolve[T interface{}](instance *T) *T {
 	envType := reflect.TypeOf(*instance)
 	envEditable := reflect.ValueOf(instance).Elem()
 
@@ -29,7 +28,9 @@ func ResolveInject[T interface{}](instance *T) *T {
 				break
 			}
 		}
-		utils.Assert(!invalidTag, "[Configs]: Invalid `inject` value")
+		if invalidTag {
+			log.Fatal("[proinject]: Invalid `inject` value in struct field. ", tag)
+		}
 		fieldValue := envEditable.FieldByName(field.Name)
 		if fieldValue.IsValid() && fieldValue.CanSet() {
 			fieldValue.Set(reflect.ValueOf(registeredInjects[tag]))

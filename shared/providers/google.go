@@ -2,6 +2,7 @@ package providers
 
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/google"
+	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
@@ -17,7 +18,7 @@ type GoogleClient struct {
 }
 
 func NewGoogleClient() *GoogleClient {
-	googleClient := configs.ResolveInject(&GoogleClient{})
+	googleClient := proinject.Resolve(&GoogleClient{})
 	googleClient.Init()
 	return googleClient
 }

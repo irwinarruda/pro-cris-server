@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS student(
+CREATE TABLE IF NOT EXISTS "student"(
   id serial PRIMARY KEY,
   name varchar(80) NOT NULL,
   birth_day varchar(10) NOT NULL,
@@ -21,5 +21,5 @@ CREATE TABLE IF NOT EXISTS student(
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS student;
+DROP TABLE IF EXISTS "student";
 -- +goose StatementEnd

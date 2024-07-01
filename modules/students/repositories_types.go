@@ -16,6 +16,7 @@ type IStudentRepository interface {
 	GetRoutineID(idStudent int, excluded ...int) []int
 	CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO)
 	DeleteRoutine(idStudent int, routine ...int)
+	ResetStudents()
 }
 
 type StudentEntity struct {

@@ -3,6 +3,7 @@ package integration
 import (
 	"testing"
 
+	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/models"
@@ -125,9 +126,9 @@ func TestStudentServiceErrorPath(t *testing.T) {
 }
 
 func setupTestsStudents() {
-	configs.RegisterInject("env", configs.GetEnv("../../.env"))
-	configs.RegisterInject("db", configs.GetDb())
-	var studentRepository = configs.ResolveInject(&students.StudentRepository{})
-	configs.RegisterInject("students_repository", studentRepository)
+	proinject.Register("env", configs.GetEnv("../../.env"))
+	proinject.Register("db", configs.GetDb())
+	var studentRepository = proinject.Resolve(&students.StudentRepository{})
+	proinject.Register("students_repository", studentRepository)
 	studentRepository.ResetStudents()
 }

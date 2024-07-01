@@ -3,6 +3,7 @@ package students
 import (
 	"fmt"
 
+	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
@@ -12,7 +13,7 @@ type StudentRepository struct {
 }
 
 func NewStudentRepository() *StudentRepository {
-	return configs.ResolveInject(&StudentRepository{})
+	return proinject.Resolve(&StudentRepository{})
 }
 
 func (r *StudentRepository) GetAllStudents() []Student {
@@ -208,6 +209,5 @@ func (r *StudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 }
 
 func (r *StudentRepository) ResetStudents() {
-	sql := "DELETE FROM student;"
-	r.Db.Exec(sql)
+	r.Db.Exec("DELETE FROM student;")
 }

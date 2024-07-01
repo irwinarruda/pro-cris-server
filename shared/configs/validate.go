@@ -11,14 +11,22 @@ var validate *validator.Validate
 
 type Validate = *validator.Validate
 
-func GetValidate() Validate {
+func GetValidate(loginProviders []string) Validate {
 	if validate == nil {
 		validate = validator.New()
+		validate.RegisterValidation("login_provider", ValidateLoginProvider(loginProviders))
 		validate.RegisterValidation("weekday", ValidateWeekDay)
 		validate.RegisterValidation("required_ifid", ValidateWeekDay)
 		validate.RegisterValidation("weekday_ifid", ValidateWeekDay)
 	}
 	return validate
+}
+
+func ValidateLoginProvider(loginProviders []string) func(fl validator.FieldLevel) bool {
+	return func(fl validator.FieldLevel) bool {
+		input := fl.Field().String()
+		return slices.Contains(loginProviders, input)
+	}
 }
 
 func ValidateWeekDay(fl validator.FieldLevel) bool {

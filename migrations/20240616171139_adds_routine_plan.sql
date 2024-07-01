@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-CREATE TABLE IF NOT EXISTS routine_plan(
+CREATE TABLE IF NOT EXISTS "routine_plan"(
   id serial PRIMARY KEY,
   id_student integer,
   week_day varchar(9) NOT NULL,
@@ -15,5 +15,5 @@ CREATE TABLE IF NOT EXISTS routine_plan(
 
 -- +goose Down
 -- +goose StatementBegin
-DROP TABLE IF EXISTS routine_plan;
+DROP TABLE IF EXISTS "routine_plan";
 -- +goose StatementEnd

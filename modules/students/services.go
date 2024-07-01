@@ -1,7 +1,7 @@
 package students
 
 import (
-	"github.com/irwinarruda/pro-cris-server/shared/configs"
+	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
@@ -10,7 +10,7 @@ type StudentService struct {
 }
 
 func NewStudentService() *StudentService {
-	return configs.ResolveInject(&StudentService{})
+	return proinject.Resolve(&StudentService{})
 }
 
 func (s *StudentService) GetAllStudents() []Student {

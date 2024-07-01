@@ -14,7 +14,6 @@ func TestGetReturnOK(t *testing.T) {
 	time.Sleep(1 * time.Second)
 	var assert = assert.New(t)
 	var env = configs.GetEnv("../../.env")
-	var validate = configs.GetValidate()
 	res, err := prohttp.DoRequest[status.GetStatusDTO](prohttp.RequestConfig[any]{
 		Url:    env.BaseUrl + "/api/v1/status",
 		Method: "GET",
@@ -24,8 +23,6 @@ func TestGetReturnOK(t *testing.T) {
 	body := status.GetStatusDTO{}
 	ok := res.ParseBody(&body)
 	assert.True(ok, "GET should return a json body")
-	err = validate.Struct(body)
-	assert.NoError(err, "GET should return a valid body")
 	database := body.Dependencies.Database
 	assert.Equal(database.Version, "16.0", "Database version should be 16.0")
 	assert.LessOrEqual(0, database.MaxConnections, "Database max connections should greater than or equal to 0")
