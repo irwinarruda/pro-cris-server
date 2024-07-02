@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS "routine_plan"(
   price float8 NOT NULL,
   is_deleted boolean NOT NULL DEFAULT false,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (id_student) REFERENCES student(id) ON DELETE CASCADE
+  FOREIGN KEY (id_student) REFERENCES "student"(id) ON DELETE CASCADE
 );
 -- +goose StatementEnd
 

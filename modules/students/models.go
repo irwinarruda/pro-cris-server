@@ -62,7 +62,7 @@ type RoutinePlan struct {
 func (r *RoutinePlan) ToRoutinePlanEntity(idStudent int) routinePlanEntity {
 	return routinePlanEntity{
 		ID:        &r.ID,
-		IdStudent: idStudent,
+		IDStudent: idStudent,
 		WeekDay:   r.WeekDay,
 		StartHour: r.StartHour,
 		Duration:  r.Duration,

@@ -29,6 +29,7 @@ func (u *UserEntity) ToUser() User {
 		Email:         u.Email,
 		EmailVerified: u.EmailVerified,
 		Picture:       u.Picture,
+		Provider:      u.Provider,
 		IsDeleted:     u.IsDeleted,
 		CreatedAt:     u.CreatedAt,
 		UpdatedAt:     u.UpdatedAt,

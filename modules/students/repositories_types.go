@@ -8,11 +8,11 @@ import (
 )
 
 type IStudentRepository interface {
-	GetAllStudents() []Student
-	GetStudentByID(id int) (Student, error)
+	GetAllStudents(data GetAllStudentsDTO) []Student
+	GetStudentByID(data GetStudentDTO) (Student, error)
 	CreateStudent(student CreateStudentDTO) int
 	UpdateStudent(student UpdateStudentDTO) (int, error)
-	DeleteStudent(id int) (int, error)
+	DeleteStudent(data DeleteStudentDTO) (int, error)
 	GetRoutineID(idStudent int, excluded ...int) []int
 	CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO)
 	DeleteRoutine(idStudent int, routine ...int)
@@ -21,6 +21,7 @@ type IStudentRepository interface {
 
 type StudentEntity struct {
 	ID                       int
+	IDUser                   int
 	Name                     string
 	BirthDay                 *string
 	DisplayColor             string
@@ -44,6 +45,7 @@ func (s *StudentEntity) FromCreateStudent(student CreateStudentDTO) {
 		latitude = &student.HouseCoordinate.Latitude
 		longitude = &student.HouseCoordinate.Longitude
 	}
+	s.IDUser = student.IDUser
 	s.Name = student.Name
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
@@ -65,6 +67,7 @@ func (s *StudentEntity) FromUpdateStudent(student UpdateStudentDTO) {
 		longitude = &student.HouseCoordinate.Longitude
 	}
 	s.ID = student.ID
+	s.IDUser = student.IDUser
 	s.Name = student.Name
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
@@ -110,7 +113,7 @@ func (s *StudentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
 
 type routinePlanEntity struct {
 	ID        *int
-	IdStudent int
+	IDStudent int
 	WeekDay   models.WeekDay
 	StartHour int
 	Duration  int

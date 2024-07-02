@@ -2,7 +2,17 @@ package students
 
 import "github.com/irwinarruda/pro-cris-server/shared/models"
 
+type GetAllStudentsDTO struct {
+	IDUser int `json:"idUser"`
+}
+
+type GetStudentDTO struct {
+	IDUser int `json:"idUser"`
+	ID     int `json:"id"`
+}
+
 type CreateStudentDTO struct {
+	IDUser            int                           `json:"idUser"`
 	Name              string                        `json:"name" validate:"required"`
 	BirthDay          *string                       `json:"birthDay" validate:"omitempty,datetime"`
 	DisplayColor      string                        `json:"displayColor" validate:"omitempty,hexcolor"`
@@ -24,6 +34,7 @@ type CreateStudentRoutinePlanDTO struct {
 }
 
 type UpdateStudentDTO struct {
+	IDUser            int                           `json:"idUser"`
 	ID                int                           `json:"id"`
 	Name              string                        `json:"name" validate:"required"`
 	BirthDay          *string                       `json:"birthDay" validate:"omitempty,datetime"`
@@ -44,4 +55,9 @@ type UpdateStudentRoutinePlanDTO struct {
 	StartHour *int            `json:"startHour" validate:"required_ifid"`
 	Duration  *int            `json:"duration" validate:"required_ifid"`
 	Price     *float64        `json:"price" validate:"required_ifid"`
+}
+
+type DeleteStudentDTO struct {
+	IDUser int `json:"idUser"`
+	ID     int `json:"id"`
 }

@@ -16,10 +16,10 @@ func NewStudentRepository() *StudentRepository {
 	return proinject.Resolve(&StudentRepository{})
 }
 
-func (r *StudentRepository) GetAllStudents() []Student {
+func (r *StudentRepository) GetAllStudents(data GetAllStudentsDTO) []Student {
 	studentsArr := []StudentEntity{}
 	students := []Student{}
-	r.Db.Raw("SELECT * FROM student WHERE is_deleted = false;").Scan(&studentsArr)
+	r.Db.Raw("SELECT * FROM student WHERE id_user = ? AND is_deleted = false;", data.IDUser).Scan(&studentsArr)
 	for _, studentE := range studentsArr {
 		routineE := []routinePlanEntity{}
 		r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", studentE.ID).Scan(&routineE)
@@ -29,14 +29,14 @@ func (r *StudentRepository) GetAllStudents() []Student {
 	return students
 }
 
-func (r *StudentRepository) GetStudentByID(id int) (Student, error) {
+func (r *StudentRepository) GetStudentByID(data GetStudentDTO) (Student, error) {
 	studentsE := []StudentEntity{}
-	r.Db.Raw("SELECT * FROM student WHERE id = ? AND is_deleted = false;", id).Scan(&studentsE)
+	r.Db.Raw("SELECT * FROM student WHERE id_user = ? AND id = ? AND is_deleted = false;", data.IDUser, data.ID).Scan(&studentsE)
 	if len(studentsE) == 0 {
 		return Student{}, utils.NewAppError("Student not found.", true, nil)
 	}
 	routineE := []routinePlanEntity{}
-	r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", id).Scan(&routineE)
+	r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", data.ID).Scan(&routineE)
 	return studentsE[0].ToStudent(routineE), nil
 }
 
@@ -45,6 +45,7 @@ func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
 	studentE.FromCreateStudent(student)
 	sql := fmt.Sprintf(`
     INSERT INTO student(
+      id_user,
       name,
       birth_day,
       display_color,
@@ -59,10 +60,11 @@ func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
     )
     %s
     RETURNING id;`,
-		utils.SqlValues(1, 11),
+		utils.SqlValues(1, 12),
 	)
 	r.Db.Raw(
 		sql,
+		studentE.IDUser,
 		studentE.Name,
 		studentE.BirthDay,
 		studentE.DisplayColor,
@@ -86,6 +88,7 @@ func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error)
 	sql := `
     UPDATE student
     SET
+      id_user = ?,
       name = ?,
       birth_day = ?,
       display_color = ?,
@@ -102,6 +105,7 @@ func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error)
     RETURNING id;`
 	r.Db.Raw(
 		sql,
+		studentE.IDUser,
 		studentE.Name,
 		studentE.BirthDay,
 		studentE.DisplayColor,
@@ -121,14 +125,15 @@ func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error)
 	return *id, nil
 }
 
-func (r *StudentRepository) DeleteStudent(id int) (int, error) {
+func (r *StudentRepository) DeleteStudent(data DeleteStudentDTO) (int, error) {
 	var idStudent *int
 	sql := `
     UPDATE student
     SET is_deleted = true
-    WHERE id = ?
+    WHERE id_user = ?
+    AND id = ?
     RETURNING id;`
-	r.Db.Raw(sql, id).Scan(&idStudent)
+	r.Db.Raw(sql, data.IDUser, data.ID).Scan(&idStudent)
 	if idStudent == nil {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
@@ -136,8 +141,8 @@ func (r *StudentRepository) DeleteStudent(id int) (int, error) {
     UPDATE routine_plan
     SET is_deleted = true
     WHERE id_student = ?;`
-	r.Db.Exec(sql, id)
-	return id, nil
+	r.Db.Exec(sql, data.ID)
+	return data.ID, nil
 }
 
 // Get Routine from a student.

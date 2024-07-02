@@ -19,19 +19,24 @@ func NewStudentCtrl() *StudentCtrl {
 }
 
 func (s StudentCtrl) GetStudents(c *gin.Context) {
+	studentsDTO := GetAllStudentsDTO{}
+	studentsDTO.IDUser = c.Value("id_user").(int)
 	studentService := NewStudentService()
-	students := studentService.GetAllStudents()
+	students := studentService.GetAllStudents(studentsDTO)
 	c.JSON(http.StatusOK, students)
 }
 
 func (s StudentCtrl) GetStudent(c *gin.Context) {
-	id, err := strconv.Atoi(c.Param("id"))
+	idStudent, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
 		return
 	}
+	studentDTO := GetStudentDTO{}
+	studentDTO.IDUser = c.Value("id_user").(int)
+	studentDTO.ID = idStudent
 	studentService := NewStudentService()
-	student, err := studentService.GetStudentByID(id)
+	student, err := studentService.GetStudentByID(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusNotFound, err)
 		return
@@ -41,6 +46,7 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 
 func (s StudentCtrl) CreateStudent(c *gin.Context) {
 	studentDTO := CreateStudentDTO{}
+	studentDTO.IDUser = c.Value("id_user").(int)
 	err := c.Bind(&studentDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
@@ -66,6 +72,8 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 		return
 	}
 	studentDTO := UpdateStudentDTO{}
+	studentDTO.ID = id
+	studentDTO.IDUser = c.Value("id_user").(int)
 	err = c.Bind(&studentDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data. "+err.Error(), false, nil))
@@ -76,7 +84,6 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
 		return
 	}
-	studentDTO.ID = id
 	studentService := NewStudentService()
 	id, err = studentService.UpdateStudent(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
@@ -94,8 +101,11 @@ func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
 		return
 	}
+	studentDTO := DeleteStudentDTO{}
+	studentDTO.ID = id
+	studentDTO.IDUser = c.Value("id_user").(int)
 	studentService := NewStudentService()
-	id, err = studentService.DeleteStudent(id)
+	id, err = studentService.DeleteStudent(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusNotFound, err)
 		return

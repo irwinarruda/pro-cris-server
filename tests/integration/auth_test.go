@@ -12,7 +12,8 @@ import (
 )
 
 func TestAuthServiceHappyPath(t *testing.T) {
-	setupTestsAuth()
+	beforeEachAuth()
+
 	var assert = assert.New(t)
 	var authService = auth.NewAuthService()
 	user1, _ := authService.Login(auth.LoginDTO{
@@ -22,21 +23,25 @@ func TestAuthServiceHappyPath(t *testing.T) {
 
 	user, err := authService.GetUserByID(user1.ID)
 	assert.NoError(err, "Should return the user.")
-	assert.NotEqual(user1, 0, "Should return a valid user id.")
+	assert.NotEqual(0, user1, "Should return a valid user id.")
 	assert.Equal(user1.ID, user.ID, "Should return the user id.")
-	assert.Equal(user.Name, "John Doe", "Should return the correct user name.")
-	assert.Equal(user.Email, "john@doe.com", "Should return the correct user email.")
-	assert.Equal(user.Picture, utils.StringPointer("https://www.google.com"), "Should return the correct user picture.")
-	assert.Equal(user.EmailVerified, false, "Should return the correct user email verification status.")
-	assert.Equal(user.IsDeleted, false, "Should return the correct user deletion status.")
+	assert.Equal("John Doe", user.Name, "Should return the correct user name.")
+	assert.Equal("john@doe.com", user.Email, "Should return the correct user email.")
+	assert.Equal(utils.StringPointer("https://www.google.com"), user.Picture, "Should return the correct user picture.")
+	assert.Equal(false, user.EmailVerified, "Should return the correct user email verification status.")
+	assert.Equal(auth.Google, user.Provider, "Should return the correct user provider.")
+	assert.Equal(false, user.IsDeleted, "Should return the correct user deletion status.")
 
 	user2, err := authService.EnsureAuthenticated("valid", auth.Google)
 	assert.NoError(err, "Should not return error with valid token")
 	assert.Equal(user.ID, user2, "Should return the same ID as the created user.")
+
+	afterEachAuth()
 }
 
 func TestAuthServiceErrorPath(t *testing.T) {
-	setupTestsAuth()
+	beforeEachAuth()
+
 	var assert = assert.New(t)
 	var authService = auth.NewAuthService()
 	_, err := authService.Login(auth.LoginDTO{
@@ -62,6 +67,8 @@ func TestAuthServiceErrorPath(t *testing.T) {
 	})
 	assert.NoError(err, "Should not return error when login with existing User.")
 	assert.Equal(u1.ID, u2.ID, "Should return same User id when multiple logins.")
+
+	afterEachAuth()
 }
 
 type MockGoogle struct{}
@@ -78,11 +85,16 @@ func (m *MockGoogle) Validate(token string) (providers.IGoogleUser, error) {
 	return providers.IGoogleUser{}, utils.NewAppError("Invalid google access token.", true, nil)
 }
 
-func setupTestsAuth() {
+func beforeEachAuth() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", &MockGoogle{})
 	var authRepository = auth.NewAuthRepository()
 	proinject.Register("auth_repository", authRepository)
+	authRepository.ResetAuth()
+}
+
+func afterEachAuth() {
+	var authRepository = auth.NewAuthRepository()
 	authRepository.ResetAuth()
 }

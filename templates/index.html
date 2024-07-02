@@ -1,29 +1,57 @@
-<html>
+<!doctype html>
+<html lang="en">
   <head>
-    <title>Authenticate Page</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Google ID Token Example</title>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
-  <body></body>
-  <script>
-    function oauthSignIn() {
-      var oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
-      var url = new URLSearchParams();
-      url.set("client_id", "{{ .GoogleClientId }}");
-      url.set("redirect_uri", "http://localhost:3000/redirect");
-      url.set("response_type", "token");
-      url.set(
-        "scope",
-        [
-          "https://www.googleapis.com/auth/userinfo.profile",
-          "https://www.googleapis.com/auth/user.birthday.read",
-          "https://www.googleapis.com/auth/userinfo.email",
-          "openid",
-        ].join(" "),
-      );
-      url.set("include_granted_scopes", "true");
-      url.set("state", "pass-through value");
+  <body>
+    <div
+      id="g_id_onload"
+      data-client_id="{{ .GoogleClientId }}"
+      data-context="signin"
+      data-callback="handleCredentialResponse"
+      data-auto_prompt="false"
+    ></div>
+    <div class="g_id_signin" data-type="standard"></div>
+    <h3></h3>
 
-      window.location.replace(`${oauth2Endpoint}?${url.toString()}`);
-    }
-    oauthSignIn();
-  </script>
+    <script async defer>
+      window.onload = function () {
+        google.accounts.id.initialize({
+          client_id: "{{ .GoogleClientId }}",
+          callback: handleCredentialResponse,
+        });
+        google.accounts.id.prompt();
+      };
+
+      function handleCredentialResponse(response) {
+        const id_token = response.credential;
+        document.querySelector("h3").innerHTML = id_token;
+
+        const decodedToken = parseJwt(id_token);
+        for (var [key, value] of Object.entries(decodedToken)) {
+          const p = document.createElement("p");
+          p.innerHTML = key + " => " + value;
+          document.body.appendChild(p);
+        }
+      }
+
+      function parseJwt(token) {
+        const base64Url = token.split(".")[1];
+        const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+        const jsonPayload = decodeURIComponent(
+          atob(base64)
+            .split("")
+            .map(function (c) {
+              return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
+            })
+            .join(""),
+        );
+
+        return JSON.parse(jsonPayload);
+      }
+    </script>
+  </body>
 </html>

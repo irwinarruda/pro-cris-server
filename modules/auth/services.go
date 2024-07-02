@@ -32,6 +32,7 @@ func (a *AuthService) Login(credentials LoginDTO) (User, error) {
 		Name:          googleUser.Name,
 		Picture:       &googleUser.Picture,
 		EmailVerified: googleUser.EmailVerified,
+		Provider:      credentials.Provider,
 	})
 	return user, err
 }

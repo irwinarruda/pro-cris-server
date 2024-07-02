@@ -13,12 +13,12 @@ func NewStudentService() *StudentService {
 	return proinject.Resolve(&StudentService{})
 }
 
-func (s *StudentService) GetAllStudents() []Student {
-	return s.StudentsRepository.GetAllStudents()
+func (s *StudentService) GetAllStudents(data GetAllStudentsDTO) []Student {
+	return s.StudentsRepository.GetAllStudents(data)
 }
 
-func (s *StudentService) GetStudentByID(id int) (Student, error) {
-	return s.StudentsRepository.GetStudentByID(id)
+func (s *StudentService) GetStudentByID(data GetStudentDTO) (Student, error) {
+	return s.StudentsRepository.GetStudentByID(data)
 }
 
 func (s *StudentService) CreateStudent(student CreateStudentDTO) int {
@@ -64,6 +64,6 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	return idStudent, nil
 }
 
-func (s *StudentService) DeleteStudent(id int) (int, error) {
-	return s.StudentsRepository.DeleteStudent(id)
+func (s *StudentService) DeleteStudent(data DeleteStudentDTO) (int, error) {
+	return s.StudentsRepository.DeleteStudent(data)
 }

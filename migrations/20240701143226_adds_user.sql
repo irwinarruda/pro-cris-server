@@ -11,9 +11,12 @@ CREATE TABLE IF NOT EXISTS "user"(
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
+ALTER TABLE "student" ADD COLUMN id_user integer;
+ALTER TABLE "student" ADD FOREIGN KEY (id_user) REFERENCES "user"(id) ON DELETE CASCADE;
 -- +goose StatementEnd
 
 -- +goose Down
 -- +goose StatementBegin
+ALTER TABLE "student" DROP COLUMN id_user;
 DROP TABLE IF EXISTS "user";
 -- +goose StatementEnd
