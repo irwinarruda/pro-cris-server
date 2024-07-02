@@ -1,0 +1,25 @@
+<html>
+  <head>
+    <title>Redirect Page</title>
+  </head>
+  <body>
+    <h1></h1>
+    <h3></h3>
+  </body>
+  <script>
+    const url = new URL(window.location.href);
+    const params = new URLSearchParams(url.hash.slice(1));
+    const token = params.get("access_token");
+    for (var [key, value] of params.entries()) {
+      const p = document.createElement("p");
+      p.innerHTML = key + " => " + value;
+      document.body.appendChild(p);
+    }
+    window.navigator.clipboard.readText();
+    document.querySelector("h1").innerHTML = "Token copied to clipboard";
+    document.querySelector("h3").innerHTML = token;
+    // https://www.googleapis.com/oauth2/v3/tokeninfo?access_token
+    // https://oauth2.googleapis.com/tokeninfo?id_token=
+    // https://github.com/googleapis/google-api-go-client
+  </script>
+</html>

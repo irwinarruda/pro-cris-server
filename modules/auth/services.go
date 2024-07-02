@@ -44,7 +44,7 @@ func (a *AuthService) EnsureAuthenticated(token string, provider LoginProvider) 
 	if err != nil {
 		return 0, utils.NewAppError(err.Error(), false, err)
 	}
-	return a.AuthRepository.GetIdByEmail(googleUser.Email)
+	return a.AuthRepository.GetIDByEmail(googleUser.Email)
 }
 
 func (a *AuthService) GetUserByID(id int) (User, error) {

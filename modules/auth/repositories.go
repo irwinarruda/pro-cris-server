@@ -53,7 +53,7 @@ func (a *AuthRepository) GetUserByEmail(email string) (User, error) {
 	return usersE[0].ToUser(), nil
 }
 
-func (a *AuthRepository) GetIdByEmail(email string) (int, error) {
+func (a *AuthRepository) GetIDByEmail(email string) (int, error) {
 	ids := []int{}
 	a.Db.Raw("SELECT id FROM \"user\" WHERE email = ?;", email).Scan(&ids)
 	if len(ids) == 0 {

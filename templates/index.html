@@ -1,0 +1,29 @@
+<html>
+  <head>
+    <title>Authenticate Page</title>
+  </head>
+  <body></body>
+  <script>
+    function oauthSignIn() {
+      var oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
+      var url = new URLSearchParams();
+      url.set("client_id", "{{ .GoogleClientId }}");
+      url.set("redirect_uri", "http://localhost:3000/redirect");
+      url.set("response_type", "token");
+      url.set(
+        "scope",
+        [
+          "https://www.googleapis.com/auth/userinfo.profile",
+          "https://www.googleapis.com/auth/user.birthday.read",
+          "https://www.googleapis.com/auth/userinfo.email",
+          "openid",
+        ].join(" "),
+      );
+      url.set("include_granted_scopes", "true");
+      url.set("state", "pass-through value");
+
+      window.location.replace(`${oauth2Endpoint}?${url.toString()}`);
+    }
+    oauthSignIn();
+  </script>
+</html>

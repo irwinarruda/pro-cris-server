@@ -4,8 +4,8 @@ prepare:
 	bash ./scripts/prepare.sh
 dev:
 	gow -c -v run .
-dev-templ:
-	templ generate --watch --proxy="http://localhost:8080" --cmd="go run ."
+templ:
+	gow -c -v run ./templates
 test-unit:
 	gow -c -v test -v -count=1 ./tests/unit
 test-integration:

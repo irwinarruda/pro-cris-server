@@ -37,3 +37,21 @@ func (a *AuthCtrl) Login(c *gin.Context) {
 	}
 	c.JSON(http.StatusOK, user)
 }
+
+func (a *AuthCtrl) EnsureAuthenticated(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+	if token == "" {
+		c.JSON(http.StatusUnauthorized, utils.NewAppError("No token provided.", false, nil))
+		c.Abort()
+		return
+	}
+	authService := NewAuthService()
+	id, err := authService.EnsureAuthenticated(token, Google)
+	if err, ok := err.(utils.AppError); ok {
+		c.JSON(http.StatusUnauthorized, err)
+		c.Abort()
+		return
+	}
+	c.Set("id_user", id)
+	c.Next()
+}
