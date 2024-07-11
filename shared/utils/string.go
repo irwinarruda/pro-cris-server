@@ -1,5 +1,5 @@
 package utils
 
-func StringPointer(s string) *string {
+func StringP(s string) *string {
 	return &s
 }

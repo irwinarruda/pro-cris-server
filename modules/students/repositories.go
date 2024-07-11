@@ -50,17 +50,23 @@ func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
       birth_day,
       display_color,
       picture,
+      gender,
       parent_name,
       parent_phone_number,
+      payment_style,
+      payment_type,
+      payment_type_value,
+      settlement_style,
+      settlement_style_value,
+      settlement_style_day,
       house_address,
       house_identifier,
       house_coordinate_latitude,
-      house_coordinate_longitude,
-      base_price
+      house_coordinate_longitude
     )
     %s
     RETURNING id;`,
-		utils.SqlValues(1, 12),
+		utils.SqlValues(1, 18),
 	)
 	r.Db.Raw(
 		sql,
@@ -69,13 +75,19 @@ func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
 		studentE.BirthDay,
 		studentE.DisplayColor,
 		studentE.Picture,
+		studentE.Gender,
 		studentE.ParentName,
 		studentE.ParentPhoneNumber,
+		studentE.PaymentStyle,
+		studentE.PaymentType,
+		studentE.PaymentTypeValue,
+		studentE.SettlementStyle,
+		studentE.SettlementStyleValue,
+		studentE.SettlementStyleDay,
 		studentE.HouseAddress,
 		studentE.HouseIdentifier,
 		studentE.HouseCoordinateLatitude,
 		studentE.HouseCoordinateLongitude,
-		studentE.BasePrice,
 	).Scan(&studentE.ID)
 	r.CreateRoutine(studentE.ID, student.Routine...)
 	return studentE.ID
@@ -93,13 +105,19 @@ func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error)
       birth_day = ?,
       display_color = ?,
       picture = ?,
+      gender = ?,
       parent_name = ?,
       parent_phone_number = ?,
+      payment_style = ?,
+      payment_type = ?,
+      payment_type_value = ?,
+      settlement_style = ?,
+      settlement_style_value = ?,
+      settlement_style_day = ?,
       house_address = ?,
       house_identifier = ?,
       house_coordinate_latitude = ?,
       house_coordinate_longitude = ?,
-      base_price = ?,
       updated_at = now()
     WHERE id = ?
     RETURNING id;`
@@ -110,13 +128,19 @@ func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error)
 		studentE.BirthDay,
 		studentE.DisplayColor,
 		studentE.Picture,
+		studentE.Gender,
 		studentE.ParentName,
 		studentE.ParentPhoneNumber,
+		studentE.PaymentStyle,
+		studentE.PaymentType,
+		studentE.PaymentTypeValue,
+		studentE.SettlementStyle,
+		studentE.SettlementStyleValue,
+		studentE.SettlementStyleDay,
 		studentE.HouseAddress,
 		studentE.HouseIdentifier,
 		studentE.HouseCoordinateLatitude,
 		studentE.HouseCoordinateLongitude,
-		studentE.BasePrice,
 		studentE.ID,
 	).Scan(&id)
 	if id == nil {
@@ -215,4 +239,5 @@ func (r *StudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 
 func (r *StudentRepository) ResetStudents() {
 	r.Db.Exec("DELETE FROM student;")
+	r.Db.Exec("ALTER SEQUENCE student_id_seq RESTART WITH 1;")
 }

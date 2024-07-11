@@ -6,22 +6,56 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/models"
 )
 
+type PaymentStyle = string
+
+const (
+	Upfront PaymentStyle = "Upfront"
+	Later   PaymentStyle = "Later"
+)
+
+func GetPaymentStyles() []PaymentStyle { return []PaymentStyle{Upfront, Later} }
+
+type PaymentType = string
+
+const (
+	Fixed    PaymentType = "Fixed"
+	Variable PaymentType = "Variable"
+)
+
+func GetPaymentTypes() []PaymentType { return []PaymentType{Fixed, Variable} }
+
+type SettlementStyle = string
+
+const (
+	Appointments SettlementStyle = "Appointments"
+	Weekly       SettlementStyle = "Weekly"
+	Monthly      SettlementStyle = "Monthly"
+)
+
+func GetSettlementStyles() []SettlementStyle { return []SettlementStyle{Appointments, Weekly, Monthly} }
+
 type Student struct {
-	ID                int                `json:"id"`
-	Name              string             `json:"name"`
-	BirthDay          *string            `json:"birthDay"`
-	DisplayColor      string             `json:"displayColor"`
-	Picture           *string            `json:"picture"`
-	ParentName        *string            `json:"parentName"`
-	ParentPhoneNumber *string            `json:"parentPhoneNumber"`
-	HouseAddress      *string            `json:"houseAddress"`
-	HouseIdentifier   *string            `json:"hoseIdentifier"`
-	HouseCoordinate   *models.Coordinate `json:"houseCoordinate"`
-	BasePrice         float64            `json:"basePrice"`
-	Routine           []RoutinePlan      `json:"routine"`
-	IsDeleted         bool               `json:"isDeleted"`
-	CreatedAt         time.Time          `json:"createdAt"`
-	UpdatedAt         time.Time          `json:"updatedAt"`
+	ID                   int                `json:"id"`
+	Name                 string             `json:"name"`
+	BirthDay             *string            `json:"birthDay"`
+	DisplayColor         string             `json:"displayColor"`
+	Picture              *string            `json:"picture"`
+	Gender               *models.Gender     `json:"gender"`
+	ParentName           *string            `json:"parentName"`
+	ParentPhoneNumber    *string            `json:"parentPhoneNumber"`
+	PaymentStyle         PaymentStyle       `json:"paymentStyle"`
+	PaymentType          PaymentType        `json:"paymentType"`
+	PaymentTypeValue     *float64           `json:"paymentTypeValue"`
+	SettlementStyle      SettlementStyle    `json:"settlementStyle"`
+	SettlementStyleValue *int               `json:"settlementStyleValue"`
+	SettlementStyleDay   *int               `json:"settlementStyleDay"`
+	HouseAddress         *string            `json:"houseAddress"`
+	HouseIdentifier      *string            `json:"hoseIdentifier"`
+	HouseCoordinate      *models.Coordinate `json:"houseCoordinate"`
+	Routine              []RoutinePlan      `json:"routine"`
+	IsDeleted            bool               `json:"isDeleted"`
+	CreatedAt            time.Time          `json:"createdAt"`
+	UpdatedAt            time.Time          `json:"updatedAt"`
 }
 
 func (s *Student) ToStudentEntity() StudentEntity {
@@ -37,13 +71,19 @@ func (s *Student) ToStudentEntity() StudentEntity {
 		BirthDay:                 s.BirthDay,
 		DisplayColor:             s.DisplayColor,
 		Picture:                  s.Picture,
+		Gender:                   s.Gender,
 		ParentName:               s.ParentName,
 		ParentPhoneNumber:        s.ParentPhoneNumber,
+		PaymentStyle:             s.PaymentStyle,
+		PaymentType:              s.PaymentType,
+		PaymentTypeValue:         s.PaymentTypeValue,
+		SettlementStyle:          s.SettlementStyle,
+		SettlementStyleValue:     s.SettlementStyleValue,
+		SettlementStyleDay:       s.SettlementStyleDay,
 		HouseAddress:             s.HouseAddress,
 		HouseIdentifier:          s.HouseIdentifier,
 		HouseCoordinateLatitude:  latitude,
 		HouseCoordinateLongitude: longitude,
-		BasePrice:                s.BasePrice,
 		IsDeleted:                s.IsDeleted,
 		CreatedAt:                s.CreatedAt,
 	}
@@ -70,50 +110,4 @@ func (r *RoutinePlan) ToRoutinePlanEntity(idStudent int) routinePlanEntity {
 		IsDeleted: r.IsDeleted,
 		CreatedAt: r.CreatedAt,
 	}
-}
-
-type Day struct {
-	Id                int    `json:"id"`
-	Day               string `json:"day"`
-	Month             string `json:"month"`
-	Year              string `json:"year"`
-	HasRoutineStarted bool   `json:"hasRoutineStarted"`
-}
-
-type Appointment struct {
-	Id         int       `json:"id"`
-	IdStudent  int       `json:"idStudent"`
-	Day        Day       `json:"day"`
-	StartHour  string    `json:"startHour"`
-	Duration   int       `json:"duration"`
-	Price      float64   `json:"price"`
-	IsSettled  bool      `json:"isSettled"`
-	IsPrePaid  bool      `json:"isPrePaid"`
-	IsCanceled bool      `json:"isCanceled"`
-	IsDeleted  bool      `json:"isDeleted"`
-	CreatedAt  time.Time `json:"createdAt"`
-	UpdatedAt  time.Time `json:"updatedAt"`
-}
-
-type Holiday struct {
-	Day  Day    `json:"day"`
-	Name string `json:"name"`
-}
-
-type ScheduleDay struct {
-	Day          Day           `json:"day"`
-	Appointments []Appointment `json:"appointments"`
-	Routines     []RoutinePlan `json:"routines"`
-	Holidays     []Holiday     `json:"holidays"`
-}
-
-type User struct {
-	Id        int       `json:"id"`
-	Name      string    `json:"name"`
-	Email     string    `json:"email"`
-	Picture   string    `json:"picture"`
-	Provider  string    `json:"provider"` // Google
-	IsDeleted bool      `json:"isDeleted"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
 }

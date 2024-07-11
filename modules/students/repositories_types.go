@@ -26,13 +26,19 @@ type StudentEntity struct {
 	BirthDay                 *string
 	DisplayColor             string
 	Picture                  *string
+	Gender                   *string
 	ParentName               *string
 	ParentPhoneNumber        *string
+	PaymentStyle             PaymentStyle
+	PaymentType              PaymentType
+	PaymentTypeValue         *float64
+	SettlementStyle          SettlementStyle
+	SettlementStyleValue     *int
+	SettlementStyleDay       *int
 	HouseAddress             *string
 	HouseIdentifier          *string
 	HouseCoordinateLatitude  *float64
 	HouseCoordinateLongitude *float64
-	BasePrice                float64
 	IsDeleted                bool
 	CreatedAt                time.Time
 	UpdatedAt                time.Time
@@ -50,13 +56,19 @@ func (s *StudentEntity) FromCreateStudent(student CreateStudentDTO) {
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
 	s.Picture = student.Picture
+	s.Gender = student.Gender
 	s.ParentName = student.ParentName
 	s.ParentPhoneNumber = student.ParentPhoneNumber
+	s.PaymentStyle = student.PaymentStyle
+	s.PaymentType = student.PaymentType
+	s.PaymentTypeValue = student.PaymentTypeValue
+	s.SettlementStyle = student.SettlementStyle
+	s.SettlementStyleValue = student.SettlementStyleValue
+	s.SettlementStyleDay = student.SettlementStyleDay
 	s.HouseAddress = student.HouseAddress
 	s.HouseIdentifier = student.HouseIdentifier
 	s.HouseCoordinateLatitude = latitude
 	s.HouseCoordinateLongitude = longitude
-	s.BasePrice = student.BasePrice
 }
 
 func (s *StudentEntity) FromUpdateStudent(student UpdateStudentDTO) {
@@ -72,13 +84,19 @@ func (s *StudentEntity) FromUpdateStudent(student UpdateStudentDTO) {
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
 	s.Picture = student.Picture
+	s.Gender = student.Gender
 	s.ParentName = student.ParentName
 	s.ParentPhoneNumber = student.ParentPhoneNumber
+	s.PaymentStyle = student.PaymentStyle
+	s.PaymentType = student.PaymentType
+	s.PaymentTypeValue = student.PaymentTypeValue
+	s.SettlementStyle = student.SettlementStyle
+	s.SettlementStyleValue = student.SettlementStyleValue
+	s.SettlementStyleDay = student.SettlementStyleDay
 	s.HouseAddress = student.HouseAddress
 	s.HouseIdentifier = student.HouseIdentifier
 	s.HouseCoordinateLatitude = latitude
 	s.HouseCoordinateLongitude = longitude
-	s.BasePrice = student.BasePrice
 	s.UpdatedAt = time.Now()
 }
 
@@ -91,20 +109,26 @@ func (s *StudentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
 		}
 	}
 	return Student{
-		ID:                s.ID,
-		Name:              s.Name,
-		BirthDay:          s.BirthDay,
-		DisplayColor:      s.DisplayColor,
-		Picture:           s.Picture,
-		ParentName:        s.ParentName,
-		ParentPhoneNumber: s.ParentPhoneNumber,
-		HouseAddress:      s.HouseAddress,
-		HouseIdentifier:   s.HouseIdentifier,
-		HouseCoordinate:   coordinate,
-		BasePrice:         s.BasePrice,
-		IsDeleted:         s.IsDeleted,
-		CreatedAt:         s.CreatedAt,
-		UpdatedAt:         s.UpdatedAt,
+		ID:                   s.ID,
+		Name:                 s.Name,
+		BirthDay:             s.BirthDay,
+		DisplayColor:         s.DisplayColor,
+		Picture:              s.Picture,
+		Gender:               s.Gender,
+		ParentName:           s.ParentName,
+		ParentPhoneNumber:    s.ParentPhoneNumber,
+		PaymentStyle:         s.PaymentStyle,
+		PaymentType:          s.PaymentType,
+		PaymentTypeValue:     s.PaymentTypeValue,
+		SettlementStyle:      s.SettlementStyle,
+		SettlementStyleValue: s.SettlementStyleValue,
+		SettlementStyleDay:   s.SettlementStyleDay,
+		HouseAddress:         s.HouseAddress,
+		HouseIdentifier:      s.HouseIdentifier,
+		HouseCoordinate:      coordinate,
+		IsDeleted:            s.IsDeleted,
+		CreatedAt:            s.CreatedAt,
+		UpdatedAt:            s.UpdatedAt,
 		Routine: utils.Map(routineEntity, func(rp routinePlanEntity, _ int) RoutinePlan {
 			return rp.ToRoutinePlan()
 		}),

@@ -21,17 +21,41 @@ func (s *StudentService) GetStudentByID(data GetStudentDTO) (Student, error) {
 	return s.StudentsRepository.GetStudentByID(data)
 }
 
-func (s *StudentService) CreateStudent(student CreateStudentDTO) int {
-	student.Routine = utils.Map(student.Routine, func(s CreateStudentRoutinePlanDTO, _ int) CreateStudentRoutinePlanDTO {
-		if s.Price == nil {
-			s.Price = &student.BasePrice
-		}
-		return s
-	})
-	return s.StudentsRepository.CreateStudent(student)
+func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
+	if student.PaymentType == Fixed && student.PaymentTypeValue == nil {
+		return 0, utils.NewAppError("Payment type value is required.", true, nil)
+	}
+	if student.PaymentType != Fixed {
+		student.PaymentTypeValue = nil
+	}
+	if student.SettlementStyle != Appointments && student.SettlementStyleValue == nil {
+		return 0, utils.NewAppError("Settlement value is required.", true, nil)
+	}
+	if student.SettlementStyle != Appointments && student.SettlementStyleDay == nil {
+		return 0, utils.NewAppError("Settlement day is required.", true, nil)
+	}
+	if student.SettlementStyle != Appointments {
+		student.PaymentTypeValue = nil
+	}
+	return s.StudentsRepository.CreateStudent(student), nil
 }
 
 func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
+	if student.PaymentType == Fixed && student.PaymentTypeValue == nil {
+		return 0, utils.NewAppError("Payment type value is required.", true, nil)
+	}
+	if student.PaymentType != Fixed {
+		student.PaymentTypeValue = nil
+	}
+	if student.SettlementStyle != Appointments && student.SettlementStyleValue == nil {
+		return 0, utils.NewAppError("Settlement value is required.", true, nil)
+	}
+	if student.SettlementStyle != Appointments && student.SettlementStyleDay == nil {
+		return 0, utils.NewAppError("Settlement day is required.", true, nil)
+	}
+	if student.SettlementStyle != Appointments {
+		student.PaymentTypeValue = nil
+	}
 	idStudent, err := s.StudentsRepository.UpdateStudent(student)
 	if err != nil {
 		return 0, err
@@ -43,15 +67,11 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 			existingRoutine = append(existingRoutine, *routinePlan.ID)
 			continue
 		}
-		price := &student.BasePrice
-		if routinePlan.Price != nil {
-			price = routinePlan.Price
-		}
 		mustCreateRoutine = append(mustCreateRoutine, CreateStudentRoutinePlanDTO{
 			WeekDay:   *routinePlan.WeekDay,
 			Duration:  *routinePlan.Duration,
 			StartHour: *routinePlan.StartHour,
-			Price:     price,
+			Price:     *routinePlan.Price,
 		})
 	}
 	shouldDeleteRoutine := s.StudentsRepository.GetRoutineID(idStudent, existingRoutine...)

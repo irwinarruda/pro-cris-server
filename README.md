@@ -23,3 +23,50 @@
 - GET /api/v1/appointment
 - GET /api/v1/appointment/:id
 - DELETE /api/v1/appointment/:id
+
+## Similar apps
+
+- https://iprofe.com.br/
+- https://www.iorclass.com.br/?af=deprof
+
+## Student
+
+- Get All Students.
+
+  - Check fields to be sent there
+
+- Get Student by ID.
+
+  - Check fields to be sent there
+
+- Create Student with
+
+  - Base information
+  - PaymentMethod (**Upfront** or **Later**)
+  - PaymentStyle (**Fixed** or **Variable**)
+  - PaymentStyleValue
+  - SettlementMethod (**NumberAppointments** or **AmountOfTime** or **None**)
+  - SettlementMethodValue
+
+- Update Student and it's default information.
+- Delete Student.
+
+## Appointments
+
+- Get appointments and future appointments by date.
+- Create daily appointments by all students routine.
+- Easily cancel an appointment right before or right after routine created.
+- Create manual appointment for a student. Flag if it's extra class or not
+
+- Get all student appointments.
+  - Filter by paid and not paid.
+  - Filter by date.
+  - Filter by settled and not settled.
+  - Filter by canceled and not canceled.
+- Show all student not settled appointments.
+  - have recipt sent to student WhatsApp.
+  - Show sent recipts.
+  - possibility to edit price when sending
+- Notification for when you should send a recipt to a student.
+
+## Settlement

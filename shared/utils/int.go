@@ -1,5 +1,5 @@
 package utils
 
-func IntPointer(i int) *int {
+func IntP(i int) *int {
 	return &i
 }

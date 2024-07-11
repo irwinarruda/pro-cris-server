@@ -10,7 +10,7 @@ import (
 
 func TestValidateWeekDay(t *testing.T) {
 	var assert = assert.New(t)
-	validate := configs.GetValidate([]string{})
+	validate := configs.GetValidate([]string{}, []string{}, []string{}, []string{})
 	correct := struct {
 		Monday    string `validate:"weekday"`
 		Tuesday   string `validate:"weekday"`

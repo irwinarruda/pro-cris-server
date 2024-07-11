@@ -1,5 +1,5 @@
 package utils
 
-func Float64Pointer(f float64) *float64 {
+func Float64P(f float64) *float64 {
 	return &f
 }

@@ -27,7 +27,7 @@ func TestAuthServiceHappyPath(t *testing.T) {
 	assert.Equal(user1.ID, user.ID, "Should return the user id.")
 	assert.Equal("John Doe", user.Name, "Should return the correct user name.")
 	assert.Equal("john@doe.com", user.Email, "Should return the correct user email.")
-	assert.Equal(utils.StringPointer("https://www.google.com"), user.Picture, "Should return the correct user picture.")
+	assert.Equal(utils.StringP("https://www.google.com"), user.Picture, "Should return the correct user picture.")
 	assert.Equal(false, user.EmailVerified, "Should return the correct user email verification status.")
 	assert.Equal(auth.Google, user.Provider, "Should return the correct user provider.")
 	assert.Equal(false, user.IsDeleted, "Should return the correct user deletion status.")

@@ -64,4 +64,5 @@ func (a *AuthRepository) GetIDByEmail(email string) (int, error) {
 
 func (a *AuthRepository) ResetAuth() {
 	a.Db.Exec("DELETE FROM \"user\";")
+	a.Db.Exec("ALTER SEQUENCE user_id_seq RESTART WITH 1;")
 }

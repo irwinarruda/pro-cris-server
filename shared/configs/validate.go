@@ -11,21 +11,25 @@ var validate *validator.Validate
 
 type Validate = *validator.Validate
 
-func GetValidate(loginProviders []string) Validate {
+func GetValidate(loginProviders []string, paymentStyle []string, paymentType []string, settlementStyle []string) Validate {
 	if validate == nil {
 		validate = validator.New()
-		validate.RegisterValidation("login_provider", ValidateLoginProvider(loginProviders))
-		validate.RegisterValidation("weekday", ValidateWeekDay)
+		validate.RegisterValidation("login_provider", ValidateEnum(loginProviders))
+		validate.RegisterValidation("payment_style", ValidateEnum(paymentStyle))
+		validate.RegisterValidation("payment_type", ValidateEnum(paymentType))
+		validate.RegisterValidation("settlement_style", ValidateEnum(settlementStyle))
+		validate.RegisterValidation("weekday", ValidateEnum(models.GetWeekDays()))
+		validate.RegisterValidation("gender", ValidateEnum(models.GetGender()))
 		validate.RegisterValidation("required_ifid", ValidateWeekDay)
 		validate.RegisterValidation("weekday_ifid", ValidateWeekDay)
 	}
 	return validate
 }
 
-func ValidateLoginProvider(loginProviders []string) func(fl validator.FieldLevel) bool {
+func ValidateEnum(enums []string) func(fl validator.FieldLevel) bool {
 	return func(fl validator.FieldLevel) bool {
 		input := fl.Field().String()
-		return slices.Contains(loginProviders, input)
+		return slices.Contains(enums, input)
 	}
 }
 

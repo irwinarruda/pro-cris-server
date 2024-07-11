@@ -59,7 +59,11 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 	}
 
 	studentService := NewStudentService()
-	id := studentService.CreateStudent(studentDTO)
+	id, err := studentService.CreateStudent(studentDTO)
+	if err, ok := err.(utils.AppError); ok {
+		c.JSON(http.StatusNotFound, err)
+		return
+	}
 	c.JSON(http.StatusCreated, struct {
 		Id int `json:"id"`
 	}{Id: id})
