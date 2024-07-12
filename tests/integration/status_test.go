@@ -5,6 +5,7 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/status"
+	"github.com/irwinarruda/pro-cris-server/modules/status/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/stretchr/testify/assert"
 )
@@ -31,6 +32,6 @@ func TestStatusServiceErrorPath(t *testing.T) {
 func beforeEachStatus() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
-	var statusRepository = status.NewDbStatusRepository()
+	var statusRepository = statusresources.NewDbStatusRepository()
 	proinject.Register("status_repository", statusRepository)
 }
