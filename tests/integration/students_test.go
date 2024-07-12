@@ -27,10 +27,10 @@ func TestStudentServiceHappyPath(t *testing.T) {
 	assert.NoError(err, "Should return a student with the same ID as the one created")
 	assert.Len(student1.Routine, 2, "Student should have 2 routine plans")
 	assert.Equal(models.Male, *student1.Gender, "Should have Male gender")
-	assert.Equal(students.Upfront, student1.PaymentStyle, "Should have Upfront payment style")
-	assert.Equal(students.Fixed, student1.PaymentType, "Should have Fixed payment type")
+	assert.Equal(students.PaymentStyleUpfront, student1.PaymentStyle, "Should have Upfront payment style")
+	assert.Equal(students.PaymentTypeFixed, student1.PaymentType, "Should have Fixed payment type")
 	assert.Equal(float64(2000), *student1.PaymentTypeValue, "Should have 2000 as payment type value")
-	assert.Equal(students.Appointments, student1.SettlementStyle, "Should have Appointments settlement style")
+	assert.Equal(students.SettlementStyleAppointments, student1.SettlementStyle, "Should have Appointments settlement style")
 	assert.Equal(10, *student1.SettlementStyleValue, "Should have 10 appointments threshold")
 	assert.Nil(student1.SettlementStyleDay, "Should have no settlement day")
 	mondayRoutineId := 0
@@ -65,10 +65,10 @@ func TestStudentServiceHappyPath(t *testing.T) {
 	assert.Equal(models.Female, *student2.Gender, "Should have Female gender")
 	assert.Equal("John Doe", *student2.ParentName, "ParentName should be updated")
 	assert.Equal("0987654321", *student2.ParentPhoneNumber, "ParentPhoneNumber should be updated")
-	assert.Equal(students.Later, student2.PaymentStyle, "Should have Later payment style")
-	assert.Equal(students.Variable, student2.PaymentType, "Should have Variable payment type")
+	assert.Equal(students.PaymentStyleLater, student2.PaymentStyle, "Should have Later payment style")
+	assert.Equal(students.PaymentTypeVariable, student2.PaymentType, "Should have Variable payment type")
 	assert.Nil(student2.PaymentTypeValue, "Should have nil as payment type value")
-	assert.Equal(students.Monthly, student2.SettlementStyle, "Should have Monthly settlement style")
+	assert.Equal(students.SettlementStyleMonthly, student2.SettlementStyle, "Should have Monthly settlement style")
 	assert.Equal(1, *student2.SettlementStyleValue, "Should have 10 month threshold")
 	assert.Equal(5, *student2.SettlementStyleDay, "Should have day 5th as the settlement day")
 	assert.Equal("456 Main St", *student2.HouseAddress, "HouseAddress should be updated")
@@ -107,13 +107,13 @@ func TestStudentServiceErrorPath(t *testing.T) {
 	var studentService = students.NewStudentService()
 
 	createStudentDTO := mockCreateStudentDTO(idUser)
-	createStudentDTO.PaymentType = students.Fixed
+	createStudentDTO.PaymentType = students.PaymentTypeFixed
 	createStudentDTO.PaymentTypeValue = nil
 	_, err := studentService.CreateStudent(createStudentDTO)
 	assert.Error(err, "Should return an error when payment type is Fixed and value is nil")
 
-	createStudentDTO.PaymentType = students.Variable
-	createStudentDTO.SettlementStyle = students.Monthly
+	createStudentDTO.PaymentType = students.PaymentTypeVariable
+	createStudentDTO.SettlementStyle = students.SettlementStyleMonthly
 	createStudentDTO.SettlementStyleValue = nil
 	_, err = studentService.CreateStudent(createStudentDTO)
 	assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and value is nil")
@@ -123,14 +123,14 @@ func TestStudentServiceErrorPath(t *testing.T) {
 	_, err = studentService.CreateStudent(createStudentDTO)
 	assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and day is nil")
 
-	createStudentDTO.SettlementStyle = students.Appointments
+	createStudentDTO.SettlementStyle = students.SettlementStyleAppointments
 	createStudentDTO.SettlementStyleValue = nil
 	createStudentDTO.SettlementStyleDay = nil
 	_, err = studentService.CreateStudent(createStudentDTO)
 	assert.NoError(err, "Should not return an error when settlement type is Appointments and value/day is nil")
 
 	updateStudentDTO := mockUpdateStudentDTO(idUser, 1)
-	updateStudentDTO.PaymentType = students.Fixed
+	updateStudentDTO.PaymentType = students.PaymentTypeFixed
 	updateStudentDTO.PaymentTypeValue = nil
 	_, err = studentService.UpdateStudent(updateStudentDTO)
 	assert.Error(err, "Should return an error when payment type is Fixed and payment type value is nil")
@@ -157,10 +157,10 @@ func mockCreateStudentDTO(idUser int) students.CreateStudentDTO {
 		Picture:              utils.StringP("http://example.com/picture.jpg"),
 		ParentName:           utils.StringP("Jane Doe"),
 		ParentPhoneNumber:    utils.StringP("1234567890"),
-		PaymentStyle:         students.Upfront,
-		PaymentType:          students.Fixed,
+		PaymentStyle:         students.PaymentStyleUpfront,
+		PaymentType:          students.PaymentTypeFixed,
 		PaymentTypeValue:     utils.Float64P(2000),
-		SettlementStyle:      students.Appointments,
+		SettlementStyle:      students.SettlementStyleAppointments,
 		SettlementStyleValue: utils.IntP(10),
 		SettlementStyleDay:   nil,
 		HouseAddress:         utils.StringP("123 Main St"),
@@ -184,10 +184,10 @@ func mockUpdateStudentDTO(idUser, id int) students.UpdateStudentDTO {
 		Picture:              utils.StringP("http://example.com/picture2.jpg"),
 		ParentName:           utils.StringP("John Doe"),
 		ParentPhoneNumber:    utils.StringP("0987654321"),
-		PaymentStyle:         students.Later,
-		PaymentType:          students.Variable,
+		PaymentStyle:         students.PaymentStyleLater,
+		PaymentType:          students.PaymentTypeVariable,
 		PaymentTypeValue:     nil,
-		SettlementStyle:      students.Monthly,
+		SettlementStyle:      students.SettlementStyleMonthly,
 		SettlementStyleValue: utils.IntP(1),
 		SettlementStyleDay:   utils.IntP(5),
 		HouseAddress:         utils.StringP("456 Main St"),
@@ -202,10 +202,10 @@ func mockUpdateStudentDTO(idUser, id int) students.UpdateStudentDTO {
 func beforeEachStudents() int {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
-	var studentRepository = students.NewStudentRepository()
+	var studentRepository = students.NewDbStudentRepository()
 	proinject.Register("students_repository", studentRepository)
 	studentRepository.ResetStudents()
-	var authRepository = auth.NewAuthRepository()
+	var authRepository = auth.NewDbAuthRepository()
 	user, _ := authRepository.CreateUser(auth.CreateUserDTO{
 		Email:         "john@doe.com",
 		Name:          "John Doe",
@@ -217,8 +217,8 @@ func beforeEachStudents() int {
 }
 
 func afterEachStudents() {
-	var studentRepository = students.NewStudentRepository()
+	var studentRepository = students.NewDbStudentRepository()
 	studentRepository.ResetStudents()
-	var authRepository = auth.NewAuthRepository()
+	var authRepository = auth.NewDbAuthRepository()
 	authRepository.ResetAuth()
 }

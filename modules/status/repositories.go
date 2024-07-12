@@ -5,16 +5,16 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
-type StatusRepository struct {
+type DbStatusRepository struct {
 	Db  configs.Db  `inject:"db"`
 	Env configs.Env `inject:"env"`
 }
 
-func NewStatusRepository() *StatusRepository {
-	return proinject.Resolve(&StatusRepository{})
+func NewDbStatusRepository() *DbStatusRepository {
+	return proinject.Resolve(&DbStatusRepository{})
 }
 
-func (s *StatusRepository) GetStatusDatabase() StatusDatabase {
+func (s *DbStatusRepository) GetStatusDatabase() StatusDatabase {
 	databaseResults := struct {
 		ServerVersion  string
 		MaxConnections int

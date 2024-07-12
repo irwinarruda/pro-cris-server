@@ -5,18 +5,18 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 )
 
-type AppointmentRepository struct {
+type DbAppointmentRepository struct {
 	Db configs.Db `inject:"db"`
 }
 
-func NewAppointmentRepository() *AppointmentRepository {
-	return proinject.Resolve(&AppointmentRepository{})
+func NewDbAppointmentRepository() *DbAppointmentRepository {
+	return proinject.Resolve(&DbAppointmentRepository{})
 }
 
-func (a *AppointmentRepository) CreateAppointment(appointment CreateAppointmentDTO) int {
+func (a *DbAppointmentRepository) CreateAppointment(appointment CreateAppointmentDTO) int {
 	return 0
 }
 
-func (a *AppointmentRepository) GetAppointmentByID(id int) (Appointment, error) {
+func (a *DbAppointmentRepository) GetAppointmentByID(id int) (Appointment, error) {
 	return Appointment{}, nil
 }

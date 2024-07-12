@@ -10,7 +10,7 @@ type IAuthRepository interface {
 	ResetAuth()
 }
 
-type UserEntity struct {
+type DbUser struct {
 	ID            int
 	Name          string
 	Email         string
@@ -22,7 +22,7 @@ type UserEntity struct {
 	UpdatedAt     time.Time
 }
 
-func (u *UserEntity) ToUser() User {
+func (u *DbUser) ToUser() User {
 	return User{
 		ID:            u.ID,
 		Name:          u.Name,

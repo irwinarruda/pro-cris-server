@@ -89,12 +89,12 @@ func beforeEachAuth() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", &MockGoogle{})
-	var authRepository = auth.NewAuthRepository()
+	var authRepository = auth.NewDbAuthRepository()
 	proinject.Register("auth_repository", authRepository)
 	authRepository.ResetAuth()
 }
 
 func afterEachAuth() {
-	var authRepository = auth.NewAuthRepository()
+	var authRepository = auth.NewDbAuthRepository()
 	authRepository.ResetAuth()
 }

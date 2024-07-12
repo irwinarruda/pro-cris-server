@@ -31,6 +31,6 @@ func TestStatusServiceErrorPath(t *testing.T) {
 func beforeEachStatus() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
-	var statusRepository = status.NewStatusRepository()
+	var statusRepository = status.NewDbStatusRepository()
 	proinject.Register("status_repository", statusRepository)
 }

@@ -19,7 +19,7 @@ type IStudentRepository interface {
 	ResetStudents()
 }
 
-type StudentEntity struct {
+type DbStudent struct {
 	ID                       int
 	IDUser                   int
 	Name                     string
@@ -44,7 +44,7 @@ type StudentEntity struct {
 	UpdatedAt                time.Time
 }
 
-func (s *StudentEntity) FromCreateStudent(student CreateStudentDTO) {
+func (s *DbStudent) FromCreateStudent(student CreateStudentDTO) {
 	var latitude *float64
 	var longitude *float64
 	if student.HouseCoordinate != nil {
@@ -71,7 +71,7 @@ func (s *StudentEntity) FromCreateStudent(student CreateStudentDTO) {
 	s.HouseCoordinateLongitude = longitude
 }
 
-func (s *StudentEntity) FromUpdateStudent(student UpdateStudentDTO) {
+func (s *DbStudent) FromUpdateStudent(student UpdateStudentDTO) {
 	var latitude *float64
 	var longitude *float64
 	if student.HouseCoordinate != nil {
@@ -100,7 +100,7 @@ func (s *StudentEntity) FromUpdateStudent(student UpdateStudentDTO) {
 	s.UpdatedAt = time.Now()
 }
 
-func (s *StudentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
+func (s *DbStudent) ToStudent(dbRoutine []DbRoutinePlan) Student {
 	var coordinate *models.Coordinate
 	if s.HouseCoordinateLatitude != nil && s.HouseCoordinateLongitude != nil {
 		coordinate = &models.Coordinate{
@@ -129,13 +129,13 @@ func (s *StudentEntity) ToStudent(routineEntity []routinePlanEntity) Student {
 		IsDeleted:            s.IsDeleted,
 		CreatedAt:            s.CreatedAt,
 		UpdatedAt:            s.UpdatedAt,
-		Routine: utils.Map(routineEntity, func(rp routinePlanEntity, _ int) RoutinePlan {
+		Routine: utils.Map(dbRoutine, func(rp DbRoutinePlan, _ int) RoutinePlan {
 			return rp.ToRoutinePlan()
 		}),
 	}
 }
 
-type routinePlanEntity struct {
+type DbRoutinePlan struct {
 	ID        *int
 	IDStudent int
 	WeekDay   models.WeekDay
@@ -146,7 +146,7 @@ type routinePlanEntity struct {
 	CreatedAt time.Time
 }
 
-func (r *routinePlanEntity) ToRoutinePlan() RoutinePlan {
+func (r *DbRoutinePlan) ToRoutinePlan() RoutinePlan {
 	var id *int
 	if r.ID != nil {
 		id = r.ID

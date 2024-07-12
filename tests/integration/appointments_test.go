@@ -27,10 +27,10 @@ func TestAppointmentServiceErrorPath(t *testing.T) {
 func beforeEachAppointment() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
-	proinject.Register("appointment_repository", appointments.NewAppointmentRepository())
-	var studentRepository = students.NewStudentRepository()
+	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
+	var studentRepository = students.NewDbStudentRepository()
 	studentRepository.ResetStudents()
-	var authRepository = auth.NewAuthRepository()
+	var authRepository = auth.NewDbAuthRepository()
 	authRepository.ResetAuth()
 	authRepository.CreateUser(auth.CreateUserDTO{
 		Email:         "john@doe.com",

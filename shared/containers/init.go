@@ -20,8 +20,8 @@ func InitInjections() {
 	))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", providers.NewGoogleClient())
-	proinject.Register("students_repository", students.NewStudentRepository())
-	proinject.Register("status_repository", status.NewStatusRepository())
-	proinject.Register("appointment_repository", appointments.NewAppointmentRepository())
-	proinject.Register("auth_repository", auth.NewAuthRepository())
+	proinject.Register("students_repository", students.NewDbStudentRepository())
+	proinject.Register("status_repository", status.NewDbStatusRepository())
+	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
+	proinject.Register("auth_repository", auth.NewDbAuthRepository())
 }

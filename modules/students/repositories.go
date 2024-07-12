@@ -8,20 +8,20 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
-type StudentRepository struct {
+type DbStudentRepository struct {
 	Db configs.Db `inject:"db"`
 }
 
-func NewStudentRepository() *StudentRepository {
-	return proinject.Resolve(&StudentRepository{})
+func NewDbStudentRepository() *DbStudentRepository {
+	return proinject.Resolve(&DbStudentRepository{})
 }
 
-func (r *StudentRepository) GetAllStudents(data GetAllStudentsDTO) []Student {
-	studentsArr := []StudentEntity{}
+func (r *DbStudentRepository) GetAllStudents(data GetAllStudentsDTO) []Student {
+	studentsArr := []DbStudent{}
 	students := []Student{}
 	r.Db.Raw("SELECT * FROM student WHERE id_user = ? AND is_deleted = false;", data.IDUser).Scan(&studentsArr)
 	for _, studentE := range studentsArr {
-		routineE := []routinePlanEntity{}
+		routineE := []DbRoutinePlan{}
 		r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", studentE.ID).Scan(&routineE)
 		student := studentE.ToStudent(routineE)
 		students = append(students, student)
@@ -29,19 +29,19 @@ func (r *StudentRepository) GetAllStudents(data GetAllStudentsDTO) []Student {
 	return students
 }
 
-func (r *StudentRepository) GetStudentByID(data GetStudentDTO) (Student, error) {
-	studentsE := []StudentEntity{}
+func (r *DbStudentRepository) GetStudentByID(data GetStudentDTO) (Student, error) {
+	studentsE := []DbStudent{}
 	r.Db.Raw("SELECT * FROM student WHERE id_user = ? AND id = ? AND is_deleted = false;", data.IDUser, data.ID).Scan(&studentsE)
 	if len(studentsE) == 0 {
 		return Student{}, utils.NewAppError("Student not found.", true, nil)
 	}
-	routineE := []routinePlanEntity{}
+	routineE := []DbRoutinePlan{}
 	r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", data.ID).Scan(&routineE)
 	return studentsE[0].ToStudent(routineE), nil
 }
 
-func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
-	studentE := StudentEntity{}
+func (r *DbStudentRepository) CreateStudent(student CreateStudentDTO) int {
+	studentE := DbStudent{}
 	studentE.FromCreateStudent(student)
 	sql := fmt.Sprintf(`
     INSERT INTO student(
@@ -93,9 +93,9 @@ func (r *StudentRepository) CreateStudent(student CreateStudentDTO) int {
 	return studentE.ID
 }
 
-func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error) {
+func (r *DbStudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	var id *int
-	studentE := StudentEntity{}
+	studentE := DbStudent{}
 	studentE.FromUpdateStudent(student)
 	sql := `
     UPDATE student
@@ -149,7 +149,7 @@ func (r *StudentRepository) UpdateStudent(student UpdateStudentDTO) (int, error)
 	return *id, nil
 }
 
-func (r *StudentRepository) DeleteStudent(data DeleteStudentDTO) (int, error) {
+func (r *DbStudentRepository) DeleteStudent(data DeleteStudentDTO) (int, error) {
 	var idStudent *int
 	sql := `
     UPDATE student
@@ -172,7 +172,7 @@ func (r *StudentRepository) DeleteStudent(data DeleteStudentDTO) (int, error) {
 // Get Routine from a student.
 //
 // 'excluded' is a list of ids that should be excluded ([]int).
-func (r *StudentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
+func (r *DbStudentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
 	routine := []int{}
 	args := []interface{}{idStudent}
 	sql := "SELECT id FROM routine_plan WHERE id_student = ? AND is_deleted = false"
@@ -191,7 +191,7 @@ func (r *StudentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
 // Create a list of RoutinePlan from a student.
 //
 // 'routinePlan' can be either one or more items.
-func (r *StudentRepository) CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO) {
+func (r *DbStudentRepository) CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO) {
 	if len(routinePlan) == 0 {
 		return
 	}
@@ -223,7 +223,7 @@ func (r *StudentRepository) CreateRoutine(idStudent int, routinePlan ...CreateSt
 // Delete a list of RoutinePlan from a student.
 //
 // 'routine' is a list of ids that should be deleted.
-func (r *StudentRepository) DeleteRoutine(idStudent int, routine ...int) {
+func (r *DbStudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 	sql := fmt.Sprintf(`
     UPDATE routine_plan
     SET is_deleted = true
@@ -237,7 +237,7 @@ func (r *StudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 	r.Db.Exec(sql, args...)
 }
 
-func (r *StudentRepository) ResetStudents() {
+func (r *DbStudentRepository) ResetStudents() {
 	r.Db.Exec("DELETE FROM student;")
 	r.Db.Exec("ALTER SEQUENCE student_id_seq RESTART WITH 1;")
 }
