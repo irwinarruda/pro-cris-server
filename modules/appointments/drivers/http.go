@@ -1,4 +1,4 @@
-package appointments
+package appointmentsdrivers
 
 import (
 	"net/http"

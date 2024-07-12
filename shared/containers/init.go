@@ -2,7 +2,7 @@ package containers
 
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
-	"github.com/irwinarruda/pro-cris-server/modules/appointments"
+	"github.com/irwinarruda/pro-cris-server/modules/appointments/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/status/resources"
@@ -24,6 +24,6 @@ func InitInjections() {
 	proinject.Register("google", providers.NewGoogleClient())
 	proinject.Register("students_repository", studentsresources.NewDbStudentRepository())
 	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
-	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
+	proinject.Register("appointment_repository", appointmentsresources.NewDbAppointmentRepository())
 	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
 }

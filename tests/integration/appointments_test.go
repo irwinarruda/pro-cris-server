@@ -5,6 +5,7 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
+	"github.com/irwinarruda/pro-cris-server/modules/appointments/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
@@ -28,7 +29,7 @@ func TestAppointmentServiceErrorPath(t *testing.T) {
 func beforeEachAppointment() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
-	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
+	proinject.Register("appointment_repository", appointmentsresources.NewDbAppointmentRepository())
 	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
 	var authRepository = authresources.NewDbAuthRepository()
