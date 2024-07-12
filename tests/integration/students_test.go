@@ -5,6 +5,7 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
+	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
@@ -206,7 +207,7 @@ func beforeEachStudents() int {
 	var studentRepository = studentsresources.NewDbStudentRepository()
 	proinject.Register("students_repository", studentRepository)
 	studentRepository.ResetStudents()
-	var authRepository = auth.NewDbAuthRepository()
+	var authRepository = authresources.NewDbAuthRepository()
 	user, _ := authRepository.CreateUser(auth.CreateUserDTO{
 		Email:         "john@doe.com",
 		Name:          "John Doe",
@@ -220,6 +221,6 @@ func beforeEachStudents() int {
 func afterEachStudents() {
 	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
-	var authRepository = auth.NewDbAuthRepository()
+	var authRepository = authresources.NewDbAuthRepository()
 	authRepository.ResetAuth()
 }

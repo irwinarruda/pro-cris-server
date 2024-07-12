@@ -4,8 +4,8 @@ import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
-	"github.com/irwinarruda/pro-cris-server/modules/status"
-	statusresources "github.com/irwinarruda/pro-cris-server/modules/status/resources"
+	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
+	"github.com/irwinarruda/pro-cris-server/modules/status/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
@@ -25,5 +25,5 @@ func InitInjections() {
 	proinject.Register("students_repository", studentsresources.NewDbStudentRepository())
 	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
 	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
-	proinject.Register("auth_repository", auth.NewDbAuthRepository())
+	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
 }

@@ -1,10 +1,11 @@
-package auth
+package authdrivers
 
 import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
+	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
@@ -18,7 +19,7 @@ func NewAuthCtrl() *AuthCtrl {
 }
 
 func (a *AuthCtrl) Login(c *gin.Context) {
-	loginDTO := LoginDTO{}
+	loginDTO := auth.LoginDTO{}
 	err := c.Bind(&loginDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, err))
@@ -29,7 +30,7 @@ func (a *AuthCtrl) Login(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
 		return
 	}
-	authService := NewAuthService()
+	authService := auth.NewAuthService()
 	user, err := authService.Login(loginDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusBadRequest, err)
@@ -45,8 +46,8 @@ func (a *AuthCtrl) EnsureAuthenticated(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	authService := NewAuthService()
-	id, err := authService.EnsureAuthenticated(token, Google)
+	authService := auth.NewAuthService()
+	id, err := authService.EnsureAuthenticated(token, auth.Google)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusUnauthorized, err)
 		c.Abort()

@@ -5,6 +5,7 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
+	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/providers"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
@@ -89,12 +90,12 @@ func beforeEachAuth() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", &MockGoogle{})
-	var authRepository = auth.NewDbAuthRepository()
+	var authRepository = authresources.NewDbAuthRepository()
 	proinject.Register("auth_repository", authRepository)
 	authRepository.ResetAuth()
 }
 
 func afterEachAuth() {
-	var authRepository = auth.NewDbAuthRepository()
+	var authRepository = authresources.NewDbAuthRepository()
 	authRepository.ResetAuth()
 }

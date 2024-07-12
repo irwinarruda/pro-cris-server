@@ -6,6 +6,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
+	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
@@ -30,7 +31,7 @@ func beforeEachAppointment() {
 	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
 	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
-	var authRepository = auth.NewDbAuthRepository()
+	var authRepository = authresources.NewDbAuthRepository()
 	authRepository.ResetAuth()
 	authRepository.CreateUser(auth.CreateUserDTO{
 		Email:         "john@doe.com",
