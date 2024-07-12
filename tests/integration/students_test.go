@@ -203,7 +203,7 @@ func mockUpdateStudentDTO(idUser, id int) students.UpdateStudentDTO {
 func beforeEachStudents() int {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
-	var studentRepository = students_resources.NewDbStudentRepository()
+	var studentRepository = studentsresources.NewDbStudentRepository()
 	proinject.Register("students_repository", studentRepository)
 	studentRepository.ResetStudents()
 	var authRepository = auth.NewDbAuthRepository()
@@ -218,7 +218,7 @@ func beforeEachStudents() int {
 }
 
 func afterEachStudents() {
-	var studentRepository = students_resources.NewDbStudentRepository()
+	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
 	var authRepository = auth.NewDbAuthRepository()
 	authRepository.ResetAuth()

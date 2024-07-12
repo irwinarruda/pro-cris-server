@@ -1,4 +1,4 @@
-package students_resources
+package studentsresources
 
 import (
 	"fmt"

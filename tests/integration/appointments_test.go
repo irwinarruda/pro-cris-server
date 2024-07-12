@@ -28,7 +28,7 @@ func beforeEachAppointment() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
-	var studentRepository = students_resources.NewDbStudentRepository()
+	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
 	var authRepository = auth.NewDbAuthRepository()
 	authRepository.ResetAuth()

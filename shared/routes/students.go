@@ -7,7 +7,7 @@ import (
 )
 
 func CreateStudentRoutes(app *gin.RouterGroup) {
-	var studentsCtrl = students_drivers.NewStudentCtrl()
+	var studentsCtrl = studentsdrivers.NewStudentCtrl()
 	var authCtrl = auth.NewAuthCtrl()
 	app.GET("/v1/students", authCtrl.EnsureAuthenticated, studentsCtrl.GetStudents)
 	app.GET("/v1/students/:id", authCtrl.EnsureAuthenticated, studentsCtrl.GetStudent)
