@@ -17,25 +17,25 @@ func TestAuthServiceHappyPath(t *testing.T) {
 
 	var assert = assert.New(t)
 	var authService = auth.NewAuthService()
-	user1, _ := authService.Login(auth.LoginDTO{
-		Provider: auth.Google,
+	account1, _ := authService.Login(auth.LoginDTO{
+		Provider: auth.LoginProviderGoogle,
 		Token:    "valid",
 	})
 
-	user, err := authService.GetUserByID(user1.ID)
-	assert.NoError(err, "Should return the user.")
-	assert.NotEqual(0, user1, "Should return a valid user id.")
-	assert.Equal(user1.ID, user.ID, "Should return the user id.")
-	assert.Equal("John Doe", user.Name, "Should return the correct user name.")
-	assert.Equal("john@doe.com", user.Email, "Should return the correct user email.")
-	assert.Equal(utils.StringP("https://www.google.com"), user.Picture, "Should return the correct user picture.")
-	assert.Equal(false, user.EmailVerified, "Should return the correct user email verification status.")
-	assert.Equal(auth.Google, user.Provider, "Should return the correct user provider.")
-	assert.Equal(false, user.IsDeleted, "Should return the correct user deletion status.")
+	account, err := authService.GetAccountByID(account1.ID)
+	assert.NoError(err, "Should return the account.")
+	assert.NotEqual(0, account1, "Should return a valid account id.")
+	assert.Equal(account1.ID, account.ID, "Should return the account id.")
+	assert.Equal("John Doe", account.Name, "Should return the correct account name.")
+	assert.Equal("john@doe.com", account.Email, "Should return the correct account email.")
+	assert.Equal(utils.StringP("https://www.google.com"), account.Picture, "Should return the correct account picture.")
+	assert.Equal(false, account.EmailVerified, "Should return the correct account email verification status.")
+	assert.Equal(auth.LoginProviderGoogle, account.Provider, "Should return the correct account provider.")
+	assert.Equal(false, account.IsDeleted, "Should return the correct account deletion status.")
 
-	user2, err := authService.EnsureAuthenticated("valid", auth.Google)
+	account2, err := authService.EnsureAuthenticated("valid", auth.LoginProviderGoogle)
 	assert.NoError(err, "Should not return error with valid token")
-	assert.Equal(user.ID, user2, "Should return the same ID as the created user.")
+	assert.Equal(account.ID, account2, "Should return the same ID as the created account.")
 
 	afterEachAuth()
 }
@@ -46,7 +46,7 @@ func TestAuthServiceErrorPath(t *testing.T) {
 	var assert = assert.New(t)
 	var authService = auth.NewAuthService()
 	_, err := authService.Login(auth.LoginDTO{
-		Provider: auth.Google,
+		Provider: auth.LoginProviderGoogle,
 		Token:    "invalid",
 	})
 	assert.Error(err, "Should return an error with invalid access token.")
@@ -58,16 +58,16 @@ func TestAuthServiceErrorPath(t *testing.T) {
 	assert.Error(err, "Should return an error with invalid provider.")
 
 	u1, err := authService.Login(auth.LoginDTO{
-		Provider: auth.Google,
+		Provider: auth.LoginProviderGoogle,
 		Token:    "valid",
 	})
-	assert.NoError(err, "Should not return error when login with new User.")
+	assert.NoError(err, "Should not return error when login with new Account.")
 	u2, err := authService.Login(auth.LoginDTO{
-		Provider: auth.Google,
+		Provider: auth.LoginProviderGoogle,
 		Token:    "valid",
 	})
-	assert.NoError(err, "Should not return error when login with existing User.")
-	assert.Equal(u1.ID, u2.ID, "Should return same User id when multiple logins.")
+	assert.NoError(err, "Should not return error when login with existing Account.")
+	assert.Equal(u1.ID, u2.ID, "Should return same Account id when multiple logins.")
 
 	afterEachAuth()
 }

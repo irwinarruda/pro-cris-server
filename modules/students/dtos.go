@@ -3,16 +3,16 @@ package students
 import "github.com/irwinarruda/pro-cris-server/shared/models"
 
 type GetAllStudentsDTO struct {
-	IDUser int `json:"idUser"`
+	IDAccount int `json:"idAccount"`
 }
 
 type GetStudentDTO struct {
-	IDUser int `json:"idUser"`
-	ID     int `json:"id"`
+	IDAccount int `json:"idAccount"`
+	ID        int `json:"id"`
 }
 
 type CreateStudentDTO struct {
-	IDUser               int                           `json:"idUser"`
+	IDAccount            int                           `json:"idAccount"`
 	Name                 string                        `json:"name" validate:"required"`
 	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime"`
 	DisplayColor         string                        `json:"displayColor" validate:"omitempty,hexcolor"`
@@ -40,7 +40,7 @@ type CreateStudentRoutinePlanDTO struct {
 }
 
 type UpdateStudentDTO struct {
-	IDUser               int                           `json:"idUser"`
+	IDAccount            int                           `json:"idAccount"`
 	ID                   int                           `json:"id"`
 	Name                 string                        `json:"name" validate:"required"`
 	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime"`
@@ -70,6 +70,6 @@ type UpdateStudentRoutinePlanDTO struct {
 }
 
 type DeleteStudentDTO struct {
-	IDUser int `json:"idUser"`
-	ID     int `json:"id"`
+	IDAccount int `json:"idAccount"`
+	ID        int `json:"id"`
 }

@@ -1,9 +1,9 @@
 package auth
 
 type IAuthRepository interface {
-	CreateUser(user CreateUserDTO) (User, error)
-	GetUserByID(id int) (User, error)
-	GetUserByEmail(email string) (User, error)
+	CreateAccount(account CreateAccountDTO) (Account, error)
+	GetAccountByID(id int) (Account, error)
+	GetAccountByEmail(email string) (Account, error)
 	GetIDByEmail(email string) (int, error)
 	ResetAuth()
 }

@@ -31,12 +31,12 @@ func (a *AuthCtrl) Login(c *gin.Context) {
 		return
 	}
 	authService := auth.NewAuthService()
-	user, err := authService.Login(loginDTO)
+	account, err := authService.Login(loginDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusBadRequest, err)
 		return
 	}
-	c.JSON(http.StatusOK, user)
+	c.JSON(http.StatusOK, account)
 }
 
 func (a *AuthCtrl) EnsureAuthenticated(c *gin.Context) {
@@ -47,12 +47,12 @@ func (a *AuthCtrl) EnsureAuthenticated(c *gin.Context) {
 		return
 	}
 	authService := auth.NewAuthService()
-	id, err := authService.EnsureAuthenticated(token, auth.Google)
+	id, err := authService.EnsureAuthenticated(token, auth.LoginProviderGoogle)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusUnauthorized, err)
 		c.Abort()
 		return
 	}
-	c.Set("id_user", id)
+	c.Set("id_account", id)
 	c.Next()
 }

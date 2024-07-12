@@ -34,11 +34,11 @@ func beforeEachAppointment() {
 	studentRepository.ResetStudents()
 	var authRepository = authresources.NewDbAuthRepository()
 	authRepository.ResetAuth()
-	authRepository.CreateUser(auth.CreateUserDTO{
+	authRepository.CreateAccount(auth.CreateAccountDTO{
 		Email:         "john@doe.com",
 		Name:          "John Doe",
 		Picture:       utils.StringP("https://www.google.com"),
 		EmailVerified: false,
-		Provider:      auth.Google,
+		Provider:      auth.LoginProviderGoogle,
 	})
 }

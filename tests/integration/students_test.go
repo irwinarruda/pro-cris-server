@@ -15,17 +15,17 @@ import (
 )
 
 func TestStudentServiceHappyPath(t *testing.T) {
-	idUser := beforeEachStudents()
+	idAccount := beforeEachStudents()
 
 	var assert = assert.New(t)
 	var studentService = students.NewStudentService()
 
-	assert.NotEqual(idUser, 0, "Should return a valid user id.")
+	assert.NotEqual(idAccount, 0, "Should return a valid account id.")
 
-	createUserDTO := mockCreateStudentDTO(idUser)
-	id1, _ := studentService.CreateStudent(createUserDTO)
+	createAccountDTO := mockCreateStudentDTO(idAccount)
+	id1, _ := studentService.CreateStudent(createAccountDTO)
 
-	student1, err := studentService.GetStudentByID(students.GetStudentDTO{IDUser: idUser, ID: id1})
+	student1, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id1})
 	assert.NoError(err, "Should return a student with the same ID as the one created")
 	assert.Len(student1.Routine, 2, "Student should have 2 routine plans")
 	assert.Equal(models.Male, *student1.Gender, "Should have Male gender")
@@ -51,14 +51,14 @@ func TestStudentServiceHappyPath(t *testing.T) {
 		)
 	}
 
-	updateStudentDTO := mockUpdateStudentDTO(idUser, id1)
+	updateStudentDTO := mockUpdateStudentDTO(idAccount, id1)
 	updateStudentDTO.Routine = append(updateStudentDTO.Routine, students.UpdateStudentRoutinePlanDTO{ID: utils.IntP(mondayRoutineId)})
 	id2, err := studentService.UpdateStudent(updateStudentDTO)
 
 	assert.NoError(err, "Should be able to update student")
 	assert.Equal(id1, id2, "Should return the same ID as the one updated")
 
-	student2, err := studentService.GetStudentByID(students.GetStudentDTO{IDUser: idUser, ID: id2})
+	student2, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id2})
 	assert.NoError(err, "Should return a student with the same ID aS the one created")
 	assert.Equal("Jane Doe Updated", student2.Name, "Name should be updated")
 	assert.Equal("1990-01-02", *student2.BirthDay, "BirthDay should be updated")
@@ -91,24 +91,24 @@ func TestStudentServiceHappyPath(t *testing.T) {
 		)
 	}
 
-	allStudents := studentService.GetAllStudents(students.GetAllStudentsDTO{IDUser: idUser})
+	allStudents := studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
 	assert.Len(allStudents, 1, "Should return a list of students with 1 student after creating/updating")
 
-	studentService.DeleteStudent(students.DeleteStudentDTO{ID: id2, IDUser: idUser})
+	studentService.DeleteStudent(students.DeleteStudentDTO{ID: id2, IDAccount: idAccount})
 
-	allStudents = studentService.GetAllStudents(students.GetAllStudentsDTO{IDUser: idUser})
+	allStudents = studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
 	assert.Len(allStudents, 0, "Should return an empty list of students after deleting")
 
 	afterEachStudents()
 }
 
 func TestStudentServiceErrorPath(t *testing.T) {
-	idUser := beforeEachStudents()
+	idAccount := beforeEachStudents()
 
 	var assert = assert.New(t)
 	var studentService = students.NewStudentService()
 
-	createStudentDTO := mockCreateStudentDTO(idUser)
+	createStudentDTO := mockCreateStudentDTO(idAccount)
 	createStudentDTO.PaymentType = students.PaymentTypeFixed
 	createStudentDTO.PaymentTypeValue = nil
 	_, err := studentService.CreateStudent(createStudentDTO)
@@ -131,27 +131,27 @@ func TestStudentServiceErrorPath(t *testing.T) {
 	_, err = studentService.CreateStudent(createStudentDTO)
 	assert.NoError(err, "Should not return an error when settlement type is Appointments and value/day is nil")
 
-	updateStudentDTO := mockUpdateStudentDTO(idUser, 1)
+	updateStudentDTO := mockUpdateStudentDTO(idAccount, 1)
 	updateStudentDTO.PaymentType = students.PaymentTypeFixed
 	updateStudentDTO.PaymentTypeValue = nil
 	_, err = studentService.UpdateStudent(updateStudentDTO)
 	assert.Error(err, "Should return an error when payment type is Fixed and payment type value is nil")
 
-	_, err = studentService.UpdateStudent(students.UpdateStudentDTO{IDUser: idUser, ID: 5})
+	_, err = studentService.UpdateStudent(students.UpdateStudentDTO{IDAccount: idAccount, ID: 5})
 	assert.Error(err, "Should return an error when trying to update a student that does not exist")
 
-	_, err = studentService.GetStudentByID(students.GetStudentDTO{IDUser: idUser, ID: 3})
+	_, err = studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: 3})
 	assert.Error(err, "Should return an error when trying to get a student that does not exist")
 
-	_, err = studentService.DeleteStudent(students.DeleteStudentDTO{IDUser: idUser, ID: 7})
+	_, err = studentService.DeleteStudent(students.DeleteStudentDTO{IDAccount: idAccount, ID: 7})
 	assert.Error(err, "Should return an error when trying to delete a student that does not exist")
 
 	afterEachStudents()
 }
 
-func mockCreateStudentDTO(idUser int) students.CreateStudentDTO {
+func mockCreateStudentDTO(idAccount int) students.CreateStudentDTO {
 	return students.CreateStudentDTO{
-		IDUser:               idUser,
+		IDAccount:            idAccount,
 		Name:                 "John Doe",
 		Gender:               utils.StringP(models.Male),
 		BirthDay:             utils.StringP("1990-01-01"),
@@ -175,9 +175,9 @@ func mockCreateStudentDTO(idUser int) students.CreateStudentDTO {
 	}
 }
 
-func mockUpdateStudentDTO(idUser, id int) students.UpdateStudentDTO {
+func mockUpdateStudentDTO(idAccount, id int) students.UpdateStudentDTO {
 	return students.UpdateStudentDTO{
-		IDUser:               idUser,
+		IDAccount:            idAccount,
 		ID:                   id,
 		Name:                 "Jane Doe Updated",
 		Gender:               utils.StringP(models.Female),
@@ -208,14 +208,14 @@ func beforeEachStudents() int {
 	proinject.Register("students_repository", studentRepository)
 	studentRepository.ResetStudents()
 	var authRepository = authresources.NewDbAuthRepository()
-	user, _ := authRepository.CreateUser(auth.CreateUserDTO{
+	account, _ := authRepository.CreateAccount(auth.CreateAccountDTO{
 		Email:         "john@doe.com",
 		Name:          "John Doe",
 		Picture:       utils.StringP("https://www.google.com"),
 		EmailVerified: false,
-		Provider:      auth.Google,
+		Provider:      auth.LoginProviderGoogle,
 	})
-	return user.ID
+	return account.ID
 }
 
 func afterEachStudents() {

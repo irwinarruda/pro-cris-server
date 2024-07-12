@@ -2,7 +2,7 @@ package auth
 
 import "time"
 
-type User struct {
+type Account struct {
 	ID              int              `json:"id"`
 	Name            string           `json:"name"`
 	Email           string           `json:"email"`
@@ -26,18 +26,18 @@ type TeacherFeatures struct {
 type Permission = string
 
 const (
-	Admin   Permission = "Admin"
-	Teacher Permission = "Teacher"
+	PermissionAdmin   Permission = "Admin"
+	PermissionTeacher Permission = "Teacher"
 )
 
 type LoginProvider = string
 
 const (
-	Google LoginProvider = "Google"
+	LoginProviderGoogle LoginProvider = "Google"
 )
 
 func GetLoginProviders() []LoginProvider {
 	return []LoginProvider{
-		Google,
+		LoginProviderGoogle,
 	}
 }

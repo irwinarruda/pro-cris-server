@@ -13,7 +13,7 @@ import (
 
 type DbStudent struct {
 	ID                       int
-	IDUser                   int
+	IDAccount                int
 	Name                     string
 	BirthDay                 *string
 	DisplayColor             string
@@ -43,7 +43,7 @@ func (s *DbStudent) FromCreateStudent(student students.CreateStudentDTO) {
 		latitude = &student.HouseCoordinate.Latitude
 		longitude = &student.HouseCoordinate.Longitude
 	}
-	s.IDUser = student.IDUser
+	s.IDAccount = student.IDAccount
 	s.Name = student.Name
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
@@ -71,7 +71,7 @@ func (s *DbStudent) FromUpdateStudent(student students.UpdateStudentDTO) {
 		longitude = &student.HouseCoordinate.Longitude
 	}
 	s.ID = student.ID
-	s.IDUser = student.IDUser
+	s.IDAccount = student.IDAccount
 	s.Name = student.Name
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
@@ -165,7 +165,7 @@ func NewDbStudentRepository() *DbStudentRepository {
 func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) []students.Student {
 	studentsArr := []DbStudent{}
 	students := []students.Student{}
-	r.Db.Raw("SELECT * FROM student WHERE id_user = ? AND is_deleted = false;", data.IDUser).Scan(&studentsArr)
+	r.Db.Raw("SELECT * FROM student WHERE id_account = ? AND is_deleted = false;", data.IDAccount).Scan(&studentsArr)
 	for _, studentE := range studentsArr {
 		routineE := []DbRoutinePlan{}
 		r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", studentE.ID).Scan(&routineE)
@@ -177,7 +177,7 @@ func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) []
 
 func (r *DbStudentRepository) GetStudentByID(data students.GetStudentDTO) (students.Student, error) {
 	studentsE := []DbStudent{}
-	r.Db.Raw("SELECT * FROM student WHERE id_user = ? AND id = ? AND is_deleted = false;", data.IDUser, data.ID).Scan(&studentsE)
+	r.Db.Raw("SELECT * FROM student WHERE id_account = ? AND id = ? AND is_deleted = false;", data.IDAccount, data.ID).Scan(&studentsE)
 	if len(studentsE) == 0 {
 		return students.Student{}, utils.NewAppError("Student not found.", true, nil)
 	}
@@ -191,7 +191,7 @@ func (r *DbStudentRepository) CreateStudent(student students.CreateStudentDTO) i
 	studentE.FromCreateStudent(student)
 	sql := fmt.Sprintf(`
     INSERT INTO student(
-      id_user,
+      id_account,
       name,
       birth_day,
       display_color,
@@ -216,7 +216,7 @@ func (r *DbStudentRepository) CreateStudent(student students.CreateStudentDTO) i
 	)
 	r.Db.Raw(
 		sql,
-		studentE.IDUser,
+		studentE.IDAccount,
 		studentE.Name,
 		studentE.BirthDay,
 		studentE.DisplayColor,
@@ -246,7 +246,7 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
 	sql := `
     UPDATE student
     SET
-      id_user = ?,
+      id_account = ?,
       name = ?,
       birth_day = ?,
       display_color = ?,
@@ -269,7 +269,7 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
     RETURNING id;`
 	r.Db.Raw(
 		sql,
-		studentE.IDUser,
+		studentE.IDAccount,
 		studentE.Name,
 		studentE.BirthDay,
 		studentE.DisplayColor,
@@ -300,10 +300,10 @@ func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int
 	sql := `
     UPDATE student
     SET is_deleted = true
-    WHERE id_user = ?
+    WHERE id_account = ?
     AND id = ?
     RETURNING id;`
-	r.Db.Raw(sql, data.IDUser, data.ID).Scan(&idStudent)
+	r.Db.Raw(sql, data.IDAccount, data.ID).Scan(&idStudent)
 	if idStudent == nil {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}

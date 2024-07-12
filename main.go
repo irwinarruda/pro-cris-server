@@ -23,13 +23,13 @@ func androidServer() {
 			Token string `json:"token"`
 		}{}
 		c.Bind(&body)
-		user, err := goo.Validate(body.Token)
+		account, err := goo.Validate(body.Token)
 		if err != nil {
 			fmt.Println(err)
 			c.String(http.StatusForbidden, err.Error())
 			return
 		}
-		c.JSON(http.StatusOK, user)
+		c.JSON(http.StatusOK, account)
 	})
 	app.Run()
 }

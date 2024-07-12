@@ -31,9 +31,9 @@ func (g *GoogleClient) Init() {
 }
 
 func (g *GoogleClient) Validate(token string) (IGoogleUser, error) {
-	user, err := g.client.Validate(token)
+	account, err := g.client.Validate(token)
 	if err != nil {
 		return google.User{}, err
 	}
-	return user, nil
+	return account, nil
 }

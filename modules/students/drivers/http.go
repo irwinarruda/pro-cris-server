@@ -21,7 +21,7 @@ func NewStudentCtrl() *StudentCtrl {
 
 func (s StudentCtrl) GetStudents(c *gin.Context) {
 	studentsDTO := students.GetAllStudentsDTO{}
-	studentsDTO.IDUser = c.Value("id_user").(int)
+	studentsDTO.IDAccount = c.Value("id_account").(int)
 	studentService := students.NewStudentService()
 	students := studentService.GetAllStudents(studentsDTO)
 	c.JSON(http.StatusOK, students)
@@ -34,7 +34,7 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 		return
 	}
 	studentDTO := students.GetStudentDTO{}
-	studentDTO.IDUser = c.Value("id_user").(int)
+	studentDTO.IDAccount = c.Value("id_account").(int)
 	studentDTO.ID = idStudent
 	studentService := students.NewStudentService()
 	student, err := studentService.GetStudentByID(studentDTO)
@@ -47,7 +47,7 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 
 func (s StudentCtrl) CreateStudent(c *gin.Context) {
 	studentDTO := students.CreateStudentDTO{}
-	studentDTO.IDUser = c.Value("id_user").(int)
+	studentDTO.IDAccount = c.Value("id_account").(int)
 	err := c.Bind(&studentDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
@@ -78,7 +78,7 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 	}
 	studentDTO := students.UpdateStudentDTO{}
 	studentDTO.ID = id
-	studentDTO.IDUser = c.Value("id_user").(int)
+	studentDTO.IDAccount = c.Value("id_account").(int)
 	err = c.Bind(&studentDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data. "+err.Error(), false, nil))
@@ -108,7 +108,7 @@ func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 	}
 	studentDTO := students.DeleteStudentDTO{}
 	studentDTO.ID = id
-	studentDTO.IDUser = c.Value("id_user").(int)
+	studentDTO.IDAccount = c.Value("id_account").(int)
 	studentService := students.NewStudentService()
 	id, err = studentService.DeleteStudent(studentDTO)
 	if err, ok := err.(utils.AppError); ok {

@@ -5,7 +5,7 @@ type LoginDTO struct {
 	Token    string        `json:"token" validate:"required,jwt"`
 }
 
-type CreateUserDTO struct {
+type CreateAccountDTO struct {
 	Name          string        `json:"name"`
 	Email         string        `json:"email"`
 	Picture       *string       `json:"picture"`

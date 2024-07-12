@@ -15,39 +15,39 @@ func NewAuthService() *AuthService {
 	return proinject.Resolve(&AuthService{})
 }
 
-func (a *AuthService) Login(credentials LoginDTO) (User, error) {
-	if credentials.Provider != Google {
-		return User{}, utils.NewAppError("Invalid provider.", true, nil)
+func (a *AuthService) Login(credentials LoginDTO) (Account, error) {
+	if credentials.Provider != LoginProviderGoogle {
+		return Account{}, utils.NewAppError("Invalid provider.", true, nil)
 	}
-	googleUser, err := a.GoogleClient.Validate(credentials.Token)
+	googleAccount, err := a.GoogleClient.Validate(credentials.Token)
 	if err != nil {
-		return User{}, utils.NewAppError("Invalid google access token.", true, err)
+		return Account{}, utils.NewAppError("Invalid google access token.", true, err)
 	}
-	existingUser, err := a.AuthRepository.GetUserByEmail(googleUser.Email)
+	existingAccount, err := a.AuthRepository.GetAccountByEmail(googleAccount.Email)
 	if err == nil {
-		return existingUser, nil
+		return existingAccount, nil
 	}
-	user, err := a.AuthRepository.CreateUser(CreateUserDTO{
-		Email:         googleUser.Email,
-		Name:          googleUser.Name,
-		Picture:       &googleUser.Picture,
-		EmailVerified: googleUser.EmailVerified,
+	account, err := a.AuthRepository.CreateAccount(CreateAccountDTO{
+		Email:         googleAccount.Email,
+		Name:          googleAccount.Name,
+		Picture:       &googleAccount.Picture,
+		EmailVerified: googleAccount.EmailVerified,
 		Provider:      credentials.Provider,
 	})
-	return user, err
+	return account, err
 }
 
 func (a *AuthService) EnsureAuthenticated(token string, provider LoginProvider) (int, error) {
-	if provider != Google {
+	if provider != LoginProviderGoogle {
 		return 0, utils.NewAppError("Invalid provider.", true, nil)
 	}
-	googleUser, err := a.GoogleClient.Validate(token)
+	googleAccount, err := a.GoogleClient.Validate(token)
 	if err != nil {
 		return 0, utils.NewAppError(err.Error(), false, err)
 	}
-	return a.AuthRepository.GetIDByEmail(googleUser.Email)
+	return a.AuthRepository.GetIDByEmail(googleAccount.Email)
 }
 
-func (a *AuthService) GetUserByID(id int) (User, error) {
-	return a.AuthRepository.GetUserByID(id)
+func (a *AuthService) GetAccountByID(id int) (Account, error) {
+	return a.AuthRepository.GetAccountByID(id)
 }
