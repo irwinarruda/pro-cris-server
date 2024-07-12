@@ -6,7 +6,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
-	"github.com/irwinarruda/pro-cris-server/modules/students"
+	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +28,7 @@ func beforeEachAppointment() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("appointment_repository", appointments.NewDbAppointmentRepository())
-	var studentRepository = students.NewDbStudentRepository()
+	var studentRepository = students_resources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
 	var authRepository = auth.NewDbAuthRepository()
 	authRepository.ResetAuth()

@@ -1,4 +1,4 @@
-package students
+package students_drivers
 
 import (
 	"net/http"
@@ -6,6 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
+	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
@@ -19,9 +20,9 @@ func NewStudentCtrl() *StudentCtrl {
 }
 
 func (s StudentCtrl) GetStudents(c *gin.Context) {
-	studentsDTO := GetAllStudentsDTO{}
+	studentsDTO := students.GetAllStudentsDTO{}
 	studentsDTO.IDUser = c.Value("id_user").(int)
-	studentService := NewStudentService()
+	studentService := students.NewStudentService()
 	students := studentService.GetAllStudents(studentsDTO)
 	c.JSON(http.StatusOK, students)
 }
@@ -32,10 +33,10 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
 		return
 	}
-	studentDTO := GetStudentDTO{}
+	studentDTO := students.GetStudentDTO{}
 	studentDTO.IDUser = c.Value("id_user").(int)
 	studentDTO.ID = idStudent
-	studentService := NewStudentService()
+	studentService := students.NewStudentService()
 	student, err := studentService.GetStudentByID(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusNotFound, err)
@@ -45,7 +46,7 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 }
 
 func (s StudentCtrl) CreateStudent(c *gin.Context) {
-	studentDTO := CreateStudentDTO{}
+	studentDTO := students.CreateStudentDTO{}
 	studentDTO.IDUser = c.Value("id_user").(int)
 	err := c.Bind(&studentDTO)
 	if err != nil {
@@ -58,7 +59,7 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 		return
 	}
 
-	studentService := NewStudentService()
+	studentService := students.NewStudentService()
 	id, err := studentService.CreateStudent(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusNotFound, err)
@@ -75,7 +76,7 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
 		return
 	}
-	studentDTO := UpdateStudentDTO{}
+	studentDTO := students.UpdateStudentDTO{}
 	studentDTO.ID = id
 	studentDTO.IDUser = c.Value("id_user").(int)
 	err = c.Bind(&studentDTO)
@@ -88,7 +89,7 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
 		return
 	}
-	studentService := NewStudentService()
+	studentService := students.NewStudentService()
 	id, err = studentService.UpdateStudent(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusNotFound, err)
@@ -105,10 +106,10 @@ func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
 		return
 	}
-	studentDTO := DeleteStudentDTO{}
+	studentDTO := students.DeleteStudentDTO{}
 	studentDTO.ID = id
 	studentDTO.IDUser = c.Value("id_user").(int)
-	studentService := NewStudentService()
+	studentService := students.NewStudentService()
 	id, err = studentService.DeleteStudent(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
 		c.JSON(http.StatusNotFound, err)
