@@ -5,18 +5,18 @@ import (
 )
 
 type Appointment struct {
-	ID         int                `json:"id"`
-	Day        Day                `json:"day"`
-	StartHour  string             `json:"startHour"`
-	Duration   int                `json:"duration"`
-	Price      float64            `json:"price"`
-	IsSettled  bool               `json:"isSettled"`
-	IsPaid     bool               `json:"isPrePaid"`
-	IsCanceled bool               `json:"isCanceled"`
-	Student    AppointmentStudent `json:"student"`
-	IsDeleted  bool               `json:"isDeleted"`
-	CreatedAt  time.Time          `json:"createdAt"`
-	UpdatedAt  time.Time          `json:"updatedAt"`
+	ID          int                `json:"id"`
+	CalendarDay CalendarDay        `json:"calendarDay"`
+	StartHour   string             `json:"startHour"`
+	Duration    int                `json:"duration"`
+	Price       float64            `json:"price"`
+	IsExtra     bool               `json:"isExtra"`
+	Student     AppointmentStudent `json:"student"`
+	IsDeleted   bool               `json:"isDeleted"`
+	CreatedAt   time.Time          `json:"createdAt"`
+	UpdatedAt   time.Time          `json:"updatedAt"`
+	// IsSettled   bool               `json:"isSettled"`
+	// IsPaid      bool               `json:"isPaid"`
 }
 
 type AppointmentStudent struct {
@@ -26,22 +26,14 @@ type AppointmentStudent struct {
 	Picture      *string `json:"picture"`
 }
 
-type Day struct {
-	Id                int    `json:"id"`
-	Day               string `json:"day"`
-	Month             string `json:"month"`
-	Year              string `json:"year"`
-	HasRoutineStarted bool   `json:"hasRoutineStarted"`
+type CalendarDay struct {
+	Id    int `json:"id"`
+	Day   int `json:"day"`
+	Month int `json:"month"`
+	Year  int `json:"year"`
 }
 
 type Holiday struct {
-	Day  Day    `json:"day"`
-	Name string `json:"name"`
+	Day  CalendarDay `json:"day"`
+	Name string      `json:"name"`
 }
-
-// type ScheduleDay struct {
-// 	Day          Day           `json:"day"`
-// 	Appointments []Appointment `json:"appointments"`
-// 	Routines     []RoutinePlan `json:"routines"`
-// 	Holidays     []Holiday     `json:"holidays"`
-// }

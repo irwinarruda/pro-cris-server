@@ -1,17 +1,18 @@
 goose_start = source .env && GOOSE_DRIVER=$$GOOSE_DRIVER GOOSE_DBSTRING=$$GOOSE_DBSTRING GOOSE_MIGRATION_DIR=$$GOOSE_MIGRATION_DIR goose -dir migrations
+watch_start = bun ./external/watch/src/index.js
 
 prepare:
 	bash ./scripts/prepare.sh
 dev:
-	gow -c -v run .
+	$(watch_start) go run .
 templ:
-	gow -c -v run ./templates
+	$(watch_start) go run ./templates
 test-unit:
-	gow -c -v test -v -count=1 ./tests/unit
+	$(watch_start) go test -v -count=1 ./tests/unit
 test-integration:
-	make migration-reset && make migration-up && gow -c -v test -v -count=1 ./tests/integration
+	make migration-reset && make migration-up && $(watch_start) go test -v -count=1 ./tests/integration
 test-e2e:
-	gow -c -v test -v -count=1 ./tests/e2e
+	$(watch_start) go test -v -count=1 ./tests/e2e
 services-up:
 	docker compose up -d
 services-down:

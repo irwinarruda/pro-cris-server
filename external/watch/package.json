@@ -1,0 +1,13 @@
+{
+  "name": "watch",
+  "module": "./src/index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/node": "^20.14.10",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "arg": "^5.0.2",
+    "event-stream": "^4.0.1"
+  }
+}
