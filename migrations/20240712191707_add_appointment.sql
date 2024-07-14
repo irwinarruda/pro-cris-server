@@ -4,8 +4,8 @@ CREATE TABLE IF NOT EXISTS "calendar_day"(
   id serial PRIMARY KEY,
   day integer NOT NULL,
   month integer NOT NULL,
-  year integer NOT NULL
-  -- UNIQUE (day, month, year)
+  year integer NOT NULL,
+  UNIQUE (day, month, year)
 );
 
 CREATE TABLE IF NOT EXISTS "appointment"(

@@ -95,15 +95,15 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 }
 
 func (a *DbAppointmentRepository) GetAppointmentByID(id int) (appointments.Appointment, error) {
-	sql := "SELECT * FROM \"appointment\" WHERE id = ?;"
+	sql := `SELECT * FROM "appointment" WHERE id = ?;`
 	appointmentE := DbAppointment{}
 	a.Db.Raw(sql, id).Scan(&appointmentE)
 
-	sql = "SELECT * FROM \"calendar_day\" WHERE id = ?;"
+	sql = `SELECT * FROM "calendar_day" WHERE id = ?;`
 	day := appointments.CalendarDay{}
 	a.Db.Raw(sql, appointmentE.IDCalendarDay).Scan(&day)
 
-	sql = "SELECT id, name, display_color, picture FROM \"student\" WHERE id = ?;"
+	sql = `SELECT id, name, display_color, picture FROM "student" WHERE id = ?;`
 	appointmentStudent := appointments.AppointmentStudent{}
 	a.Db.Raw(sql, appointmentE.IDStudent).Scan(&appointmentStudent)
 
@@ -115,5 +115,8 @@ func (a *DbAppointmentRepository) CreateAppointmentsByRoutine() int {
 }
 
 func (a *DbAppointmentRepository) ResetAppointments() {
-
+	a.Db.Exec(`DELETE FROM "appointment";`)
+	a.Db.Exec(`ALTER SEQUENCE appointment_id_seq RESTART WITH 1;`)
+	a.Db.Exec(`DELETE FROM "calendar_day";`)
+	a.Db.Exec(`ALTER SEQUENCE calendar_day_id_seq RESTART WITH 1;`)
 }

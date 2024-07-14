@@ -21,9 +21,9 @@ func (s *DbStatusRepository) GetStatusDatabase() status.StatusDatabase {
 		MaxConnections int
 		Count          int
 	}{}
-	s.Db.Raw("SHOW SERVER_VERSION;").Scan(&databaseResults)
-	s.Db.Raw("SHOW MAX_CONNECTIONS;").Scan(&databaseResults)
-	s.Db.Raw("SELECT COUNT(*) FROM PG_STAT_ACTIVITY WHERE datname = ?;", s.Env.DatabaseName).Scan(&databaseResults)
+	s.Db.Raw(`SHOW SERVER_VERSION;`).Scan(&databaseResults)
+	s.Db.Raw(`SHOW MAX_CONNECTIONS;`).Scan(&databaseResults)
+	s.Db.Raw(`SELECT COUNT(*) FROM PG_STAT_ACTIVITY WHERE datname = ?;`, s.Env.DatabaseName).Scan(&databaseResults)
 
 	return status.StatusDatabase{
 		Version:         databaseResults.ServerVersion,

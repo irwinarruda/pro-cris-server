@@ -65,7 +65,7 @@ func (a *DbAuthRepository) CreateAccount(account auth.CreateAccountDTO) (auth.Ac
 
 func (a *DbAuthRepository) GetAccountByID(id int) (auth.Account, error) {
 	accountsE := []DbAccount{}
-	a.Db.Raw("SELECT * FROM \"account\" WHERE id = ?;", id).Scan(&accountsE)
+	a.Db.Raw(`SELECT * FROM "account" WHERE id = ?;`, id).Scan(&accountsE)
 	if len(accountsE) == 0 {
 		return auth.Account{}, utils.NewAppError("Account not found.", true, nil)
 	}
@@ -74,7 +74,7 @@ func (a *DbAuthRepository) GetAccountByID(id int) (auth.Account, error) {
 
 func (a *DbAuthRepository) GetAccountByEmail(email string) (auth.Account, error) {
 	accountsE := []DbAccount{}
-	a.Db.Raw("SELECT * FROM \"account\" WHERE email = ?;", email).Scan(&accountsE)
+	a.Db.Raw(`SELECT * FROM "account" WHERE email = ?;`, email).Scan(&accountsE)
 	if len(accountsE) == 0 {
 		return auth.Account{}, utils.NewAppError("Account not found.", true, nil)
 	}
@@ -83,7 +83,7 @@ func (a *DbAuthRepository) GetAccountByEmail(email string) (auth.Account, error)
 
 func (a *DbAuthRepository) GetIDByEmail(email string) (int, error) {
 	ids := []int{}
-	a.Db.Raw("SELECT id FROM \"account\" WHERE email = ?;", email).Scan(&ids)
+	a.Db.Raw(`SELECT id FROM "account" WHERE email = ?;`, email).Scan(&ids)
 	if len(ids) == 0 {
 		return 0, utils.NewAppError("Account not found.", true, nil)
 	}
@@ -91,6 +91,6 @@ func (a *DbAuthRepository) GetIDByEmail(email string) (int, error) {
 }
 
 func (a *DbAuthRepository) ResetAuth() {
-	a.Db.Exec("DELETE FROM \"account\";")
-	a.Db.Exec("ALTER SEQUENCE account_id_seq RESTART WITH 1;")
+	a.Db.Exec(`DELETE FROM "account";`)
+	a.Db.Exec(`ALTER SEQUENCE account_id_seq RESTART WITH 1;`)
 }

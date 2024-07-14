@@ -165,10 +165,10 @@ func NewDbStudentRepository() *DbStudentRepository {
 func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) []students.Student {
 	studentsArr := []DbStudent{}
 	students := []students.Student{}
-	r.Db.Raw("SELECT * FROM student WHERE id_account = ? AND is_deleted = false;", data.IDAccount).Scan(&studentsArr)
+	r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND is_deleted = false;`, data.IDAccount).Scan(&studentsArr)
 	for _, studentE := range studentsArr {
 		routineE := []DbRoutinePlan{}
-		r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", studentE.ID).Scan(&routineE)
+		r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, studentE.ID).Scan(&routineE)
 		student := studentE.ToStudent(routineE)
 		students = append(students, student)
 	}
@@ -177,12 +177,12 @@ func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) []
 
 func (r *DbStudentRepository) GetStudentByID(data students.GetStudentDTO) (students.Student, error) {
 	studentsE := []DbStudent{}
-	r.Db.Raw("SELECT * FROM student WHERE id_account = ? AND id = ? AND is_deleted = false;", data.IDAccount, data.ID).Scan(&studentsE)
+	r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND id = ? AND is_deleted = false;`, data.IDAccount, data.ID).Scan(&studentsE)
 	if len(studentsE) == 0 {
 		return students.Student{}, utils.NewAppError("Student not found.", true, nil)
 	}
 	routineE := []DbRoutinePlan{}
-	r.Db.Raw("SELECT * FROM routine_plan WHERE id_student = ? AND is_deleted = false;", data.ID).Scan(&routineE)
+	r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, data.ID).Scan(&routineE)
 	return studentsE[0].ToStudent(routineE), nil
 }
 
@@ -190,7 +190,7 @@ func (r *DbStudentRepository) CreateStudent(student students.CreateStudentDTO) i
 	studentE := DbStudent{}
 	studentE.FromCreateStudent(student)
 	sql := fmt.Sprintf(`
-    INSERT INTO student(
+    INSERT INTO "student"(
       id_account,
       name,
       birth_day,
@@ -244,7 +244,7 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
 	studentE := DbStudent{}
 	studentE.FromUpdateStudent(student)
 	sql := `
-    UPDATE student
+    UPDATE "student"
     SET
       id_account = ?,
       name = ?,
@@ -298,7 +298,7 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
 func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int, error) {
 	var idStudent *int
 	sql := `
-    UPDATE student
+    UPDATE "student"
     SET is_deleted = true
     WHERE id_account = ?
     AND id = ?
@@ -308,7 +308,7 @@ func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
 	sql = `
-    UPDATE routine_plan
+    UPDATE "routine_plan"
     SET is_deleted = true
     WHERE id_student = ?;`
 	r.Db.Exec(sql, data.ID)
@@ -321,9 +321,9 @@ func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int
 func (r *DbStudentRepository) GetRoutineID(idStudent int, excluded ...int) []int {
 	routine := []int{}
 	args := []interface{}{idStudent}
-	sql := "SELECT id FROM routine_plan WHERE id_student = ? AND is_deleted = false"
+	sql := `SELECT id FROM "routine_plan" WHERE id_student = ? AND is_deleted = false`
 	if excluded != nil && len(excluded) > 0 {
-		sql += " AND id NOT IN "
+		sql += ` AND id NOT IN `
 		sql += utils.SqlArray(len(excluded))
 		for _, id := range excluded {
 			args = append(args, id)
@@ -344,7 +344,7 @@ func (r *DbStudentRepository) CreateRoutine(idStudent int, routinePlan ...studen
 
 	orderedValues := []interface{}{}
 	sql := fmt.Sprintf(`
-    INSERT INTO routine_plan(
+    INSERT INTO "routine_plan"(
       id_student,
       week_day,
       start_hour,
@@ -371,7 +371,7 @@ func (r *DbStudentRepository) CreateRoutine(idStudent int, routinePlan ...studen
 // 'routine' is a list of ids that should be deleted.
 func (r *DbStudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 	sql := fmt.Sprintf(`
-    UPDATE routine_plan
+    UPDATE "routine_plan"
     SET is_deleted = true
     WHERE id_student = ? AND id IN %s;`,
 		utils.SqlArray(len(routine)),
@@ -384,6 +384,6 @@ func (r *DbStudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 }
 
 func (r *DbStudentRepository) ResetStudents() {
-	r.Db.Exec("DELETE FROM student;")
-	r.Db.Exec("ALTER SEQUENCE student_id_seq RESTART WITH 1;")
+	r.Db.Exec(`DELETE FROM "student";`)
+	r.Db.Exec(`ALTER SEQUENCE student_id_seq RESTART WITH 1;`)
 }
