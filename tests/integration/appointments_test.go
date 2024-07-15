@@ -8,6 +8,8 @@ import (
 	"github.com/irwinarruda/pro-cris-server/modules/appointments/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
+	"github.com/irwinarruda/pro-cris-server/modules/calendar"
+	"github.com/irwinarruda/pro-cris-server/modules/calendar/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
@@ -44,10 +46,6 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 	assert.Equal(2024, appointment1.CalendarDay.Year, "Should return Year.")
 }
 
-// func TestAppointmentServiceErrorPath(t *testing.T) {
-// 	beforeEachAppointment()
-// }
-
 func beforeEachAppointment() int {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
@@ -55,6 +53,11 @@ func beforeEachAppointment() int {
 	var appointmentRepository = appointmentsresources.NewDbAppointmentRepository()
 	appointmentRepository.ResetAppointments()
 	proinject.Register("appointment_repository", appointmentRepository)
+
+	calendarRepository := calendarresources.NewDbCalendarRepository()
+	calendarRepository.ResetCalendarDays()
+	proinject.Register("calendar_repository", calendarRepository)
+	proinject.Register("calendar_service", calendar.NewCalendarService())
 
 	var authRepository = authresources.NewDbAuthRepository()
 	authRepository.ResetAuth()

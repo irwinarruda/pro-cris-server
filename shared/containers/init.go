@@ -5,6 +5,8 @@ import (
 	"github.com/irwinarruda/pro-cris-server/modules/appointments/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
+	"github.com/irwinarruda/pro-cris-server/modules/calendar"
+	"github.com/irwinarruda/pro-cris-server/modules/calendar/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/status/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
@@ -22,8 +24,10 @@ func InitInjections() {
 	))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", providers.NewGoogleClient())
-	proinject.Register("students_repository", studentsresources.NewDbStudentRepository())
-	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
 	proinject.Register("appointment_repository", appointmentsresources.NewDbAppointmentRepository())
 	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
+	proinject.Register("calendar_repository", calendarresources.NewDbCalendarRepository())
+	proinject.Register("calendar_service", calendar.NewCalendarService())
+	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
+	proinject.Register("students_repository", studentsresources.NewDbStudentRepository())
 }

@@ -35,7 +35,7 @@ async function main(args) {
       spawn("kill", ["-9"].concat(children.map((p) => p.PID)));
       cmdProcess = createCmd(command);
       debounce = null;
-    }, 75);
+    }, 60);
   }
 }
 

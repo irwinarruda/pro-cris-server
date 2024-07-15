@@ -6,43 +6,54 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
+	"github.com/irwinarruda/pro-cris-server/modules/calendar"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type DbAppointment struct {
-	ID            int       `json:"id"`
-	IDCalendarDay int       `json:"idCalendarDay"`
-	IDStudent     int       `json:"idStudent"`
-	StartHour     string    `json:"startHour"`
-	Duration      int       `json:"duration"`
-	Price         float64   `json:"price"`
-	IsExtra       bool      `json:"isExtra"`
-	IsDeleted     bool      `json:"isDeleted"`
-	CreatedAt     time.Time `json:"createdAt"`
-	UpdatedAt     time.Time `json:"updatedAt"`
+	ID            int
+	StartHour     string
+	Duration      int
+	Price         float64
+	IsExtra       bool
+	IsDeleted     bool
+	IDCalendarDay int
+	Day           int
+	Month         int
+	Year          int
+	Name          string
+	IDStudent     int
+	DisplayColor  string
+	Picture       *string
+	CreatedAt     time.Time
+	UpdatedAt     time.Time
 }
 
 func (a *DbAppointment) FromCreateAppointmentDTO(appointment appointments.CreateAppointmentDTO) {
 	a.IDStudent = appointment.IDStudent
+	a.IDCalendarDay = appointment.CalendarDay.ID
 	a.StartHour = appointment.StartHour
 	a.Duration = appointment.Duration
 	a.Price = appointment.Price
 	a.IsExtra = appointment.IsExtra
+	a.Day = appointment.CalendarDay.Day
+	a.Month = appointment.CalendarDay.Month
+	a.Year = appointment.CalendarDay.Year
 }
 
-func (a *DbAppointment) ToAppointment(day appointments.CalendarDay, student appointments.AppointmentStudent) appointments.Appointment {
+func (a *DbAppointment) ToAppointment() appointments.Appointment {
 	return appointments.Appointment{
 		ID:          a.ID,
-		CalendarDay: day,
 		StartHour:   a.StartHour,
 		Duration:    a.Duration,
 		Price:       a.Price,
 		IsExtra:     a.IsExtra,
-		Student:     student,
 		IsDeleted:   a.IsDeleted,
 		CreatedAt:   a.CreatedAt,
 		UpdatedAt:   a.UpdatedAt,
+		CalendarDay: calendar.CalendarDay{ID: a.IDCalendarDay, Day: a.Day, Month: a.Month, Year: a.Year},
+		Student:     appointments.AppointmentStudent{ID: a.IDStudent, Name: a.Name, DisplayColor: a.DisplayColor, Picture: a.Picture},
 	}
 }
 
@@ -54,24 +65,10 @@ func NewDbAppointmentRepository() *DbAppointmentRepository {
 	return proinject.Resolve(&DbAppointmentRepository{})
 }
 
-func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.CreateAppointmentDTO) int {
+func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.CreateAppointmentDTO) (int, error) {
 	appointmentE := DbAppointment{}
 	appointmentE.FromCreateAppointmentDTO(appointment)
 	sql := fmt.Sprintf(`
-    INSERT INTO "calendar_day"(
-      day,
-      month,
-      year
-    ) %s
-    RETURNING id;
-  `, utils.SqlValues(1, 3))
-	a.Db.Raw(
-		sql,
-		appointment.CalendarDay.Day,
-		appointment.CalendarDay.Month,
-		appointment.CalendarDay.Year,
-	).Scan(&appointmentE.IDCalendarDay)
-	sql = fmt.Sprintf(`
     INSERT INTO "appointment"(
       id_calendar_day,
       id_student,
@@ -82,7 +79,7 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
     ) %s
     RETURNING id;
   `, utils.SqlValues(1, 6))
-	a.Db.Raw(
+	err := a.Db.Raw(
 		sql,
 		appointmentE.IDCalendarDay,
 		appointmentE.IDStudent,
@@ -90,33 +87,42 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 		appointmentE.Duration,
 		appointmentE.Price,
 		appointmentE.IsExtra,
-	).Scan(&appointmentE.ID)
-	return appointmentE.ID
+	).Scan(&appointmentE.ID).Error
+	if err != nil {
+		return 0, err
+	}
+	return appointmentE.ID, nil
 }
 
 func (a *DbAppointmentRepository) GetAppointmentByID(id int) (appointments.Appointment, error) {
-	sql := `SELECT * FROM "appointment" WHERE id = ?;`
+	sql := `
+    SELECT
+      "appointment".*,
+      "calendar_day".day,
+      "calendar_day".month,
+      "calendar_day".year,
+      "student".name,
+      "student".display_color,
+      "student".picture
+    FROM "appointment"
+    LEFT JOIN "calendar_day" ON "appointment".id_calendar_day = "calendar_day".id
+    LEFT JOIN "student" ON "appointment".id_student = "student".id
+    WHERE "appointment".id = ?;
+  `
 	appointmentE := DbAppointment{}
-	a.Db.Raw(sql, id).Scan(&appointmentE)
+	result := a.Db.Raw(sql, id).Scan(&appointmentE)
+	if result.Error != nil {
+		return appointments.Appointment{}, result.Error
+	}
 
-	sql = `SELECT * FROM "calendar_day" WHERE id = ?;`
-	day := appointments.CalendarDay{}
-	a.Db.Raw(sql, appointmentE.IDCalendarDay).Scan(&day)
-
-	sql = `SELECT id, name, display_color, picture FROM "student" WHERE id = ?;`
-	appointmentStudent := appointments.AppointmentStudent{}
-	a.Db.Raw(sql, appointmentE.IDStudent).Scan(&appointmentStudent)
-
-	return appointmentE.ToAppointment(day, appointmentStudent), nil
+	return appointmentE.ToAppointment(), nil
 }
 
-func (a *DbAppointmentRepository) CreateAppointmentsByRoutine() int {
-	return 0
+func (a *DbAppointmentRepository) CreateAppointmentsByRoutine() (int, error) {
+	return 0, nil
 }
 
 func (a *DbAppointmentRepository) ResetAppointments() {
 	a.Db.Exec(`DELETE FROM "appointment";`)
 	a.Db.Exec(`ALTER SEQUENCE appointment_id_seq RESTART WITH 1;`)
-	a.Db.Exec(`DELETE FROM "calendar_day";`)
-	a.Db.Exec(`ALTER SEQUENCE calendar_day_id_seq RESTART WITH 1;`)
 }

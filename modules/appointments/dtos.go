@@ -10,6 +10,7 @@ type CreateAppointmentDTO struct {
 }
 
 type CreateAppointmentCalendarDayDTO struct {
+	ID    int `json:"id"`
 	Day   int `json:"day"`
 	Month int `json:"month"`
 	Year  int `json:"year"`
