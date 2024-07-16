@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS "appointment"(
   duration integer NOT NULL,
   price float8 NOT NULL,
   is_extra bool NOT NULL DEFAULT false,
+  is_paid bool NOT NULL DEFAULT false,
   is_deleted bool NOT NULL DEFAULT false,
   created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,

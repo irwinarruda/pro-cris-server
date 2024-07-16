@@ -13,12 +13,12 @@ type Appointment struct {
 	Duration    int                  `json:"duration"`
 	Price       float64              `json:"price"`
 	IsExtra     bool                 `json:"isExtra"`
+	IsPaid      bool                 `json:"isPaid"`
 	Student     AppointmentStudent   `json:"student"`
 	IsDeleted   bool                 `json:"isDeleted"`
 	CreatedAt   time.Time            `json:"createdAt"`
 	UpdatedAt   time.Time            `json:"updatedAt"`
 	// IsSettled   bool               `json:"isSettled"`
-	// IsPaid      bool               `json:"isPaid"`
 }
 
 type AppointmentStudent struct {

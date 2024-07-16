@@ -17,6 +17,7 @@ type DbAppointment struct {
 	Duration      int
 	Price         float64
 	IsExtra       bool
+	IsPaid        bool
 	IsDeleted     bool
 	IDCalendarDay int
 	Day           int
@@ -37,9 +38,17 @@ func (a *DbAppointment) FromCreateAppointmentDTO(appointment appointments.Create
 	a.Duration = appointment.Duration
 	a.Price = appointment.Price
 	a.IsExtra = appointment.IsExtra
+	a.IsPaid = appointment.IsPaid
 	a.Day = appointment.CalendarDay.Day
 	a.Month = appointment.CalendarDay.Month
 	a.Year = appointment.CalendarDay.Year
+}
+
+func (a *DbAppointment) FromUpdateAppointmentDTO(appointment appointments.UpdateAppointmentDTO) {
+	a.ID = appointment.ID
+	a.Price = appointment.Price
+	a.IsExtra = appointment.IsExtra
+	a.IsPaid = appointment.IsPaid
 }
 
 func (a *DbAppointment) ToAppointment() appointments.Appointment {
@@ -49,6 +58,7 @@ func (a *DbAppointment) ToAppointment() appointments.Appointment {
 		Duration:    a.Duration,
 		Price:       a.Price,
 		IsExtra:     a.IsExtra,
+		IsPaid:      a.IsPaid,
 		IsDeleted:   a.IsDeleted,
 		CreatedAt:   a.CreatedAt,
 		UpdatedAt:   a.UpdatedAt,
@@ -63,35 +73,6 @@ type DbAppointmentRepository struct {
 
 func NewDbAppointmentRepository() *DbAppointmentRepository {
 	return proinject.Resolve(&DbAppointmentRepository{})
-}
-
-func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.CreateAppointmentDTO) (int, error) {
-	appointmentE := DbAppointment{}
-	appointmentE.FromCreateAppointmentDTO(appointment)
-	sql := fmt.Sprintf(`
-    INSERT INTO "appointment"(
-      id_calendar_day,
-      id_student,
-      start_hour,
-      duration,
-      price,
-      is_extra
-    ) %s
-    RETURNING id;
-  `, utils.SqlValues(1, 6))
-	err := a.Db.Raw(
-		sql,
-		appointmentE.IDCalendarDay,
-		appointmentE.IDStudent,
-		appointmentE.StartHour,
-		appointmentE.Duration,
-		appointmentE.Price,
-		appointmentE.IsExtra,
-	).Scan(&appointmentE.ID).Error
-	if err != nil {
-		return 0, err
-	}
-	return appointmentE.ID, nil
 }
 
 func (a *DbAppointmentRepository) GetAppointmentByID(id int) (appointments.Appointment, error) {
@@ -109,17 +90,72 @@ func (a *DbAppointmentRepository) GetAppointmentByID(id int) (appointments.Appoi
     LEFT JOIN "student" ON "appointment".id_student = "student".id
     WHERE "appointment".id = ?;
   `
-	appointmentE := DbAppointment{}
-	result := a.Db.Raw(sql, id).Scan(&appointmentE)
-	if result.Error != nil {
-		return appointments.Appointment{}, result.Error
+	appointmentE := []DbAppointment{}
+	err := a.Db.Raw(sql, id).Scan(&appointmentE).Error
+	if err != nil {
+		return appointments.Appointment{}, err
+	}
+	if len(appointmentE) == 0 {
+		return appointments.Appointment{}, utils.NewAppError("Appointment not found.", true, nil)
 	}
 
-	return appointmentE.ToAppointment(), nil
+	return appointmentE[0].ToAppointment(), nil
+}
+
+func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.CreateAppointmentDTO) (int, error) {
+	appointmentE := DbAppointment{}
+	appointmentE.FromCreateAppointmentDTO(appointment)
+	sql := fmt.Sprintf(`
+    INSERT INTO "appointment"(
+      id_calendar_day,
+      id_student,
+      start_hour,
+      duration,
+      price,
+      is_extra,
+      is_paid
+    ) %s
+    RETURNING id;
+  `, utils.SqlValues(1, 7))
+	err := a.Db.Raw(
+		sql,
+		appointmentE.IDCalendarDay,
+		appointmentE.IDStudent,
+		appointmentE.StartHour,
+		appointmentE.Duration,
+		appointmentE.Price,
+		appointmentE.IsExtra,
+		appointmentE.IsPaid,
+	).Scan(&appointmentE.ID).Error
+	if err != nil {
+		return 0, err
+	}
+	return appointmentE.ID, nil
 }
 
 func (a *DbAppointmentRepository) CreateAppointmentsByRoutine() (int, error) {
 	return 0, nil
+}
+
+func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.UpdateAppointmentDTO) (int, error) {
+	appointmentE := DbAppointment{}
+	appointmentE.FromUpdateAppointmentDTO(appointment)
+	sql := `
+    UPDATE "appointment"
+    SET
+      price = ?,
+      is_extra = ?,
+      is_paid = ?
+    WHERE id = ?;
+  `
+	result := a.Db.Exec(sql, appointmentE.Price, appointmentE.IsExtra, appointmentE.IsPaid, appointmentE.ID)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	if result.RowsAffected == 0 {
+		return 0, utils.NewAppError("Appointment not found.", true, nil)
+	}
+	return appointmentE.ID, nil
 }
 
 func (a *DbAppointmentRepository) ResetAppointments() {

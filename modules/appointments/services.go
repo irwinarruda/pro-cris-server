@@ -16,11 +16,11 @@ func NewAppointmentService() *AppointmentService {
 }
 
 func (a *AppointmentService) GetAppointmentByID(id int) (Appointment, error) {
-	appointment, err := a.AppointmentRepository.GetAppointmentByID(id)
-	if err != nil {
-		return Appointment{}, utils.NewAppError("Appointment not found.", true, err)
-	}
-	return appointment, nil
+	return a.AppointmentRepository.GetAppointmentByID(id)
+}
+
+func (a *AppointmentService) UpdateAppointment(appointment UpdateAppointmentDTO) (int, error) {
+	return a.AppointmentRepository.UpdateAppointment(appointment)
 }
 
 func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO) (int, error) {

@@ -7,6 +7,7 @@ type CreateAppointmentDTO struct {
 	Duration    int                             `json:"duration"`
 	Price       float64                         `json:"price"`
 	IsExtra     bool                            `json:"isExtra"`
+	IsPaid      bool                            `json:"isPaid"`
 }
 
 type CreateAppointmentCalendarDayDTO struct {
@@ -14,4 +15,11 @@ type CreateAppointmentCalendarDayDTO struct {
 	Day   int `json:"day"`
 	Month int `json:"month"`
 	Year  int `json:"year"`
+}
+
+type UpdateAppointmentDTO struct {
+	ID      int     `json:"id"`
+	Price   float64 `json:"price"`
+	IsExtra bool    `json:"isExtra"`
+	IsPaid  bool    `json:"isPaid"`
 }
