@@ -17,7 +17,7 @@ import (
 )
 
 func TestAppointmentServiceHappyPath(t *testing.T) {
-	idStudent := beforeEachAppointment()
+	idAccount, idStudent := beforeEachAppointment()
 
 	var assert = assert.New(t)
 	var appointmentService = appointments.NewAppointmentService()
@@ -35,7 +35,10 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 			Year:  2024,
 		},
 	})
-	appointment1, err := appointmentService.GetAppointmentByID(id1)
+	appointment1, err := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
+		IDAccount: idAccount,
+		ID:        id1,
+	})
 	assert.NoError(err, "Should return get the created appointment.")
 	assert.Equal(200.0, appointment1.Price, "Should return Price.")
 	assert.Equal(int(1.8e+6), appointment1.Duration, "Should return Duration.")
@@ -51,23 +54,37 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 	assert.Equal(utils.StringP("http://example.com/picture.jpg"), appointment1.Student.Picture, "Should return Student Picture.")
 
 	id2, _ := appointmentService.UpdateAppointment(appointments.UpdateAppointmentDTO{
-		ID:      id1,
-		IsExtra: false,
-		IsPaid:  true,
-		Price:   300,
+		IDAccount: idAccount,
+		ID:        id1,
+		IsExtra:   false,
+		IsPaid:    true,
+		Price:     300,
 	})
-	appointment2, err := appointmentService.GetAppointmentByID(id2)
+	appointment2, err := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
+		IDAccount: idAccount,
+		ID:        id2,
+	})
 	assert.NoError(err, "Should return get the updated appointment.")
 	assert.Equal(300.0, appointment2.Price, "Should return Price.")
 	assert.Equal(false, appointment2.IsExtra, "Should return IsExtra.")
 	assert.Equal(true, appointment2.IsPaid, "Should return IsPaid.")
+
+	id3, _ := appointmentService.DeleteAppointment(appointments.DeleteAppointmentDTO{
+		IDAccount: idAccount,
+		ID:        id2,
+	})
+	_, err = appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
+		IDAccount: idAccount,
+		ID:        id3,
+	})
+	assert.Error(err, "Should return error because the appointment was deleted.")
 }
 
 func TestAppointmentServiceErrorPath(t *testing.T) {
 
 }
 
-func beforeEachAppointment() int {
+func beforeEachAppointment() (idAccount int, idStudent int) {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 
@@ -92,7 +109,7 @@ func beforeEachAppointment() int {
 
 	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
-	idStudent := studentRepository.CreateStudent(mockCreateStudentDTO(account.ID))
+	idStudent = studentRepository.CreateStudent(mockCreateStudentDTO(account.ID))
 
-	return idStudent
+	return account.ID, idStudent
 }

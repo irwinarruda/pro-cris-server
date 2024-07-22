@@ -15,8 +15,8 @@ func NewAppointmentService() *AppointmentService {
 	return proinject.Resolve(&AppointmentService{})
 }
 
-func (a *AppointmentService) GetAppointmentByID(id int) (Appointment, error) {
-	return a.AppointmentRepository.GetAppointmentByID(id)
+func (a *AppointmentService) GetAppointmentByID(data GetAppointmentDTO) (Appointment, error) {
+	return a.AppointmentRepository.GetAppointmentByID(data)
 }
 
 func (a *AppointmentService) UpdateAppointment(appointment UpdateAppointmentDTO) (int, error) {
@@ -34,4 +34,8 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 		return 0, utils.NewAppError("Error creating appointment.", false, nil)
 	}
 	return id, nil
+}
+
+func (a *AppointmentService) DeleteAppointment(data DeleteAppointmentDTO) (int, error) {
+	return a.AppointmentRepository.DeleteAppointment(data)
 }

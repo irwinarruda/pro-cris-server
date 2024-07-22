@@ -12,6 +12,7 @@ import (
 )
 
 type DbAppointment struct {
+	IDAccount     int
 	ID            int
 	StartHour     string
 	Duration      int
@@ -45,6 +46,7 @@ func (a *DbAppointment) FromCreateAppointmentDTO(appointment appointments.Create
 }
 
 func (a *DbAppointment) FromUpdateAppointmentDTO(appointment appointments.UpdateAppointmentDTO) {
+	a.IDAccount = appointment.IDAccount
 	a.ID = appointment.ID
 	a.Price = appointment.Price
 	a.IsExtra = appointment.IsExtra
@@ -75,23 +77,25 @@ func NewDbAppointmentRepository() *DbAppointmentRepository {
 	return proinject.Resolve(&DbAppointmentRepository{})
 }
 
-func (a *DbAppointmentRepository) GetAppointmentByID(id int) (appointments.Appointment, error) {
+func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppointmentDTO) (appointments.Appointment, error) {
 	sql := `
     SELECT
       "appointment".*,
       "calendar_day".day,
       "calendar_day".month,
       "calendar_day".year,
+      "student".id_account,
       "student".name,
       "student".display_color,
       "student".picture
     FROM "appointment"
     LEFT JOIN "calendar_day" ON "appointment".id_calendar_day = "calendar_day".id
     LEFT JOIN "student" ON "appointment".id_student = "student".id
-    WHERE "appointment".id = ?;
+    WHERE "appointment".id = ?
+    AND "student".id_account = ?;
   `
 	appointmentE := []DbAppointment{}
-	err := a.Db.Raw(sql, id).Scan(&appointmentE).Error
+	err := a.Db.Raw(sql, data.ID, data.IDAccount).Scan(&appointmentE).Error
 	if err != nil {
 		return appointments.Appointment{}, err
 	}
@@ -146,9 +150,12 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
       price = ?,
       is_extra = ?,
       is_paid = ?
-    WHERE id = ?;
+    FROM "student"
+    WHERE "appointment".id = ?
+    AND "appointment".id_student = "student".id
+    AND "student".id_account = ?;
   `
-	result := a.Db.Exec(sql, appointmentE.Price, appointmentE.IsExtra, appointmentE.IsPaid, appointmentE.ID)
+	result := a.Db.Exec(sql, appointmentE.Price, appointmentE.IsExtra, appointmentE.IsPaid, appointmentE.ID, appointmentE.IDAccount)
 	if result.Error != nil {
 		return 0, result.Error
 	}
@@ -156,6 +163,26 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
 		return 0, utils.NewAppError("Appointment not found.", true, nil)
 	}
 	return appointmentE.ID, nil
+}
+
+func (a *DbAppointmentRepository) DeleteAppointment(data appointments.DeleteAppointmentDTO) (int, error) {
+	sql := `
+    UPDATE "appointment"
+    SET
+      is_deleted = true
+    FROM "student"
+    WHERE "appointment".id = ?
+    AND "appointment".id_student = "student".id
+    AND "student".id_account = ?;
+  `
+	err := a.Db.Exec(sql, data.ID, data.IDAccount).Error
+	if err != nil {
+		return 0, err
+	}
+	if a.Db.RowsAffected == 0 {
+		return 0, utils.NewAppError("Appointment not found.", true, nil)
+	}
+	return data.ID, nil
 }
 
 func (a *DbAppointmentRepository) ResetAppointments() {

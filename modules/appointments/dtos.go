@@ -1,5 +1,10 @@
 package appointments
 
+type GetAppointmentDTO struct {
+	IDAccount int `json:"idAccount"`
+	ID        int `json:"id"`
+}
+
 type CreateAppointmentDTO struct {
 	IDStudent   int                             `json:"idStudent"`
 	CalendarDay CreateAppointmentCalendarDayDTO `json:"calendarDay"`
@@ -18,8 +23,14 @@ type CreateAppointmentCalendarDayDTO struct {
 }
 
 type UpdateAppointmentDTO struct {
-	ID      int     `json:"id"`
-	Price   float64 `json:"price"`
-	IsExtra bool    `json:"isExtra"`
-	IsPaid  bool    `json:"isPaid"`
+	IDAccount int     `json:"idAccount"`
+	ID        int     `json:"id"`
+	Price     float64 `json:"price"`
+	IsExtra   bool    `json:"isExtra"`
+	IsPaid    bool    `json:"isPaid"`
+}
+
+type DeleteAppointmentDTO struct {
+	IDAccount int `json:"idAccount"`
+	ID        int `json:"id"`
 }
