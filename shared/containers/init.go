@@ -30,4 +30,5 @@ func InitInjections() {
 	proinject.Register("calendar_service", calendar.NewCalendarService())
 	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
 	proinject.Register("students_repository", studentsresources.NewDbStudentRepository())
+	proinject.Register("students_service", students.NewStudentService())
 }

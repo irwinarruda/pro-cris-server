@@ -21,6 +21,14 @@ func (s *StudentService) GetStudentByID(data GetStudentDTO) (Student, error) {
 	return s.StudentsRepository.GetStudentByID(data)
 }
 
+func (s *StudentService) ExistsStudent(idAccount, idStudent int) bool {
+	_, err := s.StudentsRepository.GetStudentByID(GetStudentDTO{
+		IDAccount: idAccount,
+		ID:        idStudent,
+	})
+	return err == nil
+}
+
 func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
 		return 0, utils.NewAppError("Payment type value is required.", true, nil)

@@ -10,6 +10,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/calendar"
 	"github.com/irwinarruda/pro-cris-server/modules/calendar/resources"
+	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/modules/students/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
@@ -22,19 +23,7 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 	var assert = assert.New(t)
 	var appointmentService = appointments.NewAppointmentService()
 
-	id1, _ := appointmentService.CreateAppointment(appointments.CreateAppointmentDTO{
-		IDStudent: idStudent,
-		Price:     200,
-		Duration:  int(1.8e+6),
-		StartHour: "13:00",
-		IsExtra:   true,
-		IsPaid:    false,
-		CalendarDay: appointments.CreateAppointmentCalendarDayDTO{
-			Day:   1,
-			Month: 1,
-			Year:  2024,
-		},
-	})
+	id1, _ := appointmentService.CreateAppointment(mockCreateAppointmentDTO(idStudent))
 	appointment1, err := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
 		IDAccount: idAccount,
 		ID:        id1,
@@ -69,19 +58,59 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 	assert.Equal(false, appointment2.IsExtra, "Should return IsExtra.")
 	assert.Equal(true, appointment2.IsPaid, "Should return IsPaid.")
 
-	id3, _ := appointmentService.DeleteAppointment(appointments.DeleteAppointmentDTO{
+	id3, err := appointmentService.DeleteAppointment(appointments.DeleteAppointmentDTO{
 		IDAccount: idAccount,
 		ID:        id2,
 	})
+	assert.NoError(err, "Should not return error deleting appointment")
+	assert.Equal(id2, id3, "Should return the same id deleted")
 	_, err = appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
 		IDAccount: idAccount,
 		ID:        id3,
 	})
 	assert.Error(err, "Should return error because the appointment was deleted.")
+
+	afterEachAppointment()
 }
 
 func TestAppointmentServiceErrorPath(t *testing.T) {
+	idAccount, _ := beforeEachAppointment()
 
+	var assert = assert.New(t)
+	var appointmentService = appointments.NewAppointmentService()
+
+	_, err := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
+		IDAccount: idAccount,
+		ID:        8,
+	})
+	assert.Error(err, "Should return error when appointment not found.")
+
+	_, err = appointmentService.CreateAppointment(mockCreateAppointmentDTO(8))
+	assert.Error(err, "Should return error when student does not exist.")
+
+	_, err = appointmentService.DeleteAppointment(appointments.DeleteAppointmentDTO{
+		IDAccount: idAccount,
+		ID:        8,
+	})
+	assert.Error(err, "Should return error when appointment does not exist.")
+
+	afterEachAppointment()
+}
+
+func mockCreateAppointmentDTO(idStudent int) appointments.CreateAppointmentDTO {
+	return appointments.CreateAppointmentDTO{
+		IDStudent: idStudent,
+		Price:     200,
+		Duration:  int(1.8e+6),
+		StartHour: "13:00",
+		IsExtra:   true,
+		IsPaid:    false,
+		CalendarDay: appointments.CreateAppointmentCalendarDayDTO{
+			Day:   1,
+			Month: 1,
+			Year:  2024,
+		},
+	}
 }
 
 func beforeEachAppointment() (idAccount int, idStudent int) {
@@ -92,7 +121,7 @@ func beforeEachAppointment() (idAccount int, idStudent int) {
 	appointmentRepository.ResetAppointments()
 	proinject.Register("appointment_repository", appointmentRepository)
 
-	calendarRepository := calendarresources.NewDbCalendarRepository()
+	var calendarRepository = calendarresources.NewDbCalendarRepository()
 	calendarRepository.ResetCalendarDays()
 	proinject.Register("calendar_repository", calendarRepository)
 	proinject.Register("calendar_service", calendar.NewCalendarService())
@@ -109,7 +138,20 @@ func beforeEachAppointment() (idAccount int, idStudent int) {
 
 	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
+	proinject.Register("students_repository", studentRepository)
+	proinject.Register("students_service", students.NewStudentService())
 	idStudent = studentRepository.CreateStudent(mockCreateStudentDTO(account.ID))
 
 	return account.ID, idStudent
+}
+
+func afterEachAppointment() {
+	var appointmentRepository = appointmentsresources.NewDbAppointmentRepository()
+	appointmentRepository.ResetAppointments()
+	var calendarRepository = calendarresources.NewDbCalendarRepository()
+	calendarRepository.ResetCalendarDays()
+	var studentRepository = studentsresources.NewDbStudentRepository()
+	studentRepository.ResetStudents()
+	var authRepository = authresources.NewDbAuthRepository()
+	authRepository.ResetAuth()
 }

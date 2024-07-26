@@ -165,10 +165,16 @@ func NewDbStudentRepository() *DbStudentRepository {
 func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) []students.Student {
 	studentsArr := []DbStudent{}
 	students := []students.Student{}
-	r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND is_deleted = false;`, data.IDAccount).Scan(&studentsArr)
+	result := r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND is_deleted = false;`, data.IDAccount).Scan(&studentsArr)
+	if result.Error != nil {
+		return students
+	}
 	for _, studentE := range studentsArr {
 		routineE := []DbRoutinePlan{}
-		r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, studentE.ID).Scan(&routineE)
+		result = r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, studentE.ID).Scan(&routineE)
+		if result.Error != nil {
+			return students
+		}
 		student := studentE.ToStudent(routineE)
 		students = append(students, student)
 	}
@@ -177,12 +183,18 @@ func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) []
 
 func (r *DbStudentRepository) GetStudentByID(data students.GetStudentDTO) (students.Student, error) {
 	studentsE := []DbStudent{}
-	r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND id = ? AND is_deleted = false;`, data.IDAccount, data.ID).Scan(&studentsE)
+	result := r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND id = ? AND is_deleted = false;`, data.IDAccount, data.ID).Scan(&studentsE)
+	if result.Error != nil {
+		return students.Student{}, utils.NewAppError("Database query error", false, result.Error)
+	}
 	if len(studentsE) == 0 {
 		return students.Student{}, utils.NewAppError("Student not found.", true, nil)
 	}
 	routineE := []DbRoutinePlan{}
-	r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, data.ID).Scan(&routineE)
+	result = r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, data.ID).Scan(&routineE)
+	if result.Error != nil {
+		return students.Student{}, utils.NewAppError("Database query error", false, result.Error)
+	}
 	return studentsE[0].ToStudent(routineE), nil
 }
 
@@ -214,7 +226,7 @@ func (r *DbStudentRepository) CreateStudent(student students.CreateStudentDTO) i
     RETURNING id;`,
 		utils.SqlValues(1, 18),
 	)
-	r.Db.Raw(
+	result := r.Db.Raw(
 		sql,
 		studentE.IDAccount,
 		studentE.Name,
@@ -235,12 +247,15 @@ func (r *DbStudentRepository) CreateStudent(student students.CreateStudentDTO) i
 		studentE.HouseCoordinateLatitude,
 		studentE.HouseCoordinateLongitude,
 	).Scan(&studentE.ID)
+	if result.Error != nil {
+		return 0
+	}
+
 	r.CreateRoutine(studentE.ID, student.Routine...)
 	return studentE.ID
 }
 
 func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (int, error) {
-	var id *int
 	studentE := DbStudent{}
 	studentE.FromUpdateStudent(student)
 	sql := `
@@ -265,9 +280,8 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
       house_coordinate_latitude = ?,
       house_coordinate_longitude = ?,
       updated_at = now()
-    WHERE id = ?
-    RETURNING id;`
-	r.Db.Raw(
+    WHERE id = ?`
+	result := r.Db.Exec(
 		sql,
 		studentE.IDAccount,
 		studentE.Name,
@@ -288,30 +302,41 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
 		studentE.HouseCoordinateLatitude,
 		studentE.HouseCoordinateLongitude,
 		studentE.ID,
-	).Scan(&id)
-	if id == nil {
+	)
+	if result.Error != nil {
+		return 0, utils.NewAppError("Database query error", false, result.Error)
+	}
+	if result.RowsAffected == 0 {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
-	return *id, nil
+	return studentE.ID, nil
 }
 
 func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int, error) {
-	var idStudent *int
 	sql := `
     UPDATE "student"
     SET is_deleted = true
     WHERE id_account = ?
     AND id = ?
     RETURNING id;`
-	r.Db.Raw(sql, data.IDAccount, data.ID).Scan(&idStudent)
-	if idStudent == nil {
+	result := r.Db.Exec(sql, data.IDAccount, data.ID)
+	if result.Error != nil {
+		return 0, utils.NewAppError("Database query error", false, result.Error)
+	}
+	if result.RowsAffected == 0 {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
 	sql = `
     UPDATE "routine_plan"
     SET is_deleted = true
     WHERE id_student = ?;`
-	r.Db.Exec(sql, data.ID)
+	result = r.Db.Exec(sql, data.ID)
+	if result.Error != nil {
+		return 0, utils.NewAppError("Database query error", false, result.Error)
+	}
+	if result.RowsAffected == 0 {
+		return 0, utils.NewAppError("Student not found.", true, nil)
+	}
 	return data.ID, nil
 }
 

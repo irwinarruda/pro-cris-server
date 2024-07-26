@@ -92,12 +92,13 @@ func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppoin
     LEFT JOIN "calendar_day" ON "appointment".id_calendar_day = "calendar_day".id
     LEFT JOIN "student" ON "appointment".id_student = "student".id
     WHERE "appointment".id = ?
-    AND "student".id_account = ?;
+    AND "student".id_account = ?
+    AND "appointment".is_deleted = false;
   `
 	appointmentE := []DbAppointment{}
-	err := a.Db.Raw(sql, data.ID, data.IDAccount).Scan(&appointmentE).Error
-	if err != nil {
-		return appointments.Appointment{}, err
+	result := a.Db.Raw(sql, data.ID, data.IDAccount).Scan(&appointmentE)
+	if result.Error != nil {
+		return appointments.Appointment{}, utils.NewAppError("Database query error", false, result.Error)
 	}
 	if len(appointmentE) == 0 {
 		return appointments.Appointment{}, utils.NewAppError("Appointment not found.", true, nil)
@@ -121,7 +122,7 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
     ) %s
     RETURNING id;
   `, utils.SqlValues(1, 7))
-	err := a.Db.Raw(
+	result := a.Db.Raw(
 		sql,
 		appointmentE.IDCalendarDay,
 		appointmentE.IDStudent,
@@ -130,9 +131,9 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 		appointmentE.Price,
 		appointmentE.IsExtra,
 		appointmentE.IsPaid,
-	).Scan(&appointmentE.ID).Error
-	if err != nil {
-		return 0, err
+	).Scan(&appointmentE.ID)
+	if result.Error != nil {
+		return 0, utils.NewAppError("Database query error", false, result.Error)
 	}
 	return appointmentE.ID, nil
 }
@@ -157,7 +158,7 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
   `
 	result := a.Db.Exec(sql, appointmentE.Price, appointmentE.IsExtra, appointmentE.IsPaid, appointmentE.ID, appointmentE.IDAccount)
 	if result.Error != nil {
-		return 0, result.Error
+		return 0, utils.NewAppError("Database query error", false, result.Error)
 	}
 	if result.RowsAffected == 0 {
 		return 0, utils.NewAppError("Appointment not found.", true, nil)
@@ -175,11 +176,11 @@ func (a *DbAppointmentRepository) DeleteAppointment(data appointments.DeleteAppo
     AND "appointment".id_student = "student".id
     AND "student".id_account = ?;
   `
-	err := a.Db.Exec(sql, data.ID, data.IDAccount).Error
-	if err != nil {
-		return 0, err
+	result := a.Db.Exec(sql, data.ID, data.IDAccount)
+	if result.Error != nil {
+		return 0, utils.NewAppError("Database query error", false, result.Error)
 	}
-	if a.Db.RowsAffected == 0 {
+	if result.RowsAffected == 0 {
 		return 0, utils.NewAppError("Appointment not found.", true, nil)
 	}
 	return data.ID, nil

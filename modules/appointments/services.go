@@ -3,12 +3,14 @@ package appointments
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/calendar"
+	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type AppointmentService struct {
 	AppointmentRepository IAppointmentRepository    `inject:"appointment_repository"`
 	CalendarService       *calendar.CalendarService `inject:"calendar_service"`
+	StudentService        *students.StudentService  `inject:"students_service"`
 }
 
 func NewAppointmentService() *AppointmentService {
@@ -24,6 +26,9 @@ func (a *AppointmentService) UpdateAppointment(appointment UpdateAppointmentDTO)
 }
 
 func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO) (int, error) {
+	if !a.StudentService.ExistsStudent(0, appointment.IDStudent) {
+		return 0, utils.NewAppError("Student not found.", true, nil)
+	}
 	id, err := a.CalendarService.CreateCalendarDayIfNotExists(appointment.CalendarDay.Day, appointment.CalendarDay.Month, appointment.CalendarDay.Year)
 	if err != nil {
 		return 0, err

@@ -27,9 +27,9 @@ func (a *DbCalendarRepository) CreateCalendarDay(day, month, year int) (int, err
     ) %s
     RETURNING id;
   `, utils.SqlValues(1, 3))
-	err := a.Db.Raw(sql, day, month, year).Scan(&id).Error
-	if err != nil {
-		return 0, err
+	result := a.Db.Raw(sql, day, month, year).Scan(&id)
+	if result.Error != nil {
+		return 0, utils.NewAppError("Database query error", false, result.Error)
 	}
 	return id, nil
 }
@@ -37,9 +37,9 @@ func (a *DbCalendarRepository) CreateCalendarDay(day, month, year int) (int, err
 func (a *DbCalendarRepository) GetCalendarDayByID(id int) (calendar.CalendarDay, error) {
 	calendarDayE := []calendar.CalendarDay{}
 	sql := `SELECT * FROM "calendar_day" WHERE id = ?;`
-	err := a.Db.Raw(sql, id).Scan(&calendarDayE).Error
-	if err != nil {
-		return calendar.CalendarDay{}, err
+	result := a.Db.Raw(sql, id).Scan(&calendarDayE)
+	if result.Error != nil {
+		return calendar.CalendarDay{}, utils.NewAppError("Database query error", false, result.Error)
 	}
 	if len(calendarDayE) == 0 {
 		return calendar.CalendarDay{}, utils.NewAppError("Calendar day not found.", true, nil)
@@ -50,9 +50,9 @@ func (a *DbCalendarRepository) GetCalendarDayByID(id int) (calendar.CalendarDay,
 func (a *DbCalendarRepository) GetCalendarDayByDate(day int, month int, year int) (calendar.CalendarDay, error) {
 	calendarDayE := []calendar.CalendarDay{}
 	sql := `SELECT * FROM "calendar_day" WHERE day = ? AND month = ? AND year = ?;`
-	err := a.Db.Raw(sql, day, month, year).Scan(&calendarDayE).Error
-	if err != nil {
-		return calendar.CalendarDay{}, err
+	result := a.Db.Raw(sql, day, month, year).Scan(&calendarDayE)
+	if result.Error != nil {
+		return calendar.CalendarDay{}, utils.NewAppError("Database query error", false, result.Error)
 	}
 	if len(calendarDayE) == 0 {
 		return calendar.CalendarDay{}, utils.NewAppError("Calendar day not found.", true, nil)

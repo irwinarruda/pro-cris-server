@@ -56,16 +56,19 @@ func (a *DbAuthRepository) CreateAccount(account auth.CreateAccountDTO) (auth.Ac
     RETURNING *;
 	`, utils.SqlValues(1, 5))
 	accountE := DbAccount{}
-	err := a.Db.Raw(sql, account.Name, account.Email, account.Picture, account.EmailVerified, account.Provider).Scan(&accountE).Error
-	if err != nil {
-		return auth.Account{}, utils.NewAppError("Unable to create new account.", false, err)
+	result := a.Db.Raw(sql, account.Name, account.Email, account.Picture, account.EmailVerified, account.Provider).Scan(&accountE)
+	if result.Error != nil {
+		return auth.Account{}, utils.NewAppError("Database query error", false, result.Error)
 	}
 	return accountE.ToAccount(), nil
 }
 
 func (a *DbAuthRepository) GetAccountByID(id int) (auth.Account, error) {
 	accountsE := []DbAccount{}
-	a.Db.Raw(`SELECT * FROM "account" WHERE id = ?;`, id).Scan(&accountsE)
+	result := a.Db.Raw(`SELECT * FROM "account" WHERE id = ?;`, id).Scan(&accountsE)
+	if result.Error != nil {
+		return auth.Account{}, utils.NewAppError("Database query error", false, result.Error)
+	}
 	if len(accountsE) == 0 {
 		return auth.Account{}, utils.NewAppError("Account not found.", true, nil)
 	}
@@ -74,7 +77,10 @@ func (a *DbAuthRepository) GetAccountByID(id int) (auth.Account, error) {
 
 func (a *DbAuthRepository) GetAccountByEmail(email string) (auth.Account, error) {
 	accountsE := []DbAccount{}
-	a.Db.Raw(`SELECT * FROM "account" WHERE email = ?;`, email).Scan(&accountsE)
+	result := a.Db.Raw(`SELECT * FROM "account" WHERE email = ?;`, email).Scan(&accountsE)
+	if result.Error != nil {
+		return auth.Account{}, utils.NewAppError("Database query error", false, result.Error)
+	}
 	if len(accountsE) == 0 {
 		return auth.Account{}, utils.NewAppError("Account not found.", true, nil)
 	}
@@ -83,7 +89,10 @@ func (a *DbAuthRepository) GetAccountByEmail(email string) (auth.Account, error)
 
 func (a *DbAuthRepository) GetIDByEmail(email string) (int, error) {
 	ids := []int{}
-	a.Db.Raw(`SELECT id FROM "account" WHERE email = ?;`, email).Scan(&ids)
+	result := a.Db.Raw(`SELECT id FROM "account" WHERE email = ?;`, email).Scan(&ids)
+	if result.Error != nil {
+		return 0, utils.NewAppError("Database query error", false, result.Error)
+	}
 	if len(ids) == 0 {
 		return 0, utils.NewAppError("Account not found.", true, nil)
 	}
