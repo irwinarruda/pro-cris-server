@@ -6,6 +6,7 @@ type GetAppointmentDTO struct {
 }
 
 type CreateAppointmentDTO struct {
+	IDAccount   int                             `json:"idAccount"`
 	IDStudent   int                             `json:"idStudent"`
 	CalendarDay CreateAppointmentCalendarDayDTO `json:"calendarDay"`
 	StartHour   string                          `json:"startHour"`

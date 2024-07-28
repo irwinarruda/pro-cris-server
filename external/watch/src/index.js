@@ -24,17 +24,23 @@ async function main(args) {
   let cmdProcess = createCmd(command);
 
   const watch = fs.watch("./", { recursive: true });
+  let time = Date.now();
   for await (const _ of watch) {
     if (debounce) {
       clearTimeout(debounce);
       debounce = null;
+      time = Date.now();
     }
     debounce = setTimeout(async () => {
-      console.clear();
       const children = await psTree(cmdProcess.pid);
       spawn("kill", ["-9"].concat(children.map((p) => p.PID)));
       cmdProcess = createCmd(command);
+      console.clear();
+      console.log(
+        `===================================== Restarted in ${Date.now() - time}ms =====================================`,
+      );
       debounce = null;
+      time = Date.now();
     }, 60);
   }
 }

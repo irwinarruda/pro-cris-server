@@ -25,10 +25,6 @@ func TestStatusServiceHappyPath(t *testing.T) {
 	assert.LessOrEqual(status.Dependencies.Database.OpenConnections, status.Dependencies.Database.MaxConnections, "Database open connections should be less than or equal to max connections")
 }
 
-func TestStatusServiceErrorPath(t *testing.T) {
-	beforeEachStatus()
-}
-
 func beforeEachStatus() {
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())

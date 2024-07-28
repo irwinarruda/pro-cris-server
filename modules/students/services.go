@@ -21,26 +21,26 @@ func (s *StudentService) GetStudentByID(data GetStudentDTO) (Student, error) {
 	return s.StudentsRepository.GetStudentByID(data)
 }
 
-func (s *StudentService) ExistsStudent(idAccount, idStudent int) bool {
+func (s *StudentService) DoesStudentExists(data DoesStudentExistsDTO) bool {
 	_, err := s.StudentsRepository.GetStudentByID(GetStudentDTO{
-		IDAccount: idAccount,
-		ID:        idStudent,
+		IDAccount: data.IDAccount,
+		ID:        data.ID,
 	})
 	return err == nil
 }
 
 func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
-		return 0, utils.NewAppError("Payment type value is required.", true, nil)
+		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, nil)
 	}
 	if student.PaymentType != PaymentTypeFixed {
 		student.PaymentTypeValue = nil
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleValue == nil {
-		return 0, utils.NewAppError("Settlement value is required.", true, nil)
+		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, nil)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleDay == nil {
-		return 0, utils.NewAppError("Settlement day is required.", true, nil)
+		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, nil)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments {
 		student.PaymentTypeValue = nil
@@ -50,16 +50,16 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 
 func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
-		return 0, utils.NewAppError("Payment type value is required.", true, nil)
+		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, nil)
 	}
 	if student.PaymentType != PaymentTypeFixed {
 		student.PaymentTypeValue = nil
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleValue == nil {
-		return 0, utils.NewAppError("Settlement value is required.", true, nil)
+		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, nil)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleDay == nil {
-		return 0, utils.NewAppError("Settlement day is required.", true, nil)
+		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, nil)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments {
 		student.PaymentTypeValue = nil

@@ -23,7 +23,7 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 	var assert = assert.New(t)
 	var appointmentService = appointments.NewAppointmentService()
 
-	id1, _ := appointmentService.CreateAppointment(mockCreateAppointmentDTO(idStudent))
+	id1, _ := appointmentService.CreateAppointment(mockCreateAppointmentDTO(idAccount, idStudent))
 	appointment1, err := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
 		IDAccount: idAccount,
 		ID:        id1,
@@ -74,7 +74,7 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 }
 
 func TestAppointmentServiceErrorPath(t *testing.T) {
-	idAccount, _ := beforeEachAppointment()
+	idAccount, idStudent := beforeEachAppointment()
 
 	var assert = assert.New(t)
 	var appointmentService = appointments.NewAppointmentService()
@@ -83,22 +83,31 @@ func TestAppointmentServiceErrorPath(t *testing.T) {
 		IDAccount: idAccount,
 		ID:        8,
 	})
-	assert.Error(err, "Should return error when appointment not found.")
+	assert.Error(err, "Should return error when appointment/account not found.")
 
-	_, err = appointmentService.CreateAppointment(mockCreateAppointmentDTO(8))
-	assert.Error(err, "Should return error when student does not exist.")
+	_, err = appointmentService.CreateAppointment(mockCreateAppointmentDTO(idAccount, 8))
+	assert.Error(err, "Should return error when student/account  does not exist.")
+	_, err = appointmentService.CreateAppointment(mockCreateAppointmentDTO(8, idStudent))
+	assert.Error(err, "Should return error when student/account  does not exist.")
 
+	idAppointment, _ := appointmentService.CreateAppointment(mockCreateAppointmentDTO(idAccount, idStudent))
 	_, err = appointmentService.DeleteAppointment(appointments.DeleteAppointmentDTO{
 		IDAccount: idAccount,
 		ID:        8,
 	})
-	assert.Error(err, "Should return error when appointment does not exist.")
+	assert.Error(err, "Should return error when appointment/account does not exist.")
+	_, err = appointmentService.DeleteAppointment(appointments.DeleteAppointmentDTO{
+		IDAccount: 8,
+		ID:        idAppointment,
+	})
+	assert.Error(err, "Should return error when appointment/account does not exist.")
 
 	afterEachAppointment()
 }
 
-func mockCreateAppointmentDTO(idStudent int) appointments.CreateAppointmentDTO {
+func mockCreateAppointmentDTO(idAccount, idStudent int) appointments.CreateAppointmentDTO {
 	return appointments.CreateAppointmentDTO{
+		IDAccount: idAccount,
 		IDStudent: idStudent,
 		Price:     200,
 		Duration:  int(1.8e+6),

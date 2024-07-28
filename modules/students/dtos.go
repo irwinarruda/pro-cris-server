@@ -11,6 +11,11 @@ type GetStudentDTO struct {
 	ID        int `json:"id"`
 }
 
+type DoesStudentExistsDTO struct {
+	IDAccount int `json:"idAccount"`
+	ID        int `json:"id"`
+}
+
 type CreateStudentDTO struct {
 	IDAccount            int                           `json:"idAccount"`
 	Name                 string                        `json:"name" validate:"required"`

@@ -26,7 +26,11 @@ func (a *AppointmentService) UpdateAppointment(appointment UpdateAppointmentDTO)
 }
 
 func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO) (int, error) {
-	if !a.StudentService.ExistsStudent(0, appointment.IDStudent) {
+	hasStudent := a.StudentService.DoesStudentExists(students.DoesStudentExistsDTO{
+		IDAccount: appointment.IDAccount,
+		ID:        appointment.IDStudent,
+	})
+	if !hasStudent {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
 	id, err := a.CalendarService.CreateCalendarDayIfNotExists(appointment.CalendarDay.Day, appointment.CalendarDay.Month, appointment.CalendarDay.Year)
