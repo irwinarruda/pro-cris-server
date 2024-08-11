@@ -2,7 +2,7 @@ goose_start = dotenv -e .env -- goose -dir migrations
 watch_start = dotenv -e .env -- node ./external/watch/src/index.js
 
 prepare:
-	bash ./scripts/prepare.sh
+	zsh ./scripts/prepare.sh
 dev:
 	$(watch_start) go run .
 templ:

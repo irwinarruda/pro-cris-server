@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source ~/.zshrc
+
 go_required="go1.22.2 darwin/arm64"
 go_version=$(go version)
 if [[ $go_version != *$go_required* ]]; then
@@ -15,17 +17,24 @@ if [[ $goose_version != *$goose_required* ]]; then
     echo "📝 Installing Goose..."
     go install github.com/pressly/goose/v3/cmd/goose@v3.20.0
 fi
-
 echo "✅ Goose version $goose_required is installed."
 
-bun_required="1.0.19"
-bun_version=$(bun --version)
-if [[ $bun_version != *$bun_required* ]]; then
-    echo "❌ Bun version $bun_version is not supported. Please install $bun_version."
-    return 1
-  else
-    echo "✅ Bun version $bun_required is installed."
+node_required="v22.0.0"
+node_version=$(node --version)
+if [[ $node_version != *$node_required* ]]; then
+    echo "📝 Installing Node version $node_required..."
+    nvm install $node_required
+    nvm use $node_required
 fi
+echo "✅ Node version $node_required is installed."
 
-echo "📝 Installing Dotenv Cli..."
-npm install -g dotenv-cli@latest
+dotenv_required="[--help] [--debug]"
+dotenv_version=$(dotenv)
+if [[ $dotenv_version != *$dotenv_required* ]]; then
+    echo "📝 Installing Dotenv..."
+    npm install -g dotenv-cli@latest
+fi
+echo "✅ Dotenv installed."
+
+echo "📝 Updating external dependencies..."
+cd external/watch && npm install
