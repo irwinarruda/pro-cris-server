@@ -32,8 +32,10 @@ async function main(args) {
       time = Date.now();
     }
     debounce = setTimeout(async () => {
-      const children = await psTree(cmdProcess.pid);
-      spawn("kill", ["-9"].concat(children.map((p) => p.PID)));
+      if (process.env.OS_TYPE === "macos") {
+        const children = await psTree(cmdProcess.pid);
+        spawn("kill", ["-9"].concat(children.map((p) => p.PID)));
+      }
       cmdProcess = createCmd(command);
       console.clear();
       console.log(

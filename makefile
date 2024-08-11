@@ -1,5 +1,5 @@
-goose_start = source .env && GOOSE_DRIVER=$$GOOSE_DRIVER GOOSE_DBSTRING=$$GOOSE_DBSTRING GOOSE_MIGRATION_DIR=$$GOOSE_MIGRATION_DIR goose -dir migrations
-watch_start = node ./external/watch/src/index.js
+goose_start = dotenv -e .env -- goose -dir migrations
+watch_start = dotenv -e .env -- node ./external/watch/src/index.js
 
 prepare:
 	bash ./scripts/prepare.sh

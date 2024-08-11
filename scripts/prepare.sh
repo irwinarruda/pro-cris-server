@@ -26,3 +26,6 @@ if [[ $bun_version != *$bun_required* ]]; then
   else
     echo "✅ Bun version $bun_required is installed."
 fi
+
+echo "📝 Installing Dotenv Cli..."
+npm install -g dotenv-cli@latest
