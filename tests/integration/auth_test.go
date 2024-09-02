@@ -5,7 +5,7 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
-	"github.com/irwinarruda/pro-cris-server/modules/auth/resources"
+	authresources "github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/providers"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"

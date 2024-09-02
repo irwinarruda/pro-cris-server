@@ -5,7 +5,7 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/calendar"
-	"github.com/irwinarruda/pro-cris-server/modules/calendar/resources"
+	calendarresources "github.com/irwinarruda/pro-cris-server/modules/calendar/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/stretchr/testify/assert"
 )

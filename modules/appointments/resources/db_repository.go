@@ -33,6 +33,7 @@ type DbAppointment struct {
 }
 
 func (a *DbAppointment) FromCreateAppointmentDTO(appointment appointments.CreateAppointmentDTO) {
+	a.IDAccount = appointment.IDAccount
 	a.IDStudent = appointment.IDStudent
 	a.IDCalendarDay = appointment.CalendarDay.ID
 	a.StartHour = appointment.StartHour
@@ -92,7 +93,7 @@ func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppoin
     LEFT JOIN "calendar_day" ON "appointment".id_calendar_day = "calendar_day".id
     LEFT JOIN "student" ON "appointment".id_student = "student".id
     WHERE "appointment".id = ?
-    AND "student".id_account = ?
+    AND "appointment".id_account = ?
     AND "appointment".is_deleted = false;
   `
 	appointmentE := []DbAppointment{}
@@ -112,6 +113,7 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 	appointmentE.FromCreateAppointmentDTO(appointment)
 	sql := fmt.Sprintf(`
     INSERT INTO "appointment"(
+      id_account,
       id_calendar_day,
       id_student,
       start_hour,
@@ -121,9 +123,10 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
       is_paid
     ) %s
     RETURNING id;
-  `, utils.SqlValues(1, 7))
+  `, utils.SqlValues(1, 8))
 	result := a.Db.Raw(
 		sql,
+		appointmentE.IDAccount,
 		appointmentE.IDCalendarDay,
 		appointmentE.IDStudent,
 		appointmentE.StartHour,
@@ -151,10 +154,8 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
       price = ?,
       is_extra = ?,
       is_paid = ?
-    FROM "student"
     WHERE "appointment".id = ?
-    AND "appointment".id_student = "student".id
-    AND "student".id_account = ?;
+    AND "appointment".id_account = ?;
   `
 	result := a.Db.Exec(sql, appointmentE.Price, appointmentE.IsExtra, appointmentE.IsPaid, appointmentE.ID, appointmentE.IDAccount)
 	if result.Error != nil {
@@ -171,10 +172,8 @@ func (a *DbAppointmentRepository) DeleteAppointment(data appointments.DeleteAppo
     UPDATE "appointment"
     SET
       is_deleted = true
-    FROM "student"
     WHERE "appointment".id = ?
-    AND "appointment".id_student = "student".id
-    AND "student".id_account = ?;
+    AND "appointment".id_account = ?;
   `
 	result := a.Db.Exec(sql, data.ID, data.IDAccount)
 	if result.Error != nil {
