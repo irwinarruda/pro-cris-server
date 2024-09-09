@@ -53,6 +53,7 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 		IDAccount: idAccount,
 		ID:        id2,
 	})
+	assert.NotEqual(appointment2.CreatedAt, appointment2.UpdatedAt, "UpdatedAt should be updated")
 	assert.NoError(err, "Should return get the updated appointment.")
 	assert.Equal(300.0, appointment2.Price, "Should return Price.")
 	assert.Equal(false, appointment2.IsExtra, "Should return IsExtra.")

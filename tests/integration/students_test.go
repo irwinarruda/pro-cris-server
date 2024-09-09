@@ -59,6 +59,7 @@ func TestStudentServiceHappyPath(t *testing.T) {
 	assert.Equal(id1, id2, "Should return the same ID as the one updated")
 
 	student2, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id2})
+	assert.NotEqual(student2.CreatedAt, student2.UpdatedAt, "UpdatedAt should be updated")
 	assert.NoError(err, "Should return a student with the same ID aS the one created")
 	assert.Equal("Jane Doe Updated", student2.Name, "Name should be updated")
 	assert.Equal("1990-01-02", *student2.BirthDay, "BirthDay should be updated")

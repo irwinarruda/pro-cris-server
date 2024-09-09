@@ -153,7 +153,8 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
     SET
       price = ?,
       is_extra = ?,
-      is_paid = ?
+      is_paid = ?,
+      updated_at = CURRENT_TIMESTAMP
     WHERE "appointment".id = ?
     AND "appointment".id_account = ?;
   `
@@ -171,7 +172,8 @@ func (a *DbAppointmentRepository) DeleteAppointment(data appointments.DeleteAppo
 	sql := `
     UPDATE "appointment"
     SET
-      is_deleted = true
+      is_deleted = true,
+      updated_at = CURRENT_TIMESTAMP
     WHERE "appointment".id = ?
     AND "appointment".id_account = ?;
   `

@@ -279,7 +279,7 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
       house_identifier = ?,
       house_coordinate_latitude = ?,
       house_coordinate_longitude = ?,
-      updated_at = now()
+      updated_at = CURRENT_TIMESTAMP
     WHERE id = ?`
 	result := r.Db.Exec(
 		sql,
@@ -315,7 +315,9 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
 func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int, error) {
 	sql := `
     UPDATE "student"
-    SET is_deleted = true
+    SET
+      is_deleted = true,
+      updated_at = CURRENT_TIMESTAMP
     WHERE id_account = ?
     AND id = ?
     RETURNING id;`
