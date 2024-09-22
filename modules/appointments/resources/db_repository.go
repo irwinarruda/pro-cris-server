@@ -74,16 +74,16 @@ func NewDbAppointmentRepository() *DbAppointmentRepository {
 func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppointmentDTO) (appointments.Appointment, error) {
 	sql := `
     SELECT
-      "appointment".*,
-      "student".id_account,
-      "student".name,
-      "student".display_color,
-      "student".picture
-    FROM "appointment"
-    LEFT JOIN "student" ON "appointment".id_student = "student".id
-    WHERE "appointment".id = ?
-    AND "appointment".id_account = ?
-    AND "appointment".is_deleted = false;
+      ap.*,
+      st.id_account,
+      st.name,
+      st.display_color,
+      st.picture
+    FROM "appointment" ap
+    LEFT JOIN "student" st ON ap.id_student = st.id
+    WHERE ap.id = ?
+    AND ap.id_account = ?
+    AND ap.is_deleted = false;
   `
 	appointmentE := []DbAppointment{}
 	result := a.Db.Raw(sql, data.ID, data.IDAccount).Scan(&appointmentE)
@@ -134,14 +134,14 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
 	appointmentE := DbAppointment{}
 	appointmentE.FromUpdateAppointmentDTO(appointment)
 	sql := `
-    UPDATE "appointment"
+    UPDATE "appointment" ap
     SET
       price = ?,
       is_extra = ?,
       is_paid = ?,
       updated_at = CURRENT_TIMESTAMP
-    WHERE "appointment".id = ?
-    AND "appointment".id_account = ?;
+    WHERE ap.id = ?
+    AND ap.id_account = ?;
   `
 	result := a.Db.Exec(sql, appointmentE.Price, appointmentE.IsExtra, appointmentE.IsPaid, appointmentE.ID, appointmentE.IDAccount)
 	if result.Error != nil {
@@ -155,12 +155,12 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
 
 func (a *DbAppointmentRepository) DeleteAppointment(data appointments.DeleteAppointmentDTO) (int, error) {
 	sql := `
-    UPDATE "appointment"
+    UPDATE "appointment" ap
     SET
       is_deleted = true,
       updated_at = CURRENT_TIMESTAMP
-    WHERE "appointment".id = ?
-    AND "appointment".id_account = ?;
+    WHERE ap.id = ?
+    AND ap.id_account = ?;
   `
 	result := a.Db.Exec(sql, data.ID, data.IDAccount)
 	if result.Error != nil {
