@@ -2,15 +2,13 @@ package appointments
 
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
-	"github.com/irwinarruda/pro-cris-server/modules/calendar"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type AppointmentService struct {
-	AppointmentRepository IAppointmentRepository    `inject:"appointment_repository"`
-	CalendarService       *calendar.CalendarService `inject:"calendar_service"`
-	StudentService        *students.StudentService  `inject:"students_service"`
+	AppointmentRepository IAppointmentRepository   `inject:"appointment_repository"`
+	StudentService        *students.StudentService `inject:"students_service"`
 }
 
 func NewAppointmentService() *AppointmentService {
@@ -33,16 +31,15 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 	if !hasStudent {
 		return 0, utils.NewAppError("Student not found.", true, nil)
 	}
-	id, err := a.CalendarService.CreateCalendarDayIfNotExists(appointment.CalendarDay.Day, appointment.CalendarDay.Month, appointment.CalendarDay.Year)
-	if err != nil {
-		return 0, err
-	}
-	appointment.CalendarDay.ID = id
-	id, err = a.AppointmentRepository.CreateAppointment(appointment)
+	id, err := a.AppointmentRepository.CreateAppointment(appointment)
 	if err != nil {
 		return 0, utils.NewAppError("Error creating appointment.", false, nil)
 	}
 	return id, nil
+}
+
+func (a *AppointmentService) CreateDailyAppointmentsByStudentsRoutine(data CreateDailyAppointmentsByStudentsRoutineDTO) error {
+	return nil
 }
 
 func (a *AppointmentService) DeleteAppointment(data DeleteAppointmentDTO) (int, error) {

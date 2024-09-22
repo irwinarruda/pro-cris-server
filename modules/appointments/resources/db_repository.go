@@ -6,44 +6,37 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
-	"github.com/irwinarruda/pro-cris-server/modules/calendar"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type DbAppointment struct {
-	IDAccount     int
-	ID            int
-	StartHour     string
-	Duration      int
-	Price         float64
-	IsExtra       bool
-	IsPaid        bool
-	IsDeleted     bool
-	IDCalendarDay int
-	Day           int
-	Month         int
-	Year          int
-	Name          string
-	IDStudent     int
-	DisplayColor  string
-	Picture       *string
-	CreatedAt     time.Time
-	UpdatedAt     time.Time
+	IDAccount    int
+	ID           int
+	StartHour    string
+	Duration     int
+	Price        float64
+	IsExtra      bool
+	IsPaid       bool
+	IsDeleted    bool
+	CalendarDay  time.Time
+	Name         string
+	IDStudent    int
+	DisplayColor string
+	Picture      *string
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 func (a *DbAppointment) FromCreateAppointmentDTO(appointment appointments.CreateAppointmentDTO) {
 	a.IDAccount = appointment.IDAccount
 	a.IDStudent = appointment.IDStudent
-	a.IDCalendarDay = appointment.CalendarDay.ID
+	a.CalendarDay = appointment.CalendarDay
 	a.StartHour = appointment.StartHour
 	a.Duration = appointment.Duration
 	a.Price = appointment.Price
 	a.IsExtra = appointment.IsExtra
 	a.IsPaid = appointment.IsPaid
-	a.Day = appointment.CalendarDay.Day
-	a.Month = appointment.CalendarDay.Month
-	a.Year = appointment.CalendarDay.Year
 }
 
 func (a *DbAppointment) FromUpdateAppointmentDTO(appointment appointments.UpdateAppointmentDTO) {
@@ -65,7 +58,7 @@ func (a *DbAppointment) ToAppointment() appointments.Appointment {
 		IsDeleted:   a.IsDeleted,
 		CreatedAt:   a.CreatedAt,
 		UpdatedAt:   a.UpdatedAt,
-		CalendarDay: calendar.CalendarDay{ID: a.IDCalendarDay, Day: a.Day, Month: a.Month, Year: a.Year},
+		CalendarDay: a.CalendarDay,
 		Student:     appointments.AppointmentStudent{ID: a.IDStudent, Name: a.Name, DisplayColor: a.DisplayColor, Picture: a.Picture},
 	}
 }
@@ -82,15 +75,11 @@ func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppoin
 	sql := `
     SELECT
       "appointment".*,
-      "calendar_day".day,
-      "calendar_day".month,
-      "calendar_day".year,
       "student".id_account,
       "student".name,
       "student".display_color,
       "student".picture
     FROM "appointment"
-    LEFT JOIN "calendar_day" ON "appointment".id_calendar_day = "calendar_day".id
     LEFT JOIN "student" ON "appointment".id_student = "student".id
     WHERE "appointment".id = ?
     AND "appointment".id_account = ?
@@ -114,8 +103,8 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 	sql := fmt.Sprintf(`
     INSERT INTO "appointment"(
       id_account,
-      id_calendar_day,
       id_student,
+      calendar_day,
       start_hour,
       duration,
       price,
@@ -127,8 +116,8 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 	result := a.Db.Raw(
 		sql,
 		appointmentE.IDAccount,
-		appointmentE.IDCalendarDay,
 		appointmentE.IDStudent,
+		appointmentE.CalendarDay,
 		appointmentE.StartHour,
 		appointmentE.Duration,
 		appointmentE.Price,
@@ -139,10 +128,6 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 		return 0, utils.NewAppError("Database query error", false, result.Error)
 	}
 	return appointmentE.ID, nil
-}
-
-func (a *DbAppointmentRepository) CreateAppointmentsByRoutine() (int, error) {
-	return 0, nil
 }
 
 func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.UpdateAppointmentDTO) (int, error) {

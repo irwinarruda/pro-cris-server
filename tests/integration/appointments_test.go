@@ -2,14 +2,13 @@ package integration
 
 import (
 	"testing"
+	"time"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
 	appointmentsresources "github.com/irwinarruda/pro-cris-server/modules/appointments/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	authresources "github.com/irwinarruda/pro-cris-server/modules/auth/resources"
-	"github.com/irwinarruda/pro-cris-server/modules/calendar"
-	calendarresources "github.com/irwinarruda/pro-cris-server/modules/calendar/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	studentsresources "github.com/irwinarruda/pro-cris-server/modules/students/resources"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
@@ -35,9 +34,9 @@ func TestAppointmentServiceHappyPath(t *testing.T) {
 	assert.Equal("13:00", appointment1.StartHour, "Should return StartHour.")
 	assert.Equal(true, appointment1.IsExtra, "Should return IsExtra.")
 	assert.Equal(false, appointment1.IsPaid, "Should return IsPaid.")
-	assert.Equal(1, appointment1.CalendarDay.Day, "Should return Day.")
-	assert.Equal(1, appointment1.CalendarDay.Month, "Should return Month.")
-	assert.Equal(2024, appointment1.CalendarDay.Year, "Should return Year.")
+	assert.Equal(1, appointment1.CalendarDay.Day(), "Should return Day.")
+	assert.Equal(time.Month(1), appointment1.CalendarDay.Month(), "Should return Month.")
+	assert.Equal(2024, appointment1.CalendarDay.Year(), "Should return Year.")
 	assert.Equal("John Doe", appointment1.Student.Name, "Should return Student Name.")
 	assert.Equal("#000000", appointment1.Student.DisplayColor, "Should return Student Display Color.")
 	assert.Equal(utils.StringP("http://example.com/picture.jpg"), appointment1.Student.Picture, "Should return Student Picture.")
@@ -107,19 +106,16 @@ func TestAppointmentServiceErrorPath(t *testing.T) {
 }
 
 func mockCreateAppointmentDTO(idAccount, idStudent int) appointments.CreateAppointmentDTO {
+	date, _ := time.Parse(time.DateOnly, "2024-01-01")
 	return appointments.CreateAppointmentDTO{
-		IDAccount: idAccount,
-		IDStudent: idStudent,
-		Price:     200,
-		Duration:  int(1.8e+6),
-		StartHour: "13:00",
-		IsExtra:   true,
-		IsPaid:    false,
-		CalendarDay: appointments.CreateAppointmentCalendarDayDTO{
-			Day:   1,
-			Month: 1,
-			Year:  2024,
-		},
+		IDAccount:   idAccount,
+		IDStudent:   idStudent,
+		Price:       200,
+		Duration:    int(1.8e+6),
+		StartHour:   "13:00",
+		IsExtra:     true,
+		IsPaid:      false,
+		CalendarDay: date,
 	}
 }
 
@@ -130,11 +126,6 @@ func beforeEachAppointment() (idAccount int, idStudent int) {
 	var appointmentRepository = appointmentsresources.NewDbAppointmentRepository()
 	appointmentRepository.ResetAppointments()
 	proinject.Register("appointment_repository", appointmentRepository)
-
-	var calendarRepository = calendarresources.NewDbCalendarRepository()
-	calendarRepository.ResetCalendarDays()
-	proinject.Register("calendar_repository", calendarRepository)
-	proinject.Register("calendar_service", calendar.NewCalendarService())
 
 	var authRepository = authresources.NewDbAuthRepository()
 	authRepository.ResetAuth()
@@ -158,8 +149,6 @@ func beforeEachAppointment() (idAccount int, idStudent int) {
 func afterEachAppointment() {
 	var appointmentRepository = appointmentsresources.NewDbAppointmentRepository()
 	appointmentRepository.ResetAppointments()
-	var calendarRepository = calendarresources.NewDbCalendarRepository()
-	calendarRepository.ResetCalendarDays()
 	var studentRepository = studentsresources.NewDbStudentRepository()
 	studentRepository.ResetStudents()
 	var authRepository = authresources.NewDbAuthRepository()
