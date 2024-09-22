@@ -2,11 +2,13 @@ package students
 
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
+	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type StudentService struct {
 	StudentsRepository IStudentRepository `inject:"students_repository"`
+	Validate           configs.Validate   `inject:"validate"`
 }
 
 func NewStudentService() *StudentService {
@@ -14,22 +16,31 @@ func NewStudentService() *StudentService {
 }
 
 func (s *StudentService) GetAllStudents(data GetAllStudentsDTO) []Student {
+	if s.Validate.Struct(data) != nil {
+		return []Student{}
+	}
 	return s.StudentsRepository.GetAllStudents(data)
 }
 
 func (s *StudentService) GetStudentByID(data GetStudentDTO) (Student, error) {
+	if err := s.Validate.Struct(data); err != nil {
+		return Student{}, utils.NewAppError(err.Error(), false, err)
+	}
 	return s.StudentsRepository.GetStudentByID(data)
 }
 
 func (s *StudentService) DoesStudentExists(data DoesStudentExistsDTO) bool {
-	_, err := s.StudentsRepository.GetStudentByID(GetStudentDTO{
-		IDAccount: data.IDAccount,
-		ID:        data.ID,
-	})
+	if err := s.Validate.Struct(data); err != nil {
+		return false
+	}
+	_, err := s.StudentsRepository.GetStudentByID(GetStudentDTO(data))
 	return err == nil
 }
 
 func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
+	if err := s.Validate.Struct(student); err != nil {
+		return 0, utils.NewAppError(err.Error(), false, err)
+	}
 	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
 		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, nil)
 	}
@@ -49,6 +60,9 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 }
 
 func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
+	if err := s.Validate.Struct(student); err != nil {
+		return 0, utils.NewAppError(err.Error(), false, err)
+	}
 	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
 		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, nil)
 	}
@@ -93,5 +107,8 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 }
 
 func (s *StudentService) DeleteStudent(data DeleteStudentDTO) (int, error) {
+	if err := s.Validate.Struct(data); err != nil {
+		return 0, utils.NewAppError(err.Error(), false, err)
+	}
 	return s.StudentsRepository.DeleteStudent(data)
 }

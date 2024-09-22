@@ -120,6 +120,12 @@ func mockCreateAppointmentDTO(idAccount, idStudent int) appointments.CreateAppoi
 }
 
 func beforeEachAppointment() (idAccount int, idStudent int) {
+	proinject.Register("validate", configs.GetValidate(
+		auth.GetLoginProviders(),
+		students.GetPaymentStyles(),
+		students.GetPaymentTypes(),
+		students.GetSettlementStyles(),
+	))
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 

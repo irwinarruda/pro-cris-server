@@ -6,13 +6,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
-	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
-type AuthCtrl struct {
-	Validate configs.Validate `inject:"validate"`
-}
+type AuthCtrl struct{}
 
 func NewAuthCtrl() *AuthCtrl {
 	return proinject.Resolve(&AuthCtrl{})
@@ -23,11 +20,6 @@ func (a *AuthCtrl) Login(c *gin.Context) {
 	err := c.Bind(&loginDTO)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, err))
-		return
-	}
-	err = a.Validate.Struct(loginDTO)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
 		return
 	}
 	authService := auth.NewAuthService()

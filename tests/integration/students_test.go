@@ -203,6 +203,12 @@ func mockUpdateStudentDTO(idAccount, id int) students.UpdateStudentDTO {
 }
 
 func beforeEachStudents() int {
+	proinject.Register("validate", configs.GetValidate(
+		auth.GetLoginProviders(),
+		students.GetPaymentStyles(),
+		students.GetPaymentTypes(),
+		students.GetSettlementStyles(),
+	))
 	proinject.Register("env", configs.GetEnv("../../.env"))
 	proinject.Register("db", configs.GetDb())
 	var studentRepository = studentsresources.NewDbStudentRepository()

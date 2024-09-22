@@ -3,10 +3,12 @@ package appointments
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
+	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type AppointmentService struct {
+	Validate              configs.Validate         `inject:"validate"`
 	AppointmentRepository IAppointmentRepository   `inject:"appointment_repository"`
 	StudentService        *students.StudentService `inject:"students_service"`
 }
@@ -16,14 +18,23 @@ func NewAppointmentService() *AppointmentService {
 }
 
 func (a *AppointmentService) GetAppointmentByID(data GetAppointmentDTO) (Appointment, error) {
+	if err := a.Validate.Struct(data); err != nil {
+		return Appointment{}, utils.NewAppError(err.Error(), false, err)
+	}
 	return a.AppointmentRepository.GetAppointmentByID(data)
 }
 
 func (a *AppointmentService) UpdateAppointment(appointment UpdateAppointmentDTO) (int, error) {
+	if err := a.Validate.Struct(appointment); err != nil {
+		return 0, utils.NewAppError(err.Error(), false, err)
+	}
 	return a.AppointmentRepository.UpdateAppointment(appointment)
 }
 
 func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO) (int, error) {
+	if err := a.Validate.Struct(appointment); err != nil {
+		return 0, utils.NewAppError(err.Error(), false, err)
+	}
 	hasStudent := a.StudentService.DoesStudentExists(students.DoesStudentExistsDTO{
 		IDAccount: appointment.IDAccount,
 		ID:        appointment.IDStudent,
@@ -39,9 +50,15 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 }
 
 func (a *AppointmentService) CreateDailyAppointmentsByStudentsRoutine(data CreateDailyAppointmentsByStudentsRoutineDTO) error {
+	if err := a.Validate.Struct(data); err != nil {
+		return utils.NewAppError(err.Error(), false, err)
+	}
 	return nil
 }
 
 func (a *AppointmentService) DeleteAppointment(data DeleteAppointmentDTO) (int, error) {
+	if err := a.Validate.Struct(data); err != nil {
+		return 0, utils.NewAppError(err.Error(), false, err)
+	}
 	return a.AppointmentRepository.DeleteAppointment(data)
 }

@@ -3,23 +3,23 @@ package students
 import "github.com/irwinarruda/pro-cris-server/shared/models"
 
 type GetAllStudentsDTO struct {
-	IDAccount int `json:"idAccount"`
+	IDAccount int `json:"idAccount" validate:"required"`
 }
 
 type GetStudentDTO struct {
-	IDAccount int `json:"idAccount"`
-	ID        int `json:"id"`
+	IDAccount int `json:"idAccount" validate:"required"`
+	ID        int `json:"id" validate:"required"`
 }
 
 type DoesStudentExistsDTO struct {
-	IDAccount int `json:"idAccount"`
-	ID        int `json:"id"`
+	IDAccount int `json:"idAccount" validate:"required"`
+	ID        int `json:"id" validate:"required"`
 }
 
 type CreateStudentDTO struct {
-	IDAccount            int                           `json:"idAccount"`
+	IDAccount            int                           `json:"idAccount" validate:"required"`
 	Name                 string                        `json:"name" validate:"required"`
-	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime"`
+	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime=2006-01-02"`
 	DisplayColor         string                        `json:"displayColor" validate:"omitempty,hexcolor"`
 	Gender               *models.Gender                `json:"gender"`
 	Picture              *string                       `json:"picture" validate:"omitempty,url"`
@@ -45,13 +45,13 @@ type CreateStudentRoutinePlanDTO struct {
 }
 
 type UpdateStudentDTO struct {
-	IDAccount            int                           `json:"idAccount"`
-	ID                   int                           `json:"id"`
+	IDAccount            int                           `json:"idAccount" validate:"required"`
+	ID                   int                           `json:"id" validate:"required"`
 	Name                 string                        `json:"name" validate:"required"`
-	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime"`
+	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime=2006-01-02"`
 	DisplayColor         string                        `json:"displayColor" validate:"required,hexcolor"`
 	Picture              *string                       `json:"picture" validate:"omitempty,url"`
-	Gender               *models.Gender                `json:"gender" validate:"omitempty,gender"`
+	Gender               *models.Gender                `json:"gender"`
 	ParentName           *string                       `json:"parentName"`
 	ParentPhoneNumber    *string                       `json:"parentPhoneNumber"`
 	PaymentStyle         PaymentStyle                  `json:"paymentStyle" validate:"payment_style"`
@@ -75,6 +75,6 @@ type UpdateStudentRoutinePlanDTO struct {
 }
 
 type DeleteStudentDTO struct {
-	IDAccount int `json:"idAccount"`
-	ID        int `json:"id"`
+	IDAccount int `json:"idAccount" validate:"required"`
+	ID        int `json:"id" validate:"required"`
 }

@@ -2,6 +2,7 @@ package auth
 
 import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
+	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/providers"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
@@ -9,6 +10,7 @@ import (
 type AuthService struct {
 	AuthRepository IAuthRepository   `inject:"auth_repository"`
 	GoogleClient   providers.IGoogle `inject:"google"`
+	Validate       configs.Validate  `inject:"validate"`
 }
 
 func NewAuthService() *AuthService {
@@ -16,6 +18,9 @@ func NewAuthService() *AuthService {
 }
 
 func (a *AuthService) Login(credentials LoginDTO) (Account, error) {
+	if err := a.Validate.Struct(credentials); err != nil {
+		return Account{}, utils.NewAppError(err.Error(), true, err)
+	}
 	if credentials.Provider != LoginProviderGoogle {
 		return Account{}, utils.NewAppError("Invalid provider.", true, nil)
 	}

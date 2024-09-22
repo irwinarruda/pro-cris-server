@@ -7,13 +7,10 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
-	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
-type StudentCtrl struct {
-	Validate configs.Validate `inject:"validate"`
-}
+type StudentCtrl struct{}
 
 func NewStudentCtrl() *StudentCtrl {
 	return proinject.Resolve(&StudentCtrl{})
@@ -53,11 +50,6 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
 		return
 	}
-	err = s.Validate.Struct(studentDTO)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
-		return
-	}
 
 	studentService := students.NewStudentService()
 	id, err := studentService.CreateStudent(studentDTO)
@@ -84,11 +76,7 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data. "+err.Error(), false, nil))
 		return
 	}
-	err = s.Validate.Struct(studentDTO)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
-		return
-	}
+
 	studentService := students.NewStudentService()
 	id, err = studentService.UpdateStudent(studentDTO)
 	if err, ok := err.(utils.AppError); ok {
