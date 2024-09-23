@@ -27,7 +27,7 @@ func (s StudentCtrl) GetStudents(c *gin.Context) {
 func (s StudentCtrl) GetStudent(c *gin.Context) {
 	idStudent, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
+		utils.HandleHttpError(c, utils.NewAppError("Invalid student ID.", false, http.StatusBadRequest))
 		return
 	}
 	studentDTO := students.GetStudentDTO{}
@@ -35,8 +35,8 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 	studentDTO.ID = idStudent
 	studentService := students.NewStudentService()
 	student, err := studentService.GetStudentByID(studentDTO)
-	if err, ok := err.(utils.AppError); ok {
-		c.JSON(http.StatusNotFound, err)
+	if err != nil {
+		utils.HandleHttpError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, student)
@@ -47,14 +47,14 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 	studentDTO.IDAccount = c.Value("id_account").(int)
 	err := c.Bind(&studentDTO)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, nil))
+		utils.HandleHttpError(c, utils.NewAppError("Invalid student ID.", false, http.StatusBadRequest))
 		return
 	}
 
 	studentService := students.NewStudentService()
 	id, err := studentService.CreateStudent(studentDTO)
-	if err, ok := err.(utils.AppError); ok {
-		c.JSON(http.StatusNotFound, err)
+	if err != nil {
+		utils.HandleHttpError(c, err)
 		return
 	}
 	c.JSON(http.StatusCreated, struct {
@@ -65,7 +65,7 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
+		utils.HandleHttpError(c, utils.NewAppError("Invalid student ID.", false, http.StatusBadRequest))
 		return
 	}
 	studentDTO := students.UpdateStudentDTO{}
@@ -73,14 +73,13 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 	studentDTO.IDAccount = c.Value("id_account").(int)
 	err = c.Bind(&studentDTO)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data. "+err.Error(), false, nil))
+		utils.HandleHttpError(c, utils.NewAppError("Invalid student ID."+err.Error(), false, http.StatusBadRequest))
 		return
 	}
-
 	studentService := students.NewStudentService()
 	id, err = studentService.UpdateStudent(studentDTO)
-	if err, ok := err.(utils.AppError); ok {
-		c.JSON(http.StatusNotFound, err)
+	if err != nil {
+		utils.HandleHttpError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, struct {
@@ -91,7 +90,7 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student ID.", false, nil))
+		utils.HandleHttpError(c, utils.NewAppError("Invalid student ID.", false, http.StatusBadRequest))
 		return
 	}
 	studentDTO := students.DeleteStudentDTO{}
@@ -99,8 +98,8 @@ func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 	studentDTO.IDAccount = c.Value("id_account").(int)
 	studentService := students.NewStudentService()
 	id, err = studentService.DeleteStudent(studentDTO)
-	if err, ok := err.(utils.AppError); ok {
-		c.JSON(http.StatusNotFound, err)
+	if err != nil {
+		utils.HandleHttpError(c, err)
 		return
 	}
 	c.JSON(http.StatusOK, struct {

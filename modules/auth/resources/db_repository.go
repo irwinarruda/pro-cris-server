@@ -2,6 +2,7 @@ package authresources
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
@@ -58,7 +59,7 @@ func (a *DbAuthRepository) CreateAccount(account auth.CreateAccountDTO) (auth.Ac
 	accountE := DbAccount{}
 	result := a.Db.Raw(sql, account.Name, account.Email, account.Picture, account.EmailVerified, account.Provider).Scan(&accountE)
 	if result.Error != nil {
-		return auth.Account{}, utils.NewAppError("Database query error", false, result.Error)
+		return auth.Account{}, result.Error
 	}
 	return accountE.ToAccount(), nil
 }
@@ -67,10 +68,10 @@ func (a *DbAuthRepository) GetAccountByID(id int) (auth.Account, error) {
 	accountsE := []DbAccount{}
 	result := a.Db.Raw(`SELECT * FROM "account" WHERE id = ?;`, id).Scan(&accountsE)
 	if result.Error != nil {
-		return auth.Account{}, utils.NewAppError("Database query error", false, result.Error)
+		return auth.Account{}, result.Error
 	}
 	if len(accountsE) == 0 {
-		return auth.Account{}, utils.NewAppError("Account not found.", true, nil)
+		return auth.Account{}, utils.NewAppError("Account not found.", true, http.StatusBadRequest)
 	}
 	return accountsE[0].ToAccount(), nil
 }
@@ -79,10 +80,10 @@ func (a *DbAuthRepository) GetAccountByEmail(email string) (auth.Account, error)
 	accountsE := []DbAccount{}
 	result := a.Db.Raw(`SELECT * FROM "account" WHERE email = ?;`, email).Scan(&accountsE)
 	if result.Error != nil {
-		return auth.Account{}, utils.NewAppError("Database query error", false, result.Error)
+		return auth.Account{}, result.Error
 	}
 	if len(accountsE) == 0 {
-		return auth.Account{}, utils.NewAppError("Account not found.", true, nil)
+		return auth.Account{}, utils.NewAppError("Account not found.", true, http.StatusBadRequest)
 	}
 	return accountsE[0].ToAccount(), nil
 }
@@ -91,10 +92,10 @@ func (a *DbAuthRepository) GetIDByEmail(email string) (int, error) {
 	ids := []int{}
 	result := a.Db.Raw(`SELECT id FROM "account" WHERE email = ?;`, email).Scan(&ids)
 	if result.Error != nil {
-		return 0, utils.NewAppError("Database query error", false, result.Error)
+		return 0, result.Error
 	}
 	if len(ids) == 0 {
-		return 0, utils.NewAppError("Account not found.", true, nil)
+		return 0, utils.NewAppError("Account not found.", true, http.StatusBadRequest)
 	}
 	return ids[0], nil
 }

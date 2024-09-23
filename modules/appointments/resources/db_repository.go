@@ -2,6 +2,7 @@ package appointmentsresources
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
@@ -88,10 +89,10 @@ func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppoin
 	appointmentE := []DbAppointment{}
 	result := a.Db.Raw(sql, data.ID, data.IDAccount).Scan(&appointmentE)
 	if result.Error != nil {
-		return appointments.Appointment{}, utils.NewAppError("Database query error", false, result.Error)
+		return appointments.Appointment{}, result.Error
 	}
 	if len(appointmentE) == 0 {
-		return appointments.Appointment{}, utils.NewAppError("Appointment not found.", true, nil)
+		return appointments.Appointment{}, utils.NewAppError("Appointment not found.", true, http.StatusNotFound)
 	}
 
 	return appointmentE[0].ToAppointment(), nil
@@ -125,7 +126,7 @@ func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.Cre
 		appointmentE.IsPaid,
 	).Scan(&appointmentE.ID)
 	if result.Error != nil {
-		return 0, utils.NewAppError("Database query error", false, result.Error)
+		return 0, result.Error
 	}
 	return appointmentE.ID, nil
 }
@@ -145,10 +146,10 @@ func (a *DbAppointmentRepository) UpdateAppointment(appointment appointments.Upd
   `
 	result := a.Db.Exec(sql, appointmentE.Price, appointmentE.IsExtra, appointmentE.IsPaid, appointmentE.ID, appointmentE.IDAccount)
 	if result.Error != nil {
-		return 0, utils.NewAppError("Database query error", false, result.Error)
+		return 0, result.Error
 	}
 	if result.RowsAffected == 0 {
-		return 0, utils.NewAppError("Appointment not found.", true, nil)
+		return 0, utils.NewAppError("Appointment not found.", true, http.StatusNotFound)
 	}
 	return appointmentE.ID, nil
 }
@@ -164,10 +165,10 @@ func (a *DbAppointmentRepository) DeleteAppointment(data appointments.DeleteAppo
   `
 	result := a.Db.Exec(sql, data.ID, data.IDAccount)
 	if result.Error != nil {
-		return 0, utils.NewAppError("Database query error", false, result.Error)
+		return 0, result.Error
 	}
 	if result.RowsAffected == 0 {
-		return 0, utils.NewAppError("Appointment not found.", true, nil)
+		return 0, utils.NewAppError("Appointment not found.", true, http.StatusBadRequest)
 	}
 	return data.ID, nil
 }

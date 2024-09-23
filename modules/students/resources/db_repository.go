@@ -2,6 +2,7 @@ package studentsresources
 
 import (
 	"fmt"
+	"net/http"
 	"time"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
@@ -185,15 +186,15 @@ func (r *DbStudentRepository) GetStudentByID(data students.GetStudentDTO) (stude
 	studentsE := []DbStudent{}
 	result := r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND id = ? AND is_deleted = false;`, data.IDAccount, data.ID).Scan(&studentsE)
 	if result.Error != nil {
-		return students.Student{}, utils.NewAppError("Database query error", false, result.Error)
+		return students.Student{}, result.Error
 	}
 	if len(studentsE) == 0 {
-		return students.Student{}, utils.NewAppError("Student not found.", true, nil)
+		return students.Student{}, utils.NewAppError("Student not found.", true, http.StatusBadRequest)
 	}
 	routineE := []DbRoutinePlan{}
 	result = r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, data.ID).Scan(&routineE)
 	if result.Error != nil {
-		return students.Student{}, utils.NewAppError("Database query error", false, result.Error)
+		return students.Student{}, result.Error
 	}
 	return studentsE[0].ToStudent(routineE), nil
 }
@@ -304,10 +305,10 @@ func (r *DbStudentRepository) UpdateStudent(student students.UpdateStudentDTO) (
 		studentE.ID,
 	)
 	if result.Error != nil {
-		return 0, utils.NewAppError("Database query error", false, result.Error)
+		return 0, result.Error
 	}
 	if result.RowsAffected == 0 {
-		return 0, utils.NewAppError("Student not found.", true, nil)
+		return 0, utils.NewAppError("Student not found.", true, http.StatusBadRequest)
 	}
 	return studentE.ID, nil
 }
@@ -323,10 +324,10 @@ func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int
     RETURNING id;`
 	result := r.Db.Exec(sql, data.IDAccount, data.ID)
 	if result.Error != nil {
-		return 0, utils.NewAppError("Database query error", false, result.Error)
+		return 0, result.Error
 	}
 	if result.RowsAffected == 0 {
-		return 0, utils.NewAppError("Student not found.", true, nil)
+		return 0, utils.NewAppError("Student not found.", true, http.StatusBadRequest)
 	}
 	sql = `
     UPDATE "routine_plan"
@@ -334,10 +335,10 @@ func (r *DbStudentRepository) DeleteStudent(data students.DeleteStudentDTO) (int
     WHERE id_student = ?;`
 	result = r.Db.Exec(sql, data.ID)
 	if result.Error != nil {
-		return 0, utils.NewAppError("Database query error", false, result.Error)
+		return 0, result.Error
 	}
 	if result.RowsAffected == 0 {
-		return 0, utils.NewAppError("Student not found.", true, nil)
+		return 0, utils.NewAppError("Student not found.", true, http.StatusBadRequest)
 	}
 	return data.ID, nil
 }
@@ -349,7 +350,7 @@ func (r *DbStudentRepository) GetRoutineID(idStudent int, excluded ...int) []int
 	routine := []int{}
 	args := []interface{}{idStudent}
 	sql := `SELECT id FROM "routine_plan" WHERE id_student = ? AND is_deleted = false`
-	if excluded != nil && len(excluded) > 0 {
+	if len(excluded) > 0 {
 		sql += ` AND id NOT IN `
 		sql += utils.SqlArray(len(excluded))
 		for _, id := range excluded {

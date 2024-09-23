@@ -1,6 +1,8 @@
 package students
 
 import (
+	"net/http"
+
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
@@ -24,7 +26,7 @@ func (s *StudentService) GetAllStudents(data GetAllStudentsDTO) []Student {
 
 func (s *StudentService) GetStudentByID(data GetStudentDTO) (Student, error) {
 	if err := s.Validate.Struct(data); err != nil {
-		return Student{}, utils.NewAppError(err.Error(), false, err)
+		return Student{}, err
 	}
 	return s.StudentsRepository.GetStudentByID(data)
 }
@@ -39,19 +41,19 @@ func (s *StudentService) DoesStudentExists(data DoesStudentExistsDTO) bool {
 
 func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	if err := s.Validate.Struct(student); err != nil {
-		return 0, utils.NewAppError(err.Error(), false, err)
+		return 0, err
 	}
 	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
-		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, nil)
+		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, http.StatusBadRequest)
 	}
 	if student.PaymentType != PaymentTypeFixed {
 		student.PaymentTypeValue = nil
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleValue == nil {
-		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, nil)
+		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleDay == nil {
-		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, nil)
+		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments {
 		student.PaymentTypeValue = nil
@@ -61,19 +63,19 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 
 func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	if err := s.Validate.Struct(student); err != nil {
-		return 0, utils.NewAppError(err.Error(), false, err)
+		return 0, err
 	}
 	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
-		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, nil)
+		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, http.StatusBadRequest)
 	}
 	if student.PaymentType != PaymentTypeFixed {
 		student.PaymentTypeValue = nil
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleValue == nil {
-		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, nil)
+		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleDay == nil {
-		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, nil)
+		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
 	if student.SettlementStyle != SettlementStyleAppointments {
 		student.PaymentTypeValue = nil
@@ -108,7 +110,7 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 
 func (s *StudentService) DeleteStudent(data DeleteStudentDTO) (int, error) {
 	if err := s.Validate.Struct(data); err != nil {
-		return 0, utils.NewAppError(err.Error(), false, err)
+		return 0, err
 	}
 	return s.StudentsRepository.DeleteStudent(data)
 }

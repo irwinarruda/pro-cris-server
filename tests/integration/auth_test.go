@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"net/http"
 	"testing"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
@@ -93,7 +94,7 @@ func (m *MockGoogle) Validate(token string) (providers.IGoogleUser, error) {
 			EmailVerified: false,
 		}, nil
 	}
-	return providers.IGoogleUser{}, utils.NewAppError("Invalid google access token.", true, nil)
+	return providers.IGoogleUser{}, utils.NewAppError("Invalid google access token.", true, http.StatusBadRequest)
 }
 
 func beforeEachAuth() {

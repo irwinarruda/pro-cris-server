@@ -19,7 +19,7 @@ func (a *AuthCtrl) Login(c *gin.Context) {
 	loginDTO := auth.LoginDTO{}
 	err := c.Bind(&loginDTO)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, utils.NewAppError("Invalid student data"+err.Error(), false, err))
+		utils.HandleHttpError(c, utils.NewAppError("Invalid login."+err.Error(), false, http.StatusBadRequest))
 		return
 	}
 	authService := auth.NewAuthService()
@@ -34,14 +34,14 @@ func (a *AuthCtrl) Login(c *gin.Context) {
 func (a *AuthCtrl) EnsureAuthenticated(c *gin.Context) {
 	token := c.GetHeader("Authorization")
 	if token == "" {
-		c.JSON(http.StatusUnauthorized, utils.NewAppError("No token provided.", false, nil))
+		utils.HandleHttpError(c, utils.NewAppError("No token provided.", false, http.StatusBadRequest))
 		c.Abort()
 		return
 	}
 	authService := auth.NewAuthService()
 	id, err := authService.EnsureAuthenticated(token, auth.LoginProviderGoogle)
-	if err, ok := err.(utils.AppError); ok {
-		c.JSON(http.StatusUnauthorized, err)
+	if err != nil {
+		utils.HandleHttpError(c, err)
 		c.Abort()
 		return
 	}
