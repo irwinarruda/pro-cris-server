@@ -24,8 +24,7 @@ func (a *AuthCtrl) Login(c *gin.Context) {
 	}
 	authService := auth.NewAuthService()
 	account, err := authService.Login(loginDTO)
-	if err, ok := err.(utils.AppError); ok {
-		c.JSON(http.StatusBadRequest, err)
+	if utils.HandleHttpError(c, err) {
 		return
 	}
 	c.JSON(http.StatusOK, account)
@@ -40,8 +39,7 @@ func (a *AuthCtrl) EnsureAuthenticated(c *gin.Context) {
 	}
 	authService := auth.NewAuthService()
 	id, err := authService.EnsureAuthenticated(token, auth.LoginProviderGoogle)
-	if err != nil {
-		utils.HandleHttpError(c, err)
+	if utils.HandleHttpError(c, err) {
 		c.Abort()
 		return
 	}

@@ -35,8 +35,7 @@ func (s StudentCtrl) GetStudent(c *gin.Context) {
 	studentDTO.ID = idStudent
 	studentService := students.NewStudentService()
 	student, err := studentService.GetStudentByID(studentDTO)
-	if err != nil {
-		utils.HandleHttpError(c, err)
+	if utils.HandleHttpError(c, err) {
 		return
 	}
 	c.JSON(http.StatusOK, student)
@@ -53,8 +52,7 @@ func (s StudentCtrl) CreateStudent(c *gin.Context) {
 
 	studentService := students.NewStudentService()
 	id, err := studentService.CreateStudent(studentDTO)
-	if err != nil {
-		utils.HandleHttpError(c, err)
+	if utils.HandleHttpError(c, err) {
 		return
 	}
 	c.JSON(http.StatusCreated, struct {
@@ -78,8 +76,7 @@ func (s StudentCtrl) UpdateSudent(c *gin.Context) {
 	}
 	studentService := students.NewStudentService()
 	id, err = studentService.UpdateStudent(studentDTO)
-	if err != nil {
-		utils.HandleHttpError(c, err)
+	if utils.HandleHttpError(c, err) {
 		return
 	}
 	c.JSON(http.StatusOK, struct {
@@ -98,8 +95,7 @@ func (s StudentCtrl) DeleteStudent(c *gin.Context) {
 	studentDTO.IDAccount = c.Value("id_account").(int)
 	studentService := students.NewStudentService()
 	id, err = studentService.DeleteStudent(studentDTO)
-	if err != nil {
-		utils.HandleHttpError(c, err)
+	if utils.HandleHttpError(c, err) {
 		return
 	}
 	c.JSON(http.StatusOK, struct {

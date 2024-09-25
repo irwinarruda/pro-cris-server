@@ -35,7 +35,10 @@ func NewAppError(message string, isPublicMessage bool, statusCode int) AppError 
 	}
 }
 
-func HandleHttpError(c *gin.Context, err error) {
+func HandleHttpError(c *gin.Context, err error) bool {
+	if err == nil {
+		return false
+	}
 	if err, ok := err.(*AppError); ok {
 		c.JSON(*err.statusCode, HttpAppError{
 			Message:         err.message,
@@ -43,7 +46,7 @@ func HandleHttpError(c *gin.Context, err error) {
 			StatusCode:      err.statusCode,
 			IsPublicMessage: err.isPublicMessage,
 		})
-		return
+		return true
 	}
 
 	if err, ok := err.(validator.ValidationErrors); ok {
@@ -55,7 +58,7 @@ func HandleHttpError(c *gin.Context, err error) {
 			StatusCode:      IntP(http.StatusBadRequest),
 			IsPublicMessage: true,
 		})
-		return
+		return true
 	}
 
 	c.JSON(http.StatusBadRequest, HttpAppError{
@@ -64,4 +67,6 @@ func HandleHttpError(c *gin.Context, err error) {
 		StatusCode:      IntP(http.StatusInternalServerError),
 		IsPublicMessage: false,
 	})
+
+	return true
 }
