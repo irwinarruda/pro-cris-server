@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-playground/validator/v10"
 	"github.com/irwinarruda/pro-cris-server/shared/models"
+	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 var validate *validator.Validate
@@ -18,7 +19,9 @@ func GetValidate(loginProviders []string, paymentStyle []string, paymentType []s
 		validate.RegisterValidation("payment_style", ValidateEnum(paymentStyle))
 		validate.RegisterValidation("payment_type", ValidateEnum(paymentType))
 		validate.RegisterValidation("settlement_style", ValidateEnum(settlementStyle))
-		validate.RegisterValidation("weekday", ValidateEnum(models.GetWeekDays()))
+		validate.RegisterValidation("weekday", ValidateEnum(utils.Map(models.GetWeekDays(), func(m models.WeekDay, _ int) string {
+			return m.String()
+		})))
 		validate.RegisterValidation("gender", ValidateEnum(models.GetGender()))
 		validate.RegisterValidation("required_ifid", ValidateWeekDay)
 		validate.RegisterValidation("weekday_ifid", ValidateWeekDay)
@@ -36,7 +39,7 @@ func ValidateEnum(enums []string) func(fl validator.FieldLevel) bool {
 func ValidateWeekDay(fl validator.FieldLevel) bool {
 	weekDays := models.GetWeekDays()
 	input := fl.Field().String()
-	return slices.Contains(weekDays, input)
+	return slices.Contains(weekDays, models.ToWeekDay(input))
 }
 
 func ValidateRequiredIfID(fl validator.FieldLevel) bool {

@@ -163,23 +163,23 @@ func NewDbStudentRepository() *DbStudentRepository {
 	return proinject.Resolve(&DbStudentRepository{})
 }
 
-func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) []students.Student {
+func (r *DbStudentRepository) GetAllStudents(data students.GetAllStudentsDTO) ([]students.Student, error) {
 	studentsArr := []DbStudent{}
 	students := []students.Student{}
 	result := r.Db.Raw(`SELECT * FROM "student" WHERE id_account = ? AND is_deleted = false;`, data.IDAccount).Scan(&studentsArr)
 	if result.Error != nil {
-		return students
+		return students, result.Error
 	}
 	for _, studentE := range studentsArr {
 		routineE := []DbRoutinePlan{}
 		result = r.Db.Raw(`SELECT * FROM "routine_plan" WHERE id_student = ? AND is_deleted = false;`, studentE.ID).Scan(&routineE)
 		if result.Error != nil {
-			return students
+			return students, result.Error
 		}
 		student := studentE.ToStudent(routineE)
 		students = append(students, student)
 	}
-	return students
+	return students, nil
 }
 
 func (r *DbStudentRepository) GetStudentByID(data students.GetStudentDTO) (students.Student, error) {

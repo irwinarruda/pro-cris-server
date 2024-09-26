@@ -16,7 +16,7 @@ type HttpAppError struct {
 
 type AppError struct {
 	message         *string
-	messages        []string
+	errors          []string
 	statusCode      *int
 	isPublicMessage bool
 	baseMessage     string
@@ -35,6 +35,15 @@ func NewAppError(message string, isPublicMessage bool, statusCode int) AppError 
 	}
 }
 
+func NewAppErrors(message string, errors []string, isPublicMessage bool, statusCode int) AppError {
+	return AppError{
+		isPublicMessage: isPublicMessage,
+		message:         &message,
+		statusCode:      &statusCode,
+		baseMessage:     message,
+	}
+}
+
 func HandleHttpError(c *gin.Context, err error) bool {
 	if err == nil {
 		return false
@@ -42,7 +51,7 @@ func HandleHttpError(c *gin.Context, err error) bool {
 	if err, ok := err.(*AppError); ok {
 		c.JSON(*err.statusCode, HttpAppError{
 			Message:         err.message,
-			Errors:          err.messages,
+			Errors:          err.errors,
 			StatusCode:      err.statusCode,
 			IsPublicMessage: err.isPublicMessage,
 		})
@@ -54,17 +63,17 @@ func HandleHttpError(c *gin.Context, err error) bool {
 			Errors: Map(err, func(item validator.FieldError, _ int) string {
 				return item.Error()
 			}),
-			Message:         StringP("One or more fields are invalid."),
-			StatusCode:      IntP(http.StatusBadRequest),
+			Message:         ToP("One or more fields are invalid."),
+			StatusCode:      ToP(http.StatusBadRequest),
 			IsPublicMessage: true,
 		})
 		return true
 	}
 
 	c.JSON(http.StatusBadRequest, HttpAppError{
-		Message:         StringP(err.Error()),
+		Message:         ToP(err.Error()),
 		Errors:          nil,
-		StatusCode:      IntP(http.StatusInternalServerError),
+		StatusCode:      ToP(http.StatusInternalServerError),
 		IsPublicMessage: false,
 	})
 

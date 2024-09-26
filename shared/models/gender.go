@@ -9,12 +9,7 @@ const (
 
 func GetGender() []Gender {
 	return []Gender{
-		Monday,
-		Tuesday,
-		Wednesday,
-		Thursday,
-		Friday,
-		Saturday,
-		Sunday,
+		Male,
+		Female,
 	}
 }

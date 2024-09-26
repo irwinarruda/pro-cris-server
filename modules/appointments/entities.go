@@ -7,8 +7,8 @@ import (
 type Appointment struct {
 	ID          int                `json:"id"`
 	CalendarDay time.Time          `json:"calendarDay"`
-	StartHour   string             `json:"startHour"`
-	Duration    int                `json:"duration"`
+	StartHour   int                `json:"startHour"` // milisseconds
+	Duration    int                `json:"duration"`  // milisseconds
 	Price       float64            `json:"price"`
 	IsExtra     bool               `json:"isExtra"`
 	IsPaid      bool               `json:"isPaid"`

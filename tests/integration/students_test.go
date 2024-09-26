@@ -52,7 +52,7 @@ func TestStudentServiceHappyPath(t *testing.T) {
 	}
 
 	updateStudentDTO := mockUpdateStudentDTO(idAccount, id1)
-	updateStudentDTO.Routine = append(updateStudentDTO.Routine, students.UpdateStudentRoutinePlanDTO{ID: utils.IntP(mondayRoutineId)})
+	updateStudentDTO.Routine = append(updateStudentDTO.Routine, students.UpdateStudentRoutinePlanDTO{ID: utils.ToP(mondayRoutineId)})
 	id2, err := studentService.UpdateStudent(updateStudentDTO)
 
 	assert.NoError(err, "Should be able to update student")
@@ -92,12 +92,12 @@ func TestStudentServiceHappyPath(t *testing.T) {
 		)
 	}
 
-	allStudents := studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
+	allStudents, _ := studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
 	assert.Len(allStudents, 1, "Should return a list of students with 1 student after creating/updating")
 
 	studentService.DeleteStudent(students.DeleteStudentDTO{ID: id2, IDAccount: idAccount})
 
-	allStudents = studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
+	allStudents, _ = studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
 	assert.Len(allStudents, 0, "Should return an empty list of students after deleting")
 
 	afterEachStudents()
@@ -121,7 +121,7 @@ func TestStudentServiceErrorPath(t *testing.T) {
 	_, err = studentService.CreateStudent(createStudentDTO)
 	assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and value is nil")
 
-	createStudentDTO.SettlementStyleValue = utils.IntP(1)
+	createStudentDTO.SettlementStyleValue = utils.ToP(1)
 	createStudentDTO.SettlementStyleDay = nil
 	_, err = studentService.CreateStudent(createStudentDTO)
 	assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and day is nil")
@@ -154,24 +154,49 @@ func mockCreateStudentDTO(idAccount int) students.CreateStudentDTO {
 	return students.CreateStudentDTO{
 		IDAccount:            idAccount,
 		Name:                 "John Doe",
-		Gender:               utils.StringP(models.Male),
-		BirthDay:             utils.StringP("1990-01-01"),
+		Gender:               utils.ToP(models.Male),
+		BirthDay:             utils.ToP("1990-01-01"),
 		DisplayColor:         "#000000",
-		Picture:              utils.StringP("http://example.com/picture.jpg"),
-		ParentName:           utils.StringP("Jane Doe"),
-		ParentPhoneNumber:    utils.StringP("1234567890"),
+		Picture:              utils.ToP("http://example.com/picture.jpg"),
+		ParentName:           utils.ToP("Jane Doe"),
+		ParentPhoneNumber:    utils.ToP("1234567890"),
 		PaymentStyle:         students.PaymentStyleUpfront,
 		PaymentType:          students.PaymentTypeFixed,
-		PaymentTypeValue:     utils.Float64P(2000),
+		PaymentTypeValue:     utils.ToP(2000.0),
 		SettlementStyle:      students.SettlementStyleAppointments,
-		SettlementStyleValue: utils.IntP(10),
+		SettlementStyleValue: utils.ToP(10),
 		SettlementStyleDay:   nil,
-		HouseAddress:         utils.StringP("123 Main St"),
-		HouseIdentifier:      utils.StringP("Apt 1"),
+		HouseAddress:         utils.ToP("123 Main St"),
+		HouseIdentifier:      utils.ToP("Apt 1"),
 		HouseCoordinate:      &models.Coordinate{Latitude: 20, Longitude: 20},
 		Routine: []students.CreateStudentRoutinePlanDTO{
 			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: 120},
 			{WeekDay: models.Tuesday, Duration: 60, StartHour: 8, Price: 100},
+		},
+	}
+}
+
+func mockCreateStudentDTO2(idAccount int) students.CreateStudentDTO {
+	return students.CreateStudentDTO{
+		IDAccount:            idAccount,
+		Name:                 "Jane Doe Updated",
+		Gender:               utils.ToP(models.Female),
+		BirthDay:             utils.ToP("1990-01-02"),
+		DisplayColor:         "#FFFFFF",
+		Picture:              utils.ToP("http://example.com/picture2.jpg"),
+		ParentName:           utils.ToP("John Doe"),
+		ParentPhoneNumber:    utils.ToP("0987654321"),
+		PaymentStyle:         students.PaymentStyleLater,
+		PaymentType:          students.PaymentTypeVariable,
+		PaymentTypeValue:     nil,
+		SettlementStyle:      students.SettlementStyleMonthly,
+		SettlementStyleValue: utils.ToP(1),
+		SettlementStyleDay:   utils.ToP(5),
+		HouseAddress:         utils.ToP("456 Main St"),
+		HouseIdentifier:      utils.ToP("Apt 2"),
+		HouseCoordinate:      &models.Coordinate{Latitude: 30, Longitude: 30},
+		Routine: []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Tuesday, Duration: 120, StartHour: 10, Price: 300},
 		},
 	}
 }
@@ -181,23 +206,23 @@ func mockUpdateStudentDTO(idAccount, id int) students.UpdateStudentDTO {
 		IDAccount:            idAccount,
 		ID:                   id,
 		Name:                 "Jane Doe Updated",
-		Gender:               utils.StringP(models.Female),
-		BirthDay:             utils.StringP("1990-01-02"),
+		Gender:               utils.ToP(models.Female),
+		BirthDay:             utils.ToP("1990-01-02"),
 		DisplayColor:         "#FFFFFF",
-		Picture:              utils.StringP("http://example.com/picture2.jpg"),
-		ParentName:           utils.StringP("John Doe"),
-		ParentPhoneNumber:    utils.StringP("0987654321"),
+		Picture:              utils.ToP("http://example.com/picture2.jpg"),
+		ParentName:           utils.ToP("John Doe"),
+		ParentPhoneNumber:    utils.ToP("0987654321"),
 		PaymentStyle:         students.PaymentStyleLater,
 		PaymentType:          students.PaymentTypeVariable,
 		PaymentTypeValue:     nil,
 		SettlementStyle:      students.SettlementStyleMonthly,
-		SettlementStyleValue: utils.IntP(1),
-		SettlementStyleDay:   utils.IntP(5),
-		HouseAddress:         utils.StringP("456 Main St"),
-		HouseIdentifier:      utils.StringP("Apt 2"),
+		SettlementStyleValue: utils.ToP(1),
+		SettlementStyleDay:   utils.ToP(5),
+		HouseAddress:         utils.ToP("456 Main St"),
+		HouseIdentifier:      utils.ToP("Apt 2"),
 		HouseCoordinate:      &models.Coordinate{Latitude: 30, Longitude: 30},
 		Routine: []students.UpdateStudentRoutinePlanDTO{
-			{ID: nil, WeekDay: utils.StringP(models.Friday), StartHour: utils.IntP(9), Duration: utils.IntP(90), Price: utils.Float64P(200)},
+			{ID: nil, WeekDay: utils.ToP(models.Friday), StartHour: utils.ToP(9), Duration: utils.ToP(90), Price: utils.ToP(200.0)},
 		},
 	}
 }
@@ -218,7 +243,7 @@ func beforeEachStudents() int {
 	account, _ := authRepository.CreateAccount(auth.CreateAccountDTO{
 		Email:         "john@doe.com",
 		Name:          "John Doe",
-		Picture:       utils.StringP("https://www.google.com"),
+		Picture:       utils.ToP("https://www.google.com"),
 		EmailVerified: false,
 		Provider:      auth.LoginProviderGoogle,
 	})

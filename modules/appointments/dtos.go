@@ -10,17 +10,17 @@ type GetAppointmentDTO struct {
 type CreateAppointmentDTO struct {
 	IDAccount   int       `json:"idAccount" validate:"required"`
 	IDStudent   int       `json:"idStudent" validate:"required"`
-	CalendarDay time.Time `json:"calendarDay"`
-	StartHour   string    `json:"startHour"`
-	Duration    int       `json:"duration"`
-	Price       float64   `json:"price"`
+	CalendarDay time.Time `json:"calendarDay" validate:"required"`
+	StartHour   int       `json:"startHour" validate:"required"` // milisseconds
+	Duration    int       `json:"duration" validate:"required"`  // milisseconds
+	Price       float64   `json:"price" validate:"required"`
 	IsExtra     bool      `json:"isExtra"`
 	IsPaid      bool      `json:"isPaid"`
 }
 
 type CreateDailyAppointmentsByStudentsRoutineDTO struct {
 	IDAccount   int       `json:"idAccount" validate:"required"`
-	CalendarDay time.Time `json:"calendarDay"`
+	CalendarDay time.Time `json:"calendarDay" validate:"required"`
 }
 
 type UpdateAppointmentDTO struct {

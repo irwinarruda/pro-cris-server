@@ -20,13 +20,13 @@ func TestValidateWeekDay(t *testing.T) {
 		Saturday  string `validate:"weekday"`
 		Sunday    string `validate:"weekday"`
 	}{
-		Monday:    models.Monday,
-		Tuesday:   models.Tuesday,
-		Wednesday: models.Wednesday,
-		Thursday:  models.Thursday,
-		Friday:    models.Friday,
-		Saturday:  models.Saturday,
-		Sunday:    models.Sunday,
+		Monday:    models.Monday.String(),
+		Tuesday:   models.Tuesday.String(),
+		Wednesday: models.Wednesday.String(),
+		Thursday:  models.Thursday.String(),
+		Friday:    models.Friday.String(),
+		Saturday:  models.Saturday.String(),
+		Sunday:    models.Sunday.String(),
 	}
 	err := validate.Struct(correct)
 	assert.NoError(err, "it should not throw an error with correct weekdays")

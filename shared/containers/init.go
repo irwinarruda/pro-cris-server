@@ -5,6 +5,7 @@ import (
 	appointmentsresources "github.com/irwinarruda/pro-cris-server/modules/appointments/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	authresources "github.com/irwinarruda/pro-cris-server/modules/auth/resources"
+	"github.com/irwinarruda/pro-cris-server/modules/date"
 	statusresources "github.com/irwinarruda/pro-cris-server/modules/status/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	studentsresources "github.com/irwinarruda/pro-cris-server/modules/students/resources"
@@ -22,6 +23,7 @@ func InitInjections() {
 	))
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", providers.NewGoogleClient())
+	proinject.Register("date_service", date.NewDateService())
 	proinject.Register("appointment_repository", appointmentsresources.NewDbAppointmentRepository())
 	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
 	proinject.Register("status_repository", statusresources.NewDbStatusRepository())

@@ -14,7 +14,7 @@ import (
 type DbAppointment struct {
 	IDAccount    int
 	ID           int
-	StartHour    string
+	StartHour    int
 	Duration     int
 	Price        float64
 	IsExtra      bool

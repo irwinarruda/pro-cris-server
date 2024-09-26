@@ -32,7 +32,7 @@ func TestAuthServiceHappyPath(t *testing.T) {
 	assert.Equal(account1.ID, account.ID, "Should return the account id.")
 	assert.Equal("John Doe", account.Name, "Should return the correct account name.")
 	assert.Equal("john@doe.com", account.Email, "Should return the correct account email.")
-	assert.Equal(utils.StringP("https://www.google.com"), account.Picture, "Should return the correct account picture.")
+	assert.Equal(utils.ToP("https://www.google.com"), account.Picture, "Should return the correct account picture.")
 	assert.Equal(false, account.EmailVerified, "Should return the correct account email verification status.")
 	assert.Equal(auth.LoginProviderGoogle, account.Provider, "Should return the correct account provider.")
 	assert.Equal(false, account.IsDeleted, "Should return the correct account deletion status.")

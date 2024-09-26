@@ -20,7 +20,10 @@ func (s StudentCtrl) GetStudents(c *gin.Context) {
 	studentsDTO := students.GetAllStudentsDTO{}
 	studentsDTO.IDAccount = c.Value("id_account").(int)
 	studentService := students.NewStudentService()
-	students := studentService.GetAllStudents(studentsDTO)
+	students, err := studentService.GetAllStudents(studentsDTO)
+	if utils.HandleHttpError(c, err) {
+		return
+	}
 	c.JSON(http.StatusOK, students)
 }
 

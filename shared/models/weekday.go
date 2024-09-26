@@ -1,6 +1,6 @@
 package models
 
-type WeekDay = string
+type WeekDay string
 
 const (
 	Monday    WeekDay = "Monday"
@@ -11,6 +11,14 @@ const (
 	Saturday  WeekDay = "Saturday"
 	Sunday    WeekDay = "Sunday"
 )
+
+func (w WeekDay) String() string {
+	return string(w)
+}
+
+func ToWeekDay(day any) WeekDay {
+	return WeekDay(day.(string))
+}
 
 func GetWeekDays() []WeekDay {
 	return []WeekDay{

@@ -17,9 +17,9 @@ func NewStudentService() *StudentService {
 	return proinject.Resolve(&StudentService{})
 }
 
-func (s *StudentService) GetAllStudents(data GetAllStudentsDTO) []Student {
-	if s.Validate.Struct(data) != nil {
-		return []Student{}
+func (s *StudentService) GetAllStudents(data GetAllStudentsDTO) ([]Student, error) {
+	if err := s.Validate.Struct(data); err != nil {
+		return []Student{}, err
 	}
 	return s.StudentsRepository.GetAllStudents(data)
 }

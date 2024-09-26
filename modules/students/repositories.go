@@ -1,7 +1,7 @@
 package students
 
 type IStudentRepository interface {
-	GetAllStudents(data GetAllStudentsDTO) []Student
+	GetAllStudents(data GetAllStudentsDTO) ([]Student, error)
 	GetStudentByID(data GetStudentDTO) (Student, error)
 	CreateStudent(student CreateStudentDTO) int
 	UpdateStudent(student UpdateStudentDTO) (int, error)
