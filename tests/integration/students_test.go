@@ -5,149 +5,148 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
-	authresources "github.com/irwinarruda/pro-cris-server/modules/auth/resources"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
-	studentsresources "github.com/irwinarruda/pro-cris-server/modules/students/resources"
-	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/models"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 	"github.com/stretchr/testify/assert"
 )
 
-func TestStudentServiceHappyPath(t *testing.T) {
-	idAccount := beforeEachStudents()
+func TestStudentService(t *testing.T) {
+	t.Run("Happy Path", func(t *testing.T) {
+		idAccount := beforeEachStudents()
 
-	var assert = assert.New(t)
-	var studentService = students.NewStudentService()
+		var assert = assert.New(t)
+		var studentService = students.NewStudentService()
 
-	assert.NotEqual(idAccount, 0, "Should return a valid account id.")
+		assert.NotEqual(idAccount, 0, "Should return a valid account id.")
 
-	createAccountDTO := mockCreateStudentDTO(idAccount)
-	id1, _ := studentService.CreateStudent(createAccountDTO)
+		createAccountDTO := mockCreateStudentDTO(idAccount)
+		id1, _ := studentService.CreateStudent(createAccountDTO)
 
-	student1, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id1})
-	assert.NoError(err, "Should return a student with the same ID as the one created")
-	assert.Len(student1.Routine, 2, "Student should have 2 routine plans")
-	assert.Equal(models.Male, *student1.Gender, "Should have Male gender")
-	assert.Equal(students.PaymentStyleUpfront, student1.PaymentStyle, "Should have Upfront payment style")
-	assert.Equal(students.PaymentTypeFixed, student1.PaymentType, "Should have Fixed payment type")
-	assert.Equal(float64(2000), *student1.PaymentTypeValue, "Should have 2000 as payment type value")
-	assert.Equal(students.SettlementStyleAppointments, student1.SettlementStyle, "Should have Appointments settlement style")
-	assert.Equal(10, *student1.SettlementStyleValue, "Should have 10 appointments threshold")
-	assert.Nil(student1.SettlementStyleDay, "Should have no settlement day")
-	mondayRoutineId := 0
-	for _, routinePlan := range student1.Routine {
-		if routinePlan.WeekDay == models.Monday {
-			mondayRoutineId = routinePlan.ID
+		student1, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id1})
+		assert.NoError(err, "Should return a student with the same ID as the one created")
+		assert.Len(student1.Routine, 2, "Student should have 2 routine plans")
+		assert.Equal(models.Male, *student1.Gender, "Should have Male gender")
+		assert.Equal(students.PaymentStyleUpfront, student1.PaymentStyle, "Should have Upfront payment style")
+		assert.Equal(students.PaymentTypeFixed, student1.PaymentType, "Should have Fixed payment type")
+		assert.Equal(float64(2000), *student1.PaymentTypeValue, "Should have 2000 as payment type value")
+		assert.Equal(students.SettlementStyleAppointments, student1.SettlementStyle, "Should have Appointments settlement style")
+		assert.Equal(10, *student1.SettlementStyleValue, "Should have 10 appointments threshold")
+		assert.Nil(student1.SettlementStyleDay, "Should have no settlement day")
+		mondayRoutineId := 0
+		for _, routinePlan := range student1.Routine {
+			if routinePlan.WeekDay == models.Monday {
+				mondayRoutineId = routinePlan.ID
+			}
+			assert.NotEqual(routinePlan.ID, 0, "Routine plan ID should not be 0")
+			assert.Condition(
+				func() bool { return routinePlan.WeekDay != models.Monday || routinePlan.Price == 120 },
+				"Routine plan price on Monday should be equal to the base price",
+			)
+			assert.Condition(
+				func() bool { return routinePlan.WeekDay != models.Tuesday || routinePlan.Price == 100 },
+				"Routine plan price on Tuesday should be equal to 100",
+			)
 		}
-		assert.NotEqual(routinePlan.ID, 0, "Routine plan ID should not be 0")
-		assert.Condition(
-			func() bool { return routinePlan.WeekDay != models.Monday || routinePlan.Price == 120 },
-			"Routine plan price on Monday should be equal to the base price",
-		)
-		assert.Condition(
-			func() bool { return routinePlan.WeekDay != models.Tuesday || routinePlan.Price == 100 },
-			"Routine plan price on Tuesday should be equal to 100",
-		)
-	}
 
-	updateStudentDTO := mockUpdateStudentDTO(idAccount, id1)
-	updateStudentDTO.Routine = append(updateStudentDTO.Routine, students.UpdateStudentRoutinePlanDTO{ID: utils.ToP(mondayRoutineId)})
-	id2, err := studentService.UpdateStudent(updateStudentDTO)
+		updateStudentDTO := mockUpdateStudentDTO(idAccount, id1)
+		updateStudentDTO.Routine = append(updateStudentDTO.Routine, students.UpdateStudentRoutinePlanDTO{ID: utils.ToP(mondayRoutineId)})
+		id2, err := studentService.UpdateStudent(updateStudentDTO)
 
-	assert.NoError(err, "Should be able to update student")
-	assert.Equal(id1, id2, "Should return the same ID as the one updated")
+		assert.NoError(err, "Should be able to update student")
+		assert.Equal(id1, id2, "Should return the same ID as the one updated")
 
-	student2, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id2})
-	assert.NotEqual(student2.CreatedAt, student2.UpdatedAt, "UpdatedAt should be updated")
-	assert.NoError(err, "Should return a student with the same ID aS the one created")
-	assert.Equal("Jane Doe Updated", student2.Name, "Name should be updated")
-	assert.Equal("1990-01-02", *student2.BirthDay, "BirthDay should be updated")
-	assert.Equal("#FFFFFF", student2.DisplayColor, "DisplayColor should be updated")
-	assert.Equal("http://example.com/picture2.jpg", *student2.Picture, "Picture should be updated")
-	assert.Equal(models.Female, *student2.Gender, "Should have Female gender")
-	assert.Equal("John Doe", *student2.ParentName, "ParentName should be updated")
-	assert.Equal("0987654321", *student2.ParentPhoneNumber, "ParentPhoneNumber should be updated")
-	assert.Equal(students.PaymentStyleLater, student2.PaymentStyle, "Should have Later payment style")
-	assert.Equal(students.PaymentTypeVariable, student2.PaymentType, "Should have Variable payment type")
-	assert.Nil(student2.PaymentTypeValue, "Should have nil as payment type value")
-	assert.Equal(students.SettlementStyleMonthly, student2.SettlementStyle, "Should have Monthly settlement style")
-	assert.Equal(1, *student2.SettlementStyleValue, "Should have 10 month threshold")
-	assert.Equal(5, *student2.SettlementStyleDay, "Should have day 5th as the settlement day")
-	assert.Equal("456 Main St", *student2.HouseAddress, "HouseAddress should be updated")
-	assert.Equal("Apt 2", *student2.HouseIdentifier, "HouseIdentifier should be updated")
-	assert.Equal(30.0, student2.HouseCoordinate.Latitude, "HouseCoordinate Latitude should be updated")
-	assert.Equal(30.0, student2.HouseCoordinate.Longitude, "HouseCoordinate Longitude should be updated")
-	assert.Len(student2.Routine, 2, "Student should have 2 routine plans")
-	for _, routinePlan := range student2.Routine {
-		assert.NotEqual(0, routinePlan.ID, "Routine plan ID should not be 0")
-		assert.NotEqual(models.Tuesday, routinePlan.WeekDay, "Routine plan on Tuesday should be deleted")
-		assert.Condition(
-			func() bool { return routinePlan.WeekDay != models.Monday || routinePlan.Price == 120 },
-			"Routine plan price on Monday should be equal to the base price",
-		)
-		assert.Condition(
-			func() bool { return routinePlan.WeekDay != models.Friday || routinePlan.Price == 200 },
-			"Routine plan price on Friday should be equal to 200",
-		)
-	}
+		student2, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id2})
+		assert.NotEqual(student2.CreatedAt, student2.UpdatedAt, "UpdatedAt should be updated")
+		assert.NoError(err, "Should return a student with the same ID aS the one created")
+		assert.Equal("Jane Doe Updated", student2.Name, "Name should be updated")
+		assert.Equal("1990-01-02", *student2.BirthDay, "BirthDay should be updated")
+		assert.Equal("#FFFFFF", student2.DisplayColor, "DisplayColor should be updated")
+		assert.Equal("http://example.com/picture2.jpg", *student2.Picture, "Picture should be updated")
+		assert.Equal(models.Female, *student2.Gender, "Should have Female gender")
+		assert.Equal("John Doe", *student2.ParentName, "ParentName should be updated")
+		assert.Equal("0987654321", *student2.ParentPhoneNumber, "ParentPhoneNumber should be updated")
+		assert.Equal(students.PaymentStyleLater, student2.PaymentStyle, "Should have Later payment style")
+		assert.Equal(students.PaymentTypeVariable, student2.PaymentType, "Should have Variable payment type")
+		assert.Nil(student2.PaymentTypeValue, "Should have nil as payment type value")
+		assert.Equal(students.SettlementStyleMonthly, student2.SettlementStyle, "Should have Monthly settlement style")
+		assert.Equal(1, *student2.SettlementStyleValue, "Should have 10 month threshold")
+		assert.Equal(5, *student2.SettlementStyleDay, "Should have day 5th as the settlement day")
+		assert.Equal("456 Main St", *student2.HouseAddress, "HouseAddress should be updated")
+		assert.Equal("Apt 2", *student2.HouseIdentifier, "HouseIdentifier should be updated")
+		assert.Equal(30.0, student2.HouseCoordinate.Latitude, "HouseCoordinate Latitude should be updated")
+		assert.Equal(30.0, student2.HouseCoordinate.Longitude, "HouseCoordinate Longitude should be updated")
+		assert.Len(student2.Routine, 2, "Student should have 2 routine plans")
+		for _, routinePlan := range student2.Routine {
+			assert.NotEqual(0, routinePlan.ID, "Routine plan ID should not be 0")
+			assert.NotEqual(models.Tuesday, routinePlan.WeekDay, "Routine plan on Tuesday should be deleted")
+			assert.Condition(
+				func() bool { return routinePlan.WeekDay != models.Monday || routinePlan.Price == 120 },
+				"Routine plan price on Monday should be equal to the base price",
+			)
+			assert.Condition(
+				func() bool { return routinePlan.WeekDay != models.Friday || routinePlan.Price == 200 },
+				"Routine plan price on Friday should be equal to 200",
+			)
+		}
 
-	allStudents, _ := studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
-	assert.Len(allStudents, 1, "Should return a list of students with 1 student after creating/updating")
+		allStudents, _ := studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
+		assert.Len(allStudents, 1, "Should return a list of students with 1 student after creating/updating")
 
-	studentService.DeleteStudent(students.DeleteStudentDTO{ID: id2, IDAccount: idAccount})
+		studentService.DeleteStudent(students.DeleteStudentDTO{ID: id2, IDAccount: idAccount})
 
-	allStudents, _ = studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
-	assert.Len(allStudents, 0, "Should return an empty list of students after deleting")
+		allStudents, _ = studentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: idAccount})
+		assert.Len(allStudents, 0, "Should return an empty list of students after deleting")
 
-	afterEachStudents()
-}
+		afterEachStudents()
+	})
 
-func TestStudentServiceErrorPath(t *testing.T) {
-	idAccount := beforeEachStudents()
+	t.Run("Error Path", func(t *testing.T) {
+		idAccount := beforeEachStudents()
 
-	var assert = assert.New(t)
-	var studentService = students.NewStudentService()
+		var assert = assert.New(t)
+		var studentService = students.NewStudentService()
 
-	createStudentDTO := mockCreateStudentDTO(idAccount)
-	createStudentDTO.PaymentType = students.PaymentTypeFixed
-	createStudentDTO.PaymentTypeValue = nil
-	_, err := studentService.CreateStudent(createStudentDTO)
-	assert.Error(err, "Should return an error when payment type is Fixed and value is nil")
+		createStudentDTO := mockCreateStudentDTO(idAccount)
+		createStudentDTO.PaymentType = students.PaymentTypeFixed
+		createStudentDTO.PaymentTypeValue = nil
+		_, err := studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when payment type is Fixed and value is nil")
 
-	createStudentDTO.PaymentType = students.PaymentTypeVariable
-	createStudentDTO.SettlementStyle = students.SettlementStyleMonthly
-	createStudentDTO.SettlementStyleValue = nil
-	_, err = studentService.CreateStudent(createStudentDTO)
-	assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and value is nil")
+		createStudentDTO.PaymentType = students.PaymentTypeVariable
+		createStudentDTO.SettlementStyle = students.SettlementStyleMonthly
+		createStudentDTO.SettlementStyleValue = nil
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and value is nil")
 
-	createStudentDTO.SettlementStyleValue = utils.ToP(1)
-	createStudentDTO.SettlementStyleDay = nil
-	_, err = studentService.CreateStudent(createStudentDTO)
-	assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and day is nil")
+		createStudentDTO.SettlementStyleValue = utils.ToP(1)
+		createStudentDTO.SettlementStyleDay = nil
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and day is nil")
 
-	createStudentDTO.SettlementStyle = students.SettlementStyleAppointments
-	createStudentDTO.SettlementStyleValue = nil
-	createStudentDTO.SettlementStyleDay = nil
-	_, err = studentService.CreateStudent(createStudentDTO)
-	assert.NoError(err, "Should not return an error when settlement type is Appointments and value/day is nil")
+		createStudentDTO.SettlementStyle = students.SettlementStyleAppointments
+		createStudentDTO.SettlementStyleValue = nil
+		createStudentDTO.SettlementStyleDay = nil
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.NoError(err, "Should not return an error when settlement type is Appointments and value/day is nil")
 
-	updateStudentDTO := mockUpdateStudentDTO(idAccount, 1)
-	updateStudentDTO.PaymentType = students.PaymentTypeFixed
-	updateStudentDTO.PaymentTypeValue = nil
-	_, err = studentService.UpdateStudent(updateStudentDTO)
-	assert.Error(err, "Should return an error when payment type is Fixed and payment type value is nil")
+		updateStudentDTO := mockUpdateStudentDTO(idAccount, 1)
+		updateStudentDTO.PaymentType = students.PaymentTypeFixed
+		updateStudentDTO.PaymentTypeValue = nil
+		_, err = studentService.UpdateStudent(updateStudentDTO)
+		assert.Error(err, "Should return an error when payment type is Fixed and payment type value is nil")
 
-	_, err = studentService.UpdateStudent(students.UpdateStudentDTO{IDAccount: idAccount, ID: 5})
-	assert.Error(err, "Should return an error when trying to update a student that does not exist")
+		_, err = studentService.UpdateStudent(students.UpdateStudentDTO{IDAccount: idAccount, ID: 5})
+		assert.Error(err, "Should return an error when trying to update a student that does not exist")
 
-	_, err = studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: 3})
-	assert.Error(err, "Should return an error when trying to get a student that does not exist")
+		_, err = studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: 3})
+		assert.Error(err, "Should return an error when trying to get a student that does not exist")
 
-	_, err = studentService.DeleteStudent(students.DeleteStudentDTO{IDAccount: idAccount, ID: 7})
-	assert.Error(err, "Should return an error when trying to delete a student that does not exist")
+		_, err = studentService.DeleteStudent(students.DeleteStudentDTO{IDAccount: idAccount, ID: 7})
+		assert.Error(err, "Should return an error when trying to delete a student that does not exist")
 
-	afterEachStudents()
+		afterEachStudents()
+	})
 }
 
 func mockCreateStudentDTO(idAccount int) students.CreateStudentDTO {
@@ -228,18 +227,11 @@ func mockUpdateStudentDTO(idAccount, id int) students.UpdateStudentDTO {
 }
 
 func beforeEachStudents() int {
-	proinject.Register("validate", configs.GetValidate(
-		auth.GetLoginProviders(),
-		students.GetPaymentStyles(),
-		students.GetPaymentTypes(),
-		students.GetSettlementStyles(),
-	))
-	proinject.Register("env", configs.GetEnv("../../.env"))
-	proinject.Register("db", configs.GetDb())
-	var studentRepository = studentsresources.NewDbStudentRepository()
-	proinject.Register("students_repository", studentRepository)
+	var authRepository = proinject.Get[auth.IAuthRepository]("auth_repository")
+	var studentRepository = proinject.Get[students.IStudentRepository]("students_repository")
+	authRepository.ResetAuth()
 	studentRepository.ResetStudents()
-	var authRepository = authresources.NewDbAuthRepository()
+
 	account, _ := authRepository.CreateAccount(auth.CreateAccountDTO{
 		Email:         "john@doe.com",
 		Name:          "John Doe",
@@ -251,8 +243,8 @@ func beforeEachStudents() int {
 }
 
 func afterEachStudents() {
-	var studentRepository = studentsresources.NewDbStudentRepository()
-	studentRepository.ResetStudents()
-	var authRepository = authresources.NewDbAuthRepository()
+	var authRepository = proinject.Get[auth.IAuthRepository]("auth_repository")
+	var studentRepository = proinject.Get[students.IStudentRepository]("students_repository")
 	authRepository.ResetAuth()
+	studentRepository.ResetStudents()
 }

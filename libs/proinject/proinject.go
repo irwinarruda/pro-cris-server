@@ -38,3 +38,7 @@ func Resolve[T interface{}](instance *T) *T {
 	}
 	return instance
 }
+
+func Get[T interface{}](key string) T {
+	return registeredInjects[key].(T)
+}
