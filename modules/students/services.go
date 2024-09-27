@@ -9,9 +9,11 @@ import (
 )
 
 type StudentService struct {
-	StudentsRepository IStudentRepository `inject:"students_repository"`
 	Validate           configs.Validate   `inject:"validate"`
+	StudentsRepository IStudentRepository `inject:"student_repository"`
 }
+
+type IStudentService = *StudentService
 
 func NewStudentService() *StudentService {
 	return proinject.Resolve(&StudentService{})

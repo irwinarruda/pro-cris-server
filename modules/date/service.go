@@ -9,6 +9,8 @@ import (
 
 type DateService struct{}
 
+type IDateService = *DateService
+
 func NewDateService() *DateService {
 	return proinject.Resolve(&DateService{})
 }

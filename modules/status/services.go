@@ -10,6 +10,8 @@ type StatusService struct {
 	StatusRepository IStatusRepository `inject:"status_repository"`
 }
 
+type IStatusService = *StatusService
+
 func NewStatusService() *StatusService {
 	return proinject.Resolve(&StatusService{})
 }

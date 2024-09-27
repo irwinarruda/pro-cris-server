@@ -14,19 +14,20 @@ import (
 )
 
 func InitInjections() {
-	proinject.Register("env", configs.GetEnv())
 	proinject.Register("validate", configs.GetValidate(
 		auth.GetLoginProviders(),
 		students.GetPaymentStyles(),
 		students.GetPaymentTypes(),
 		students.GetSettlementStyles(),
 	))
+	proinject.Register("env", configs.GetEnv())
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", providers.NewGoogleClient())
+	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
 	proinject.Register("date_service", date.NewDateService())
 	proinject.Register("appointment_repository", appointmentsresources.NewDbAppointmentRepository())
 	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
 	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
-	proinject.Register("students_repository", studentsresources.NewDbStudentRepository())
+	proinject.Register("student_repository", studentsresources.NewDbStudentRepository())
 	proinject.Register("students_service", students.NewStudentService())
 }

@@ -15,6 +15,8 @@ type AuthService struct {
 	Validate       configs.Validate  `inject:"validate"`
 }
 
+type IAuthService = *AuthService
+
 func NewAuthService() *AuthService {
 	return proinject.Resolve(&AuthService{})
 }

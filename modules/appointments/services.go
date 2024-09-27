@@ -13,9 +13,11 @@ import (
 type AppointmentService struct {
 	Validate              configs.Validate         `inject:"validate"`
 	AppointmentRepository IAppointmentRepository   `inject:"appointment_repository"`
-	StudentService        *students.StudentService `inject:"students_service"`
-	DateService           *date.DateService        `inject:"date_service"`
+	StudentService        students.IStudentService `inject:"students_service"`
+	DateService           date.IDateService        `inject:"date_service"`
 }
+
+type IAppointmentService = *AppointmentService
 
 func NewAppointmentService() *AppointmentService {
 	return proinject.Resolve(&AppointmentService{})

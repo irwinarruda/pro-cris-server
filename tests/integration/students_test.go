@@ -228,7 +228,7 @@ func mockUpdateStudentDTO(idAccount, id int) students.UpdateStudentDTO {
 
 func beforeEachStudents() int {
 	var authRepository = proinject.Get[auth.IAuthRepository]("auth_repository")
-	var studentRepository = proinject.Get[students.IStudentRepository]("students_repository")
+	var studentRepository = proinject.Get[students.IStudentRepository]("student_repository")
 	authRepository.ResetAuth()
 	studentRepository.ResetStudents()
 
@@ -244,7 +244,7 @@ func beforeEachStudents() int {
 
 func afterEachStudents() {
 	var authRepository = proinject.Get[auth.IAuthRepository]("auth_repository")
-	var studentRepository = proinject.Get[students.IStudentRepository]("students_repository")
+	var studentRepository = proinject.Get[students.IStudentRepository]("student_repository")
 	authRepository.ResetAuth()
 	studentRepository.ResetStudents()
 }

@@ -137,7 +137,7 @@ func mockCreateAppointmentDTO(idAccount, idStudent int) appointments.CreateAppoi
 func beforeEachAppointment() (idAccount int, idStudent int, idStudent2 int) {
 	var appointmentRepository = proinject.Get[appointments.IAppointmentRepository]("appointment_repository")
 	var authRepository = proinject.Get[auth.IAuthRepository]("auth_repository")
-	var studentRepository = proinject.Get[students.IStudentRepository]("students_repository")
+	var studentRepository = proinject.Get[students.IStudentRepository]("student_repository")
 	appointmentRepository.ResetAppointments()
 	authRepository.ResetAuth()
 	studentRepository.ResetStudents()
@@ -157,7 +157,7 @@ func beforeEachAppointment() (idAccount int, idStudent int, idStudent2 int) {
 
 func afterEachAppointment() {
 	var authRepository = proinject.Get[auth.IAuthRepository]("auth_repository")
-	var studentRepository = proinject.Get[students.IStudentRepository]("students_repository")
+	var studentRepository = proinject.Get[students.IStudentRepository]("student_repository")
 	var appointmentRepository = proinject.Get[appointments.IAppointmentRepository]("appointment_repository")
 	authRepository.ResetAuth()
 	studentRepository.ResetStudents()

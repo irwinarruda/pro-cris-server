@@ -27,6 +27,6 @@ func Init() {
 	proinject.Register("appointment_repository", appointmentsresources.NewDbAppointmentRepository())
 	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
 	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
-	proinject.Register("students_repository", studentsresources.NewDbStudentRepository())
+	proinject.Register("student_repository", studentsresources.NewDbStudentRepository())
 	proinject.Register("students_service", students.NewStudentService())
 }
