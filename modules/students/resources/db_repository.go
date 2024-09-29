@@ -416,4 +416,6 @@ func (r *DbStudentRepository) DeleteRoutine(idStudent int, routine ...int) {
 func (r *DbStudentRepository) ResetStudents() {
 	r.Db.Exec(`DELETE FROM "student";`)
 	r.Db.Exec(`ALTER SEQUENCE student_id_seq RESTART WITH 1;`)
+	r.Db.Exec(`DELETE FROM "routine_plan";`)
+	r.Db.Exec(`ALTER SEQUENCE routine_plan_id_seq RESTART WITH 1;`)
 }

@@ -21,8 +21,8 @@ func TestStudentService(t *testing.T) {
 
 		assert.NotEqual(idAccount, 0, "Should return a valid account id.")
 
-		createAccountDTO := mockCreateStudentDTO(idAccount)
-		id1, _ := studentService.CreateStudent(createAccountDTO)
+		createStudentDTO := mockCreateStudentDTO(idAccount)
+		id1, _ := studentService.CreateStudent(createStudentDTO)
 
 		student1, err := studentService.GetStudentByID(students.GetStudentDTO{IDAccount: idAccount, ID: id1})
 		assert.NoError(err, "Should return a student with the same ID as the one created")
@@ -142,6 +142,36 @@ func TestStudentService(t *testing.T) {
 
 		_, err = studentService.DeleteStudent(students.DeleteStudentDTO{IDAccount: idAccount, ID: 7})
 		assert.Error(err, "Should return an error when trying to delete a student that does not exist")
+
+		afterEachStudents()
+	})
+
+	t.Run("Routine Plan Error Path", func(t *testing.T) {
+		idAccount := beforeEachStudents()
+
+		createStudentDTO := mockCreateStudentDTO(idAccount)
+		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Thursday, Duration: 60, StartHour: 8, Price: 120},
+			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: 120},
+			{WeekDay: models.Monday, Duration: 60, StartHour: 68, Price: 120},
+			{WeekDay: models.Monday, Duration: 4, StartHour: 4, Price: 120},
+		}
+		_, err := studentService.CreateStudent(createStudentDTO)
+		assert.NoError(err, "Should not return when overlapping happens at the beggining and the end appointment hours")
+
+		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Thursday, Duration: 60, StartHour: 8, Price: 120},
+			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: 120},
+			{WeekDay: models.Monday, Duration: 60, StartHour: 67, Price: 120},
+		}
+		idStudent, err := studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return when overlapping routine plan happens")
+
+		updateStudentDTO := mockUpdateStudentDTO(idAccount, idStudent)
+		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
+			{ID: nil, WeekDay: utils.ToP(models.Friday), StartHour: utils.ToP(9), Duration: utils.ToP(90), Price: utils.ToP(200.0)},
+		}
+		_, _ = studentService.UpdateStudent(updateStudentDTO)
 
 		afterEachStudents()
 	})

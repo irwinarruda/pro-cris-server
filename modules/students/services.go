@@ -1,6 +1,7 @@
 package students
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
@@ -59,6 +60,16 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	}
 	if student.SettlementStyle != SettlementStyleAppointments {
 		student.PaymentTypeValue = nil
+	}
+	for i, routineI := range student.Routine {
+		for j, routineJ := range student.Routine {
+			if routineI.WeekDay != routineJ.WeekDay || i == j {
+				continue
+			}
+			if utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping", routineI.WeekDay), true, http.StatusBadRequest)
+			}
+		}
 	}
 	return s.StudentsRepository.CreateStudent(student), nil
 }
