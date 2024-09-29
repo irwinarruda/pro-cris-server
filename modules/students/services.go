@@ -3,6 +3,7 @@ package students
 import (
 	"fmt"
 	"net/http"
+	"slices"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
@@ -63,10 +64,7 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	}
 	for i, routineI := range student.Routine {
 		for j, routineJ := range student.Routine {
-			if routineI.WeekDay != routineJ.WeekDay || i == j {
-				continue
-			}
-			if utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
+			if routineI.WeekDay == routineJ.WeekDay && i != j && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
 				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping", routineI.WeekDay), true, http.StatusBadRequest)
 			}
 		}
@@ -97,24 +95,43 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	updatedStudent, err := s.StudentsRepository.GetStudentByID(GetStudentDTO{IDAccount: student.IDAccount, ID: idStudent})
+	if err != nil {
+		return 0, err
+	}
 	mustCreateRoutine := []CreateStudentRoutinePlanDTO{}
 	existingRoutine := []int{}
 	for _, routinePlan := range student.Routine {
-		if routinePlan.ID != nil {
-			existingRoutine = append(existingRoutine, *routinePlan.ID)
+		if routinePlan.ID == nil {
+			mustCreateRoutine = append(mustCreateRoutine, CreateStudentRoutinePlanDTO{
+				WeekDay:   *routinePlan.WeekDay,
+				Duration:  *routinePlan.Duration,
+				StartHour: *routinePlan.StartHour,
+				Price:     *routinePlan.Price,
+			})
+			updatedStudent.Routine = append(updatedStudent.Routine, RoutinePlan{
+				WeekDay:   *routinePlan.WeekDay,
+				StartHour: *routinePlan.StartHour,
+				Duration:  *routinePlan.Duration,
+				Price:     *routinePlan.Price,
+			})
 			continue
 		}
-		mustCreateRoutine = append(mustCreateRoutine, CreateStudentRoutinePlanDTO{
-			WeekDay:   *routinePlan.WeekDay,
-			Duration:  *routinePlan.Duration,
-			StartHour: *routinePlan.StartHour,
-			Price:     *routinePlan.Price,
+		index := slices.IndexFunc(updatedStudent.Routine, func(r RoutinePlan) bool {
+			return r.ID == *routinePlan.ID
 		})
+		if index != -1 {
+			existingRoutine = append(existingRoutine, updatedStudent.Routine[index].ID)
+		}
 	}
-	shouldDeleteRoutine := s.StudentsRepository.GetRoutineID(idStudent, existingRoutine...)
-	if len(shouldDeleteRoutine) > 0 {
-		s.StudentsRepository.DeleteRoutine(idStudent, shouldDeleteRoutine...)
+	for i, routineI := range updatedStudent.Routine {
+		for j, routineJ := range updatedStudent.Routine {
+			if routineI.WeekDay == routineJ.WeekDay && i != j && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping", routineI.WeekDay), true, http.StatusBadRequest)
+			}
+		}
 	}
+	s.StudentsRepository.DeleteAllRoutine(idStudent, existingRoutine...)
 	if len(mustCreateRoutine) > 0 {
 		s.StudentsRepository.CreateRoutine(idStudent, mustCreateRoutine...)
 	}

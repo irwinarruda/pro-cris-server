@@ -156,7 +156,7 @@ func TestStudentService(t *testing.T) {
 			{WeekDay: models.Monday, Duration: 60, StartHour: 68, Price: 120},
 			{WeekDay: models.Monday, Duration: 4, StartHour: 4, Price: 120},
 		}
-		_, err := studentService.CreateStudent(createStudentDTO)
+		idStudent, err := studentService.CreateStudent(createStudentDTO)
 		assert.NoError(err, "Should not return when overlapping happens at the beggining and the end appointment hours")
 
 		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
@@ -164,14 +164,23 @@ func TestStudentService(t *testing.T) {
 			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: 120},
 			{WeekDay: models.Monday, Duration: 60, StartHour: 67, Price: 120},
 		}
-		idStudent, err := studentService.CreateStudent(createStudentDTO)
-		assert.Error(err, "Should return when overlapping routine plan happens")
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when overlapping routine plan happens")
 
 		updateStudentDTO := mockUpdateStudentDTO(idAccount, idStudent)
 		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
-			{ID: nil, WeekDay: utils.ToP(models.Friday), StartHour: utils.ToP(9), Duration: utils.ToP(90), Price: utils.ToP(200.0)},
+			{ID: utils.ToP(1)},
+			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(0), Duration: utils.ToP(8), Price: utils.ToP(200.0)},
 		}
-		_, _ = studentService.UpdateStudent(updateStudentDTO)
+		_, err = studentService.UpdateStudent(updateStudentDTO)
+		assert.NoError(err, "Should not return when updating a routine plan that is not overlapping")
+
+		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
+			{ID: utils.ToP(1)},
+			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(50), Duration: utils.ToP(12), Price: utils.ToP(200.0)},
+		}
+		_, err = studentService.UpdateStudent(updateStudentDTO)
+		assert.Error(err, "Should return an error when overlapping happens")
 
 		afterEachStudents()
 	})

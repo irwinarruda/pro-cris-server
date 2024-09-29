@@ -399,17 +399,20 @@ func (r *DbStudentRepository) CreateRoutine(idStudent int, routinePlan ...studen
 // Delete a list of RoutinePlan from a student.
 //
 // 'routine' is a list of ids that should be deleted.
-func (r *DbStudentRepository) DeleteRoutine(idStudent int, routine ...int) {
-	sql := fmt.Sprintf(`
+func (r *DbStudentRepository) DeleteAllRoutine(idStudent int, except ...int) {
+	sql := `
     UPDATE "routine_plan"
     SET is_deleted = true
-    WHERE id_student = ? AND id IN %s;`,
-		utils.SqlArray(len(routine)),
-	)
+    WHERE id_student = ?`
 	args := []interface{}{idStudent}
-	for _, id := range routine {
-		args = append(args, id)
+	if len(except) > 0 {
+		sql += ` AND id NOT IN `
+		sql += utils.SqlArray(len(except))
+		for _, id := range except {
+			args = append(args, id)
+		}
 	}
+	sql += ";"
 	r.Db.Exec(sql, args...)
 }
 

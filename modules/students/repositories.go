@@ -8,6 +8,6 @@ type IStudentRepository interface {
 	DeleteStudent(data DeleteStudentDTO) (int, error)
 	GetRoutineID(idStudent int, excluded ...int) []int
 	CreateRoutine(idStudent int, routinePlan ...CreateStudentRoutinePlanDTO)
-	DeleteRoutine(idStudent int, routine ...int)
+	DeleteAllRoutine(idStudent int, except ...int)
 	ResetStudents()
 }

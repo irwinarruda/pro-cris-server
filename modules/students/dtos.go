@@ -21,7 +21,7 @@ type CreateStudentDTO struct {
 	Name                 string                        `json:"name" validate:"required"`
 	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime=2006-01-02"`
 	DisplayColor         string                        `json:"displayColor" validate:"omitempty,hexcolor"`
-	Gender               *models.Gender                `json:"gender"`
+	Gender               *models.Gender                `json:"gender" validate:"gender"`
 	Picture              *string                       `json:"picture" validate:"omitempty,url"`
 	ParentName           *string                       `json:"parentName"`
 	ParentPhoneNumber    *string                       `json:"parentPhoneNumber"`
@@ -51,7 +51,7 @@ type UpdateStudentDTO struct {
 	BirthDay             *string                       `json:"birthDay" validate:"omitempty,datetime=2006-01-02"`
 	DisplayColor         string                        `json:"displayColor" validate:"required,hexcolor"`
 	Picture              *string                       `json:"picture" validate:"omitempty,url"`
-	Gender               *models.Gender                `json:"gender"`
+	Gender               *models.Gender                `json:"gender" validate:"gender"`
 	ParentName           *string                       `json:"parentName"`
 	ParentPhoneNumber    *string                       `json:"parentPhoneNumber"`
 	PaymentStyle         PaymentStyle                  `json:"paymentStyle" validate:"payment_style"`
