@@ -49,7 +49,8 @@ func (s *DbStudent) FromCreateStudent(student students.CreateStudentDTO) {
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
 	s.Picture = student.Picture
-	s.Gender = student.Gender
+	gender := student.Gender.String()
+	s.Gender = &gender
 	s.ParentName = student.ParentName
 	s.ParentPhoneNumber = student.ParentPhoneNumber
 	s.PaymentStyle = student.PaymentStyle
@@ -77,7 +78,8 @@ func (s *DbStudent) FromUpdateStudent(student students.UpdateStudentDTO) {
 	s.BirthDay = student.BirthDay
 	s.DisplayColor = student.DisplayColor
 	s.Picture = student.Picture
-	s.Gender = student.Gender
+	gender := student.Gender.String()
+	s.Gender = &gender
 	s.ParentName = student.ParentName
 	s.ParentPhoneNumber = student.ParentPhoneNumber
 	s.PaymentStyle = student.PaymentStyle
@@ -107,7 +109,7 @@ func (s *DbStudent) ToStudent(dbRoutine []DbRoutinePlan) students.Student {
 		BirthDay:             s.BirthDay,
 		DisplayColor:         s.DisplayColor,
 		Picture:              s.Picture,
-		Gender:               s.Gender,
+		Gender:               (*models.Gender)(s.Gender),
 		ParentName:           s.ParentName,
 		ParentPhoneNumber:    s.ParentPhoneNumber,
 		PaymentStyle:         s.PaymentStyle,

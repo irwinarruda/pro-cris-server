@@ -14,11 +14,11 @@ import (
 
 func TestAppointmentService(t *testing.T) {
 	Init()
+	var assert = assert.New(t)
+	var appointmentService = appointments.NewAppointmentService()
+
 	t.Run("Happy Path", func(t *testing.T) {
 		idAccount, idStudent, idStudent2 := beforeEachAppointment()
-
-		var assert = assert.New(t)
-		var appointmentService = appointments.NewAppointmentService()
 
 		id1, _ := appointmentService.CreateAppointment(mockCreateAppointmentDTO(idAccount, idStudent))
 		appointment1, err := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
@@ -89,9 +89,6 @@ func TestAppointmentService(t *testing.T) {
 
 	t.Run("Error Path", func(t *testing.T) {
 		idAccount, idStudent, _ := beforeEachAppointment()
-
-		var assert = assert.New(t)
-		var appointmentService = appointments.NewAppointmentService()
 
 		_, err := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
 			IDAccount: idAccount,

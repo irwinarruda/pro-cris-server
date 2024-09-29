@@ -1,15 +1,17 @@
 package models
 
-type Gender = string
+type Gender string
 
 const (
 	Female Gender = "Female"
 	Male   Gender = "Male"
 )
 
-func GetGender() []Gender {
-	return []Gender{
-		Male,
-		Female,
+func (g Gender) String() string { return string(g) }
+
+func GetGenderString() []string {
+	return []string{
+		Male.String(),
+		Female.String(),
 	}
 }

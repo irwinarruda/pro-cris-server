@@ -1,7 +1,7 @@
 package auth
 
 type LoginDTO struct {
-	Provider LoginProvider `json:"provider" validate:"required,eq=Google"`
+	Provider LoginProvider `json:"provider" validate:"required,login_provider"`
 	Token    string        `json:"token" validate:"required,jwt"`
 }
 

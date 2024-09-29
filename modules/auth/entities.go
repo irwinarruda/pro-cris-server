@@ -23,21 +23,25 @@ type TeacherFeatures struct {
 	CanManuallyCreateAppointments bool `json:"canManuallyCreateAppointments"`
 }
 
-type Permission = string
+type Permission string
 
 const (
 	PermissionAdmin   Permission = "Admin"
 	PermissionTeacher Permission = "Teacher"
 )
 
-type LoginProvider = string
+type LoginProvider string
 
 const (
 	LoginProviderGoogle LoginProvider = "Google"
 )
 
-func GetLoginProviders() []LoginProvider {
-	return []LoginProvider{
-		LoginProviderGoogle,
+func (l LoginProvider) String() string {
+	return string(l)
+}
+
+func GetLoginProvidersString() []string {
+	return []string{
+		LoginProviderGoogle.String(),
 	}
 }

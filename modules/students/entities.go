@@ -6,25 +6,33 @@ import (
 	"github.com/irwinarruda/pro-cris-server/shared/models"
 )
 
-type PaymentStyle = string
+type PaymentStyle string
 
 const (
 	PaymentStyleUpfront PaymentStyle = "Upfront"
 	PaymentStyleLater   PaymentStyle = "Later"
 )
 
-func GetPaymentStyles() []PaymentStyle { return []PaymentStyle{PaymentStyleUpfront, PaymentStyleLater} }
+func (p PaymentStyle) String() string { return string(p) }
 
-type PaymentType = string
+func GetPaymentStylesString() []string {
+	return []string{PaymentStyleUpfront.String(), PaymentStyleLater.String()}
+}
+
+type PaymentType string
 
 const (
 	PaymentTypeFixed    PaymentType = "Fixed"
 	PaymentTypeVariable PaymentType = "Variable"
 )
 
-func GetPaymentTypes() []PaymentType { return []PaymentType{PaymentTypeFixed, PaymentTypeVariable} }
+func (p PaymentType) String() string { return string(p) }
 
-type SettlementStyle = string
+func GetPaymentTypesString() []string {
+	return []string{PaymentTypeFixed.String(), PaymentTypeVariable.String()}
+}
+
+type SettlementStyle string
 
 const (
 	SettlementStyleAppointments SettlementStyle = "Appointments"
@@ -32,8 +40,10 @@ const (
 	SettlementStyleMonthly      SettlementStyle = "Monthly"
 )
 
-func GetSettlementStyles() []SettlementStyle {
-	return []SettlementStyle{SettlementStyleAppointments, SettlementStyleWeekly, SettlementStyleMonthly}
+func (p SettlementStyle) String() string { return string(p) }
+
+func GetSettlementStylesString() []string {
+	return []string{SettlementStyleAppointments.String(), SettlementStyleWeekly.String(), SettlementStyleMonthly.String()}
 }
 
 type Student struct {

@@ -12,11 +12,12 @@ import (
 )
 
 func TestStudentService(t *testing.T) {
+	Init()
+	var assert = assert.New(t)
+	var studentService = students.NewStudentService()
+
 	t.Run("Happy Path", func(t *testing.T) {
 		idAccount := beforeEachStudents()
-
-		var assert = assert.New(t)
-		var studentService = students.NewStudentService()
 
 		assert.NotEqual(idAccount, 0, "Should return a valid account id.")
 
@@ -103,9 +104,6 @@ func TestStudentService(t *testing.T) {
 
 	t.Run("Error Path", func(t *testing.T) {
 		idAccount := beforeEachStudents()
-
-		var assert = assert.New(t)
-		var studentService = students.NewStudentService()
 
 		createStudentDTO := mockCreateStudentDTO(idAccount)
 		createStudentDTO.PaymentType = students.PaymentTypeFixed

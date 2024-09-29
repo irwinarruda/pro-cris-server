@@ -14,12 +14,12 @@ import (
 )
 
 func InitInjections() {
-	proinject.Register("validate", configs.GetValidate(
-		auth.GetLoginProviders(),
-		students.GetPaymentStyles(),
-		students.GetPaymentTypes(),
-		students.GetSettlementStyles(),
-	))
+	proinject.Register("validate", configs.GetValidate(map[string][]string{
+		"login_provider":   auth.GetLoginProvidersString(),
+		"payment_style":    students.GetPaymentStylesString(),
+		"payment_type":     students.GetPaymentTypesString(),
+		"settlement_style": students.GetSettlementStylesString(),
+	}))
 	proinject.Register("env", configs.GetEnv())
 	proinject.Register("db", configs.GetDb())
 	proinject.Register("google", providers.NewGoogleClient())

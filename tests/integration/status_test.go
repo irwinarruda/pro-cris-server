@@ -9,10 +9,10 @@ import (
 
 func TestStatusService(t *testing.T) {
 	Init()
+	var assert = assert.New(t)
+	var statusService = status.NewStatusService()
 
 	t.Run("Happy Path", func(t *testing.T) {
-		var assert = assert.New(t)
-		var statusService = status.NewStatusService()
 		var status = statusService.GetStatus()
 
 		assert.NotEqual(0, status.UpdatedAt, "Should return a valid updated at.")

@@ -16,11 +16,11 @@ var invalidToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODk
 
 func TestAuthService(t *testing.T) {
 	Init()
+	var assert = assert.New(t)
+	var authService = auth.NewAuthService()
 
 	t.Run("Happy Path", func(t *testing.T) {
 		beforeEachAuth()
-		var assert = assert.New(t)
-		var authService = auth.NewAuthService()
 		account1, _ := authService.Login(auth.LoginDTO{
 			Provider: auth.LoginProviderGoogle,
 			Token:    validToken,
@@ -44,9 +44,6 @@ func TestAuthService(t *testing.T) {
 	})
 
 	t.Run("Error Path", func(t *testing.T) {
-		var assert = assert.New(t)
-		var authService = auth.NewAuthService()
-
 		_, err := authService.Login(auth.LoginDTO{
 			Provider: auth.LoginProviderGoogle,
 			Token:    "invalid",

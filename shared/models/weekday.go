@@ -20,14 +20,14 @@ func ToWeekDay(day any) WeekDay {
 	return WeekDay(day.(string))
 }
 
-func GetWeekDays() []WeekDay {
-	return []WeekDay{
-		Monday,
-		Tuesday,
-		Wednesday,
-		Thursday,
-		Friday,
-		Saturday,
-		Sunday,
+func GetWeekDaysString() []string {
+	return []string{
+		Monday.String(),
+		Tuesday.String(),
+		Wednesday.String(),
+		Thursday.String(),
+		Friday.String(),
+		Saturday.String(),
+		Sunday.String(),
 	}
 }
