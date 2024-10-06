@@ -6,6 +6,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
+	"github.com/irwinarruda/pro-cris-server/shared/constants"
 	"github.com/irwinarruda/pro-cris-server/shared/models"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 	"github.com/stretchr/testify/assert"
@@ -150,7 +151,6 @@ func TestStudentService(t *testing.T) {
 		idAccount := beforeEachStudents()
 
 		createStudentDTO := mockCreateStudentDTO(idAccount)
-		// createStudentDTO.BirthDay = utils.ToP("Something Wrong")
 		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
 			{WeekDay: models.Thursday, Duration: 60, StartHour: 8, Price: 120},
 			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: 120},
@@ -169,13 +169,27 @@ func TestStudentService(t *testing.T) {
 		assert.Error(err, "Should return an error when overlapping routine plan happens")
 
 		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
-			{WeekDay: models.Thursday, Duration: 86400001, StartHour: 8, Price: 120},
+			{WeekDay: models.Saturday, Duration: 60, StartHour: 7, Price: 120},
+			{WeekDay: models.Saturday.Before(), Duration: constants.HOUR_24, StartHour: 8, Price: 120},
+		}
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when overlapping routine plan from day before happens")
+
+		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Sunday, Duration: constants.HOUR_24, StartHour: 8, Price: 120},
+			{WeekDay: models.Sunday.After(), Duration: 60, StartHour: 7, Price: 120},
+		}
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when overlapping routine plan from day after happens")
+
+		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Thursday, Duration: constants.HOUR_24 + 1, StartHour: 8, Price: 120},
 		}
 		_, err = studentService.CreateStudent(createStudentDTO)
 		assert.Error(err, "Should return an error when duration is greater than 24 hours")
 
 		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
-			{WeekDay: models.Thursday, Duration: 60, StartHour: 86400001, Price: 120},
+			{WeekDay: models.Thursday, Duration: 60, StartHour: constants.HOUR_24 + 1, Price: 120},
 		}
 		_, err = studentService.CreateStudent(createStudentDTO)
 		assert.Error(err, "Should return an error when start hour is greater than 24 hours")
@@ -196,13 +210,20 @@ func TestStudentService(t *testing.T) {
 		assert.Error(err, "Should return an error when overlapping happens")
 
 		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
-			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(8), Duration: utils.ToP(86400001), Price: utils.ToP(200.0)},
+			{ID: utils.ToP(1)},
+			{ID: nil, WeekDay: utils.ToP(models.Thursday.Before()), StartHour: utils.ToP(9), Duration: utils.ToP(constants.HOUR_24), Price: utils.ToP(200.0)},
+		}
+		_, err = studentService.UpdateStudent(updateStudentDTO)
+		assert.Error(err, "Should return an error when overlapping routine plan from day before happens")
+
+		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
+			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(8), Duration: utils.ToP(constants.HOUR_24 + 1), Price: utils.ToP(200.0)},
 		}
 		_, err = studentService.UpdateStudent(updateStudentDTO)
 		assert.Error(err, "Should return an error when duration is greater than 24 hours")
 
 		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
-			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(86400001), Duration: utils.ToP(60), Price: utils.ToP(200.0)},
+			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(constants.HOUR_24 + 1), Duration: utils.ToP(60), Price: utils.ToP(200.0)},
 		}
 		_, err = studentService.UpdateStudent(updateStudentDTO)
 		assert.Error(err, "Should return an error when start hour is greater than 24 hours")

@@ -7,6 +7,7 @@ import (
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
+	"github.com/irwinarruda/pro-cris-server/shared/constants"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
@@ -64,8 +65,17 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	}
 	for i, routineI := range student.Routine {
 		for j, routineJ := range student.Routine {
-			if routineI.WeekDay == routineJ.WeekDay && i != j && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping", routineI.WeekDay), true, http.StatusBadRequest)
+			if i == j {
+				continue
+			}
+			if routineI.WeekDay == routineJ.WeekDay && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+			}
+			if routineI.WeekDay.Before() == routineJ.WeekDay && utils.IsOverlapping(routineI.StartHour+constants.HOUR_24, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+			}
+			if routineI.WeekDay.After() == routineJ.WeekDay && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour+constants.HOUR_24, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
 			}
 		}
 	}
@@ -134,8 +144,17 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	}
 	for i, routineI := range resultingRoutinePlan {
 		for j, routineJ := range resultingRoutinePlan {
-			if routineI.WeekDay == routineJ.WeekDay && i != j && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping", routineI.WeekDay), true, http.StatusBadRequest)
+			if i == j {
+				continue
+			}
+			if routineI.WeekDay == routineJ.WeekDay && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+			}
+			if routineI.WeekDay.Before() == routineJ.WeekDay && utils.IsOverlapping(routineI.StartHour+constants.HOUR_24, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+			}
+			if routineI.WeekDay.After() == routineJ.WeekDay && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour+constants.HOUR_24, routineJ.Duration) {
+				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
 			}
 		}
 	}
