@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/irwinarruda/pro-cris-server/shared/utils"
+)
+
 type WeekDay string
 
 const (
@@ -16,8 +20,8 @@ func (w WeekDay) String() string {
 	return string(w)
 }
 
-func ToWeekDay(day any) WeekDay {
-	return WeekDay(day.(string))
+func (w *WeekDay) UnmarshalJSON(b []byte) (err error) {
+	return utils.UnmarshalEnum(w, GetWeekDaysString(), b)
 }
 
 func GetWeekDaysString() []string {

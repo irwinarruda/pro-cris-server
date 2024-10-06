@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/irwinarruda/pro-cris-server/shared/models"
+	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
 type PaymentStyle string
@@ -12,6 +13,10 @@ const (
 	PaymentStyleUpfront PaymentStyle = "Upfront"
 	PaymentStyleLater   PaymentStyle = "Later"
 )
+
+func (s *PaymentStyle) UnmarshalJSON(b []byte) (err error) {
+	return utils.UnmarshalEnum(s, GetPaymentStylesString(), b)
+}
 
 func (p PaymentStyle) String() string { return string(p) }
 
@@ -26,6 +31,10 @@ const (
 	PaymentTypeVariable PaymentType = "Variable"
 )
 
+func (p *PaymentType) UnmarshalJSON(b []byte) (err error) {
+	return utils.UnmarshalEnum(p, GetPaymentTypesString(), b)
+}
+
 func (p PaymentType) String() string { return string(p) }
 
 func GetPaymentTypesString() []string {
@@ -39,6 +48,10 @@ const (
 	SettlementStyleWeekly       SettlementStyle = "Weekly"
 	SettlementStyleMonthly      SettlementStyle = "Monthly"
 )
+
+func (s *SettlementStyle) UnmarshalJSON(b []byte) (err error) {
+	return utils.UnmarshalEnum(s, GetSettlementStylesString(), b)
+}
 
 func (p SettlementStyle) String() string { return string(p) }
 

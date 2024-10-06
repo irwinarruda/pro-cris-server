@@ -16,5 +16,5 @@ func NewDateService() *DateService {
 }
 
 func (d *DateService) GetWeekDayFromDate(date time.Time) models.WeekDay {
-	return models.ToWeekDay(date.Weekday().String())
+	return models.WeekDay(date.Weekday().String())
 }

@@ -57,7 +57,6 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 
 func (a *AppointmentService) CreateDailyAppointmentsByStudentsRoutine(data CreateDailyAppointmentsByStudentsRoutineDTO) ([]Appointment, error) {
 	createdAppointments := []Appointment{}
-	// errorList := []string{}
 
 	if err := a.Validate.Struct(data); err != nil {
 		return createdAppointments, err

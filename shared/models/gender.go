@@ -1,5 +1,9 @@
 package models
 
+import (
+	"github.com/irwinarruda/pro-cris-server/shared/utils"
+)
+
 type Gender string
 
 const (
@@ -8,6 +12,10 @@ const (
 )
 
 func (g Gender) String() string { return string(g) }
+
+func (g *Gender) UnmarshalJSON(b []byte) (err error) {
+	return utils.UnmarshalEnum(g, GetGenderString(), b)
+}
 
 func GetGenderString() []string {
 	return []string{
