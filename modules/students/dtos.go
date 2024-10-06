@@ -34,14 +34,14 @@ type CreateStudentDTO struct {
 	HouseAddress         *string                       `json:"houseAddress"`
 	HouseIdentifier      *string                       `json:"hoseInfo"`
 	HouseCoordinate      *models.Coordinate            `json:"houseCoordinate"`
-	Routine              []CreateStudentRoutinePlanDTO `json:"routine" validate:"required"`
+	Routine              []CreateStudentRoutinePlanDTO `json:"routine" validate:"required,dive"`
 }
 
 type CreateStudentRoutinePlanDTO struct {
 	WeekDay   models.WeekDay `json:"weekDay" validate:"required,weekday"`
-	StartHour int            `json:"startHour" validate:"required"`
-	Duration  int            `json:"duration" validate:"required"`
-	Price     float64        `json:"price" validate:"required"`
+	StartHour int            `json:"startHour" validate:"required,min=0,max=86400000"`
+	Duration  int            `json:"duration" validate:"required,min=0,max=86400000"`
+	Price     float64        `json:"price" validate:"required,min=0"`
 }
 
 type UpdateStudentDTO struct {
@@ -63,15 +63,15 @@ type UpdateStudentDTO struct {
 	HouseAddress         *string                       `json:"houseAddress"`
 	HouseIdentifier      *string                       `json:"hoseInfo"`
 	HouseCoordinate      *models.Coordinate            `json:"houseCoordinate"`
-	Routine              []UpdateStudentRoutinePlanDTO `json:"routine" validate:"required"`
+	Routine              []UpdateStudentRoutinePlanDTO `json:"routine" validate:"required,dive"`
 }
 
 type UpdateStudentRoutinePlanDTO struct {
 	ID        *int            `json:"id"`
-	WeekDay   *models.WeekDay `json:"weekDay" validate:"required_ifid,weekday_ifid"`
-	StartHour *int            `json:"startHour" validate:"required_ifid"`
-	Duration  *int            `json:"duration" validate:"required_ifid"`
-	Price     *float64        `json:"price" validate:"required_ifid"`
+	WeekDay   *models.WeekDay `json:"weekDay" validate:"omitnil,required"`
+	StartHour *int            `json:"startHour" validate:"omitnil,min=0,max=86400000"`
+	Duration  *int            `json:"duration" validate:"omitnil,min=0,max=86400000"`
+	Price     *float64        `json:"price" validate:"omitnil,min=0"`
 }
 
 type DeleteStudentDTO struct {

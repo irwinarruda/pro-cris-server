@@ -99,6 +99,7 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	if err != nil {
 		return 0, err
 	}
+	resultingRoutinePlan := []RoutinePlan{}
 	mustCreateRoutine := []CreateStudentRoutinePlanDTO{}
 	existingRoutine := []int{}
 	for _, routinePlan := range student.Routine {
@@ -109,7 +110,7 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 				StartHour: *routinePlan.StartHour,
 				Price:     *routinePlan.Price,
 			})
-			updatedStudent.Routine = append(updatedStudent.Routine, RoutinePlan{
+			resultingRoutinePlan = append(resultingRoutinePlan, RoutinePlan{
 				WeekDay:   *routinePlan.WeekDay,
 				StartHour: *routinePlan.StartHour,
 				Duration:  *routinePlan.Duration,
@@ -122,16 +123,25 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 		})
 		if index != -1 {
 			existingRoutine = append(existingRoutine, updatedStudent.Routine[index].ID)
+			resultingRoutinePlan = append(resultingRoutinePlan, RoutinePlan{
+				ID:        updatedStudent.Routine[index].ID,
+				WeekDay:   updatedStudent.Routine[index].WeekDay,
+				StartHour: updatedStudent.Routine[index].StartHour,
+				Duration:  updatedStudent.Routine[index].Duration,
+				Price:     updatedStudent.Routine[index].Price,
+			})
 		}
 	}
-	for i, routineI := range updatedStudent.Routine {
-		for j, routineJ := range updatedStudent.Routine {
+	for i, routineI := range resultingRoutinePlan {
+		for j, routineJ := range resultingRoutinePlan {
 			if routineI.WeekDay == routineJ.WeekDay && i != j && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
 				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping", routineI.WeekDay), true, http.StatusBadRequest)
 			}
 		}
 	}
-	s.StudentsRepository.DeleteAllRoutine(idStudent, existingRoutine...)
+	if len(existingRoutine) != len(updatedStudent.Routine) {
+		s.StudentsRepository.DeleteAllRoutine(idStudent, existingRoutine...)
+	}
 	if len(mustCreateRoutine) > 0 {
 		s.StudentsRepository.CreateRoutine(idStudent, mustCreateRoutine...)
 	}

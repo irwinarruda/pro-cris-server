@@ -150,6 +150,7 @@ func TestStudentService(t *testing.T) {
 		idAccount := beforeEachStudents()
 
 		createStudentDTO := mockCreateStudentDTO(idAccount)
+		// createStudentDTO.BirthDay = utils.ToP("Something Wrong")
 		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
 			{WeekDay: models.Thursday, Duration: 60, StartHour: 8, Price: 120},
 			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: 120},
@@ -167,6 +168,18 @@ func TestStudentService(t *testing.T) {
 		_, err = studentService.CreateStudent(createStudentDTO)
 		assert.Error(err, "Should return an error when overlapping routine plan happens")
 
+		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Thursday, Duration: 86400001, StartHour: 8, Price: 120},
+		}
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when duration is greater than 24 hours")
+
+		createStudentDTO.Routine = []students.CreateStudentRoutinePlanDTO{
+			{WeekDay: models.Thursday, Duration: 60, StartHour: 86400001, Price: 120},
+		}
+		_, err = studentService.CreateStudent(createStudentDTO)
+		assert.Error(err, "Should return an error when start hour is greater than 24 hours")
+
 		updateStudentDTO := mockUpdateStudentDTO(idAccount, idStudent)
 		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
 			{ID: utils.ToP(1)},
@@ -181,6 +194,18 @@ func TestStudentService(t *testing.T) {
 		}
 		_, err = studentService.UpdateStudent(updateStudentDTO)
 		assert.Error(err, "Should return an error when overlapping happens")
+
+		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
+			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(8), Duration: utils.ToP(86400001), Price: utils.ToP(200.0)},
+		}
+		_, err = studentService.UpdateStudent(updateStudentDTO)
+		assert.Error(err, "Should return an error when duration is greater than 24 hours")
+
+		updateStudentDTO.Routine = []students.UpdateStudentRoutinePlanDTO{
+			{ID: nil, WeekDay: utils.ToP(models.Thursday), StartHour: utils.ToP(86400001), Duration: utils.ToP(60), Price: utils.ToP(200.0)},
+		}
+		_, err = studentService.UpdateStudent(updateStudentDTO)
+		assert.Error(err, "Should return an error when start hour is greater than 24 hours")
 
 		afterEachStudents()
 	})
