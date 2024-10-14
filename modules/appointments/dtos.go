@@ -7,6 +7,13 @@ type GetAppointmentDTO struct {
 	ID        int `json:"id" validate:"required"`
 }
 
+type GetAppointmentsByDateRangeDTO struct {
+	IDAccount   int       `json:"idAccount" validate:"required"`
+	IDStudent   int       `json:"idStudent" validate:"required"`
+	InitialDate time.Time `json:"initialDate" validate:"required"`
+	FinalDate   time.Time `json:"finalDate" validate:"required"`
+}
+
 type CreateAppointmentDTO struct {
 	IDAccount   int       `json:"idAccount" validate:"required"`
 	IDStudent   int       `json:"idStudent" validate:"required"`

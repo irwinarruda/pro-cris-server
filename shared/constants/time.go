@@ -1,3 +1,3 @@
 package constants
 
-const HOUR_24 = 86400000
+const Hour24 = 86400000

@@ -98,6 +98,34 @@ func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppoin
 	return appointmentE[0].ToAppointment(), nil
 }
 
+func (a *DbAppointmentRepository) GetAppointmentsByDateRange(data appointments.GetAppointmentsByDateRangeDTO) ([]appointments.Appointment, error) {
+	sql := `
+    SELECT
+      ap.*,
+      st.id_account,
+      st.name,
+      st.display_color,
+      st.picture
+    FROM "appointment" ap
+    LEFT JOIN "student" st ON st.id = ap.id_student
+    WHERE ap.id_account = ?
+    AND ap.id_student = ?
+    AND ap.calendar_day >= ?
+    AND ap.calendar_day <= ?
+    AND ap.is_deleted = false;
+  `
+	appointmentsE := []DbAppointment{}
+	result := a.Db.Raw(sql, data.IDAccount, data.IDStudent, data.InitialDate, data.FinalDate).Scan(&appointmentsE)
+	if result.Error != nil {
+		return []appointments.Appointment{}, result.Error
+	}
+	appointments := []appointments.Appointment{}
+	for _, appointmentE := range appointmentsE {
+		appointments = append(appointments, appointmentE.ToAppointment())
+	}
+	return appointments, nil
+}
+
 func (a *DbAppointmentRepository) CreateAppointment(appointment appointments.CreateAppointmentDTO) (int, error) {
 	appointmentE := DbAppointment{}
 	appointmentE.FromCreateAppointmentDTO(appointment)

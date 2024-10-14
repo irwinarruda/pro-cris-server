@@ -7,6 +7,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/modules/date"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
+	"github.com/irwinarruda/pro-cris-server/shared/constants"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
@@ -30,6 +31,13 @@ func (a *AppointmentService) GetAppointmentByID(data GetAppointmentDTO) (Appoint
 	return a.AppointmentRepository.GetAppointmentByID(data)
 }
 
+func (a *AppointmentService) GetAppointmentsByDateRange(data GetAppointmentsByDateRangeDTO) ([]Appointment, error) {
+	if err := a.Validate.Struct(data); err != nil {
+		return []Appointment{}, err
+	}
+	return a.AppointmentRepository.GetAppointmentsByDateRange(data)
+}
+
 func (a *AppointmentService) UpdateAppointment(appointment UpdateAppointmentDTO) (int, error) {
 	if err := a.Validate.Struct(appointment); err != nil {
 		return 0, err
@@ -48,9 +56,31 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 	if !hasStudent {
 		return 0, utils.NewAppError("Student not found.", true, http.StatusBadRequest)
 	}
+	initialDate := appointment.CalendarDay.AddDate(0, 0, -1)
+	finalDate := appointment.CalendarDay.AddDate(0, 0, 1)
+	appointmentsRange, err := a.AppointmentRepository.GetAppointmentsByDateRange(GetAppointmentsByDateRangeDTO{
+		IDAccount:   appointment.IDAccount,
+		IDStudent:   appointment.IDStudent,
+		InitialDate: initialDate,
+		FinalDate:   finalDate,
+	})
+	if err != nil {
+		return 0, err
+	}
+	for _, appointmentRange := range appointmentsRange {
+		if appointment.CalendarDay == appointmentRange.CalendarDay && utils.IsOverlapping(appointment.StartHour, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
+			return 0, utils.NewAppError("Appointment is overlapping with another appointment.", true, http.StatusBadRequest)
+		}
+		if appointment.CalendarDay.Before(appointmentRange.CalendarDay) && utils.IsOverlapping(appointment.StartHour, appointment.Duration, appointmentRange.StartHour+constants.Hour24, appointmentRange.Duration) {
+			return 0, utils.NewAppError("Appointment is overlapping with another appointment.", true, http.StatusBadRequest)
+		}
+		if appointment.CalendarDay.After(appointmentRange.CalendarDay) && utils.IsOverlapping(appointment.StartHour+constants.Hour24, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
+			return 0, utils.NewAppError("Appointment is overlapping with another appointment.", true, http.StatusBadRequest)
+		}
+	}
 	id, err := a.AppointmentRepository.CreateAppointment(appointment)
 	if err != nil {
-		return 0, utils.NewAppError("Error creating appointment.", false, http.StatusBadRequest)
+		return 0, err
 	}
 	return id, nil
 }
