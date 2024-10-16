@@ -147,7 +147,7 @@ func TestStudentService(t *testing.T) {
 		afterEachStudents()
 	})
 
-	t.Run("Routine Plan Error Path", func(t *testing.T) {
+	t.Run("Overlapping routine plan", func(t *testing.T) {
 		idAccount := beforeEachStudents()
 
 		createStudentDTO := mockCreateStudentDTO(idAccount)

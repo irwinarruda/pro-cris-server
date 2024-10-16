@@ -8,6 +8,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/modules/appointments"
 	"github.com/irwinarruda/pro-cris-server/modules/auth"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
+	"github.com/irwinarruda/pro-cris-server/shared/constants"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 	"github.com/stretchr/testify/assert"
 )
@@ -97,9 +98,9 @@ func TestAppointmentService(t *testing.T) {
 		assert.Error(err, "Should return error when appointment/account not found.")
 
 		_, err = appointmentService.CreateAppointment(mockCreateAppointmentDTO(idAccount, 8))
-		assert.Error(err, "Should return error when student/account  does not exist.")
+		assert.Error(err, "Should return error when student/account does not exist.")
 		_, err = appointmentService.CreateAppointment(mockCreateAppointmentDTO(8, idStudent))
-		assert.Error(err, "Should return error when student/account  does not exist.")
+		assert.Error(err, "Should return error when student/account does not exist.")
 
 		idAppointment, _ := appointmentService.CreateAppointment(mockCreateAppointmentDTO(idAccount, idStudent))
 		_, err = appointmentService.DeleteAppointment(appointments.DeleteAppointmentDTO{
@@ -112,6 +113,33 @@ func TestAppointmentService(t *testing.T) {
 			ID:        idAppointment,
 		})
 		assert.Error(err, "Should return error when appointment/account does not exist.")
+
+		afterEachAppointment()
+	})
+
+	t.Run("Overlapping Appointments", func(t *testing.T) {
+		idAccount, idStudent, _ := beforeEachAppointment()
+
+		createAppointmentDTO := mockCreateAppointmentDTO(idAccount, idStudent)
+		_, err := appointmentService.CreateAppointment(createAppointmentDTO)
+		assert.NoError(err, "Should not return error when creating a normal appointment.")
+
+		_, err = appointmentService.CreateAppointment(createAppointmentDTO)
+		assert.Error(err, "Should return error when creating the same appointment.")
+
+		createAppointmentDTO.StartHour += createAppointmentDTO.Duration - 1
+		_, err = appointmentService.CreateAppointment(createAppointmentDTO)
+		assert.Error(err, "Should return error when overlapping appointments.")
+
+		createAppointmentDTO.StartHour += 1
+		_, err = appointmentService.CreateAppointment(createAppointmentDTO)
+		assert.NoError(err, "Should not return error when appointment is created right at the end of another.")
+
+		createAppointmentDTO.CalendarDay = createAppointmentDTO.CalendarDay.AddDate(0, 0, -1)
+		createAppointmentDTO.StartHour = 14
+		createAppointmentDTO.Duration = constants.Hour24
+		_, err = appointmentService.CreateAppointment(createAppointmentDTO)
+		assert.Error(err, "Should return error when appointment from day before is overlapping.")
 
 		afterEachAppointment()
 	})
