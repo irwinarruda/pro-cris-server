@@ -109,13 +109,12 @@ func (a *DbAppointmentRepository) GetAppointmentsByDateRange(data appointments.G
     FROM "appointment" ap
     LEFT JOIN "student" st ON st.id = ap.id_student
     WHERE ap.id_account = ?
-    AND ap.id_student = ?
     AND ap.calendar_day >= ?
     AND ap.calendar_day <= ?
     AND ap.is_deleted = false;
   `
 	appointmentsE := []DbAppointment{}
-	result := a.Db.Raw(sql, data.IDAccount, data.IDStudent, data.InitialDate, data.FinalDate).Scan(&appointmentsE)
+	result := a.Db.Raw(sql, data.IDAccount, data.InitialDate, data.FinalDate).Scan(&appointmentsE)
 	if result.Error != nil {
 		return []appointments.Appointment{}, result.Error
 	}

@@ -4,10 +4,10 @@ import (
 	"net/http"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
-	"github.com/irwinarruda/pro-cris-server/modules/date"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/constants"
+	"github.com/irwinarruda/pro-cris-server/shared/models"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
@@ -15,7 +15,6 @@ type AppointmentService struct {
 	Validate              configs.Validate         `inject:"validate"`
 	AppointmentRepository IAppointmentRepository   `inject:"appointment_repository"`
 	StudentService        students.IStudentService `inject:"students_service"`
-	DateService           date.IDateService        `inject:"date_service"`
 }
 
 type IAppointmentService = *AppointmentService
@@ -60,7 +59,6 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 	finalDate := appointment.CalendarDay.AddDate(0, 0, 1)
 	appointmentsRange, err := a.AppointmentRepository.GetAppointmentsByDateRange(GetAppointmentsByDateRangeDTO{
 		IDAccount:   appointment.IDAccount,
-		IDStudent:   appointment.IDStudent,
 		InitialDate: initialDate,
 		FinalDate:   finalDate,
 	})
@@ -69,13 +67,13 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 	}
 	for _, appointmentRange := range appointmentsRange {
 		if appointment.CalendarDay == appointmentRange.CalendarDay && utils.IsOverlapping(appointment.StartHour, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
-			return 0, utils.NewAppError("Appointment is overlapping with another appointment.", true, http.StatusBadRequest)
+			return 0, utils.NewAppErrors("Appointment is overlapping with another appointment.", appointmentRange, true, http.StatusBadRequest)
 		}
 		if appointment.CalendarDay.Before(appointmentRange.CalendarDay) && utils.IsOverlapping(appointment.StartHour, appointment.Duration, appointmentRange.StartHour+constants.Hour24, appointmentRange.Duration) {
-			return 0, utils.NewAppError("Appointment is overlapping with another appointment.", true, http.StatusBadRequest)
+			return 0, utils.NewAppErrors("Appointment is overlapping with another appointment.", appointmentRange, true, http.StatusBadRequest)
 		}
 		if appointment.CalendarDay.After(appointmentRange.CalendarDay) && utils.IsOverlapping(appointment.StartHour+constants.Hour24, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
-			return 0, utils.NewAppError("Appointment is overlapping with another appointment.", true, http.StatusBadRequest)
+			return 0, utils.NewAppErrors("Appointment is overlapping with another appointment.", appointmentRange, true, http.StatusBadRequest)
 		}
 	}
 	id, err := a.AppointmentRepository.CreateAppointment(appointment)
@@ -85,18 +83,18 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 	return id, nil
 }
 
-func (a *AppointmentService) CreateDailyAppointmentsByStudentsRoutine(data CreateDailyAppointmentsByStudentsRoutineDTO) ([]Appointment, error) {
-	createdAppointments := []Appointment{}
-
+func (a *AppointmentService) CreateDailyAppointmentsByStudentsRoutine(data CreateDailyAppointmentsByStudentsRoutineDTO) ([]int, error) {
 	if err := a.Validate.Struct(data); err != nil {
-		return createdAppointments, err
+		return []int{}, err
 	}
 	students, err := a.StudentService.GetAllStudents(students.GetAllStudentsDTO{IDAccount: data.IDAccount})
 	if err != nil {
-		return createdAppointments, err
+		return []int{}, err
 	}
 
-	weekDay := a.DateService.GetWeekDayFromDate(data.CalendarDay)
+	createdAppointments := []int{}
+	notCreatedRoutine := []int{}
+	weekDay := models.FromTime(data.CalendarDay)
 	for _, student := range students {
 		for _, routinePlan := range student.Routine {
 			if weekDay != routinePlan.WeekDay {
@@ -113,14 +111,18 @@ func (a *AppointmentService) CreateDailyAppointmentsByStudentsRoutine(data Creat
 				IsPaid:      false,
 			})
 			if err != nil {
+				notCreatedRoutine = append(notCreatedRoutine, routinePlan.ID)
 				continue
 			}
-			appointment, err := a.GetAppointmentByID(GetAppointmentDTO{IDAccount: data.IDAccount, ID: id})
-			if err != nil {
-				continue
-			}
-			createdAppointments = append(createdAppointments, appointment)
+			createdAppointments = append(createdAppointments, id)
 		}
+	}
+	if len(notCreatedRoutine) > 0 {
+		meta := struct {
+			CreatedAppointments   []int `json:"createdAppointments"`
+			NotCreatedRoutinePlan []int `json:"notCreatedRoutinePlan"`
+		}{CreatedAppointments: createdAppointments, NotCreatedRoutinePlan: notCreatedRoutine}
+		return []int{}, utils.NewAppErrors("Some appointments were not created.", meta, true, http.StatusPartialContent)
 	}
 	return createdAppointments, nil
 }

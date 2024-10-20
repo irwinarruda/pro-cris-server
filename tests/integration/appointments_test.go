@@ -69,22 +69,31 @@ func TestAppointmentService(t *testing.T) {
 		})
 		assert.Error(err, "Should return error because the appointment was deleted.")
 
-		date, err := time.Parse(time.DateOnly, "2024-01-02")
-		createdAppointments, _ := appointmentService.CreateDailyAppointmentsByStudentsRoutine(appointments.CreateDailyAppointmentsByStudentsRoutineDTO{
+		date, err := time.Parse(time.DateOnly, "2024-01-09")
+
+		createdAppointments, err := appointmentService.CreateDailyAppointmentsByStudentsRoutine(appointments.CreateDailyAppointmentsByStudentsRoutineDTO{
 			IDAccount:   idAccount,
 			CalendarDay: date,
 		})
 		assert.NoError(err, "Should not return error creating appointments.")
-		assert.Len(createdAppointments, 2, "Should create 2 appointments from the students.")
-		assert.Equal(idStudent, createdAppointments[0].Student.ID, "Should return the ID from the student routine.")
-		assert.Equal(100.0, createdAppointments[0].Price, "Should return the price from the student routine.")
-		assert.Equal(60, createdAppointments[0].Duration, "Should return the duration from the student routine.")
-		assert.Equal(8, createdAppointments[0].StartHour, "Should return the start hour from the student routine.")
-		assert.Equal(idStudent2, createdAppointments[1].Student.ID, "Should return the ID from the student routine.")
-		assert.Equal(300.0, createdAppointments[1].Price, "Should return the price from the student routine.")
-		assert.Equal(120, createdAppointments[1].Duration, "Should return the duration from the student routine.")
-		assert.Equal(10, createdAppointments[1].StartHour, "Should return the start hour from the student routine.")
 
+		createdAppointment1, _ := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
+			IDAccount: idAccount,
+			ID:        createdAppointments[0],
+		})
+		createdAppointment2, _ := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
+			IDAccount: idAccount,
+			ID:        createdAppointments[1],
+		})
+		assert.Len(createdAppointments, 2, "Should create 2 appointments from the students.")
+		assert.Equal(idStudent, createdAppointment1.Student.ID, "Should return the ID from the student routine.")
+		assert.Equal(100.0, createdAppointment1.Price, "Should return the price from the student routine.")
+		assert.Equal(60, createdAppointment1.Duration, "Should return the duration from the student routine.")
+		assert.Equal(8, createdAppointment1.StartHour, "Should return the start hour from the student routine.")
+		assert.Equal(idStudent2, createdAppointment2.Student.ID, "Should return the ID from the student routine.")
+		assert.Equal(300.0, createdAppointment2.Price, "Should return the price from the student routine.")
+		assert.Equal(120, createdAppointment2.Duration, "Should return the duration from the student routine.")
+		assert.Equal(68, createdAppointment2.StartHour, "Should return the start hour from the student routine.")
 		afterEachAppointment()
 	})
 
@@ -118,7 +127,7 @@ func TestAppointmentService(t *testing.T) {
 	})
 
 	t.Run("Overlapping Appointments", func(t *testing.T) {
-		idAccount, idStudent, _ := beforeEachAppointment()
+		idAccount, idStudent, idStudent2 := beforeEachAppointment()
 
 		createAppointmentDTO := mockCreateAppointmentDTO(idAccount, idStudent)
 		_, err := appointmentService.CreateAppointment(createAppointmentDTO)
@@ -127,14 +136,16 @@ func TestAppointmentService(t *testing.T) {
 		_, err = appointmentService.CreateAppointment(createAppointmentDTO)
 		assert.Error(err, "Should return error when creating the same appointment.")
 
+		createAppointmentDTO.IDStudent = idStudent2
 		createAppointmentDTO.StartHour += createAppointmentDTO.Duration - 1
 		_, err = appointmentService.CreateAppointment(createAppointmentDTO)
 		assert.Error(err, "Should return error when overlapping appointments.")
 
 		createAppointmentDTO.StartHour += 1
 		_, err = appointmentService.CreateAppointment(createAppointmentDTO)
-		assert.NoError(err, "Should not return error when appointment is created right at the end of another.")
+		assert.NoError(err, "Should not error when appointment is created right at the end of another.")
 
+		createAppointmentDTO.IDStudent = idStudent
 		createAppointmentDTO.CalendarDay = createAppointmentDTO.CalendarDay.AddDate(0, 0, -1)
 		createAppointmentDTO.StartHour = 14
 		createAppointmentDTO.Duration = constants.Hour24

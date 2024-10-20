@@ -8,15 +8,15 @@ import (
 )
 
 type HttpAppError struct {
-	Message         *string  `json:"message,omitempty"`
-	Errors          []string `json:"messages,omitempty"`
-	StatusCode      *int     `json:"statusCode,omitempty"`
-	IsPublicMessage bool     `json:"isPublicMessage"`
+	Message         *string `json:"message,omitempty"`
+	Meta            any     `json:"messages,omitempty"`
+	StatusCode      *int    `json:"statusCode,omitempty"`
+	IsPublicMessage bool    `json:"isPublicMessage"`
 }
 
 type AppError struct {
 	message         *string
-	errors          []string
+	meta            any
 	statusCode      *int
 	isPublicMessage bool
 	baseMessage     string
@@ -35,12 +35,13 @@ func NewAppError(message string, isPublicMessage bool, statusCode int) AppError 
 	}
 }
 
-func NewAppErrors(message string, errors []string, isPublicMessage bool, statusCode int) AppError {
+func NewAppErrors(message string, meta any, isPublicMessage bool, statusCode int) AppError {
 	return AppError{
 		isPublicMessage: isPublicMessage,
 		message:         &message,
 		statusCode:      &statusCode,
 		baseMessage:     message,
+		meta:            meta,
 	}
 }
 
@@ -51,7 +52,7 @@ func HandleHttpError(c *gin.Context, err error) bool {
 	if err, ok := err.(*AppError); ok {
 		c.JSON(*err.statusCode, HttpAppError{
 			Message:         err.message,
-			Errors:          err.errors,
+			Meta:            err.meta,
 			StatusCode:      err.statusCode,
 			IsPublicMessage: err.isPublicMessage,
 		})
@@ -60,7 +61,7 @@ func HandleHttpError(c *gin.Context, err error) bool {
 
 	if err, ok := err.(validator.ValidationErrors); ok {
 		c.JSON(http.StatusBadRequest, HttpAppError{
-			Errors: Map(err, func(item validator.FieldError, _ int) string {
+			Meta: Map(err, func(item validator.FieldError, _ int) any {
 				return item.Error()
 			}),
 			Message:         ToP("One or more fields are invalid."),
@@ -72,7 +73,7 @@ func HandleHttpError(c *gin.Context, err error) bool {
 
 	c.JSON(http.StatusBadRequest, HttpAppError{
 		Message:         ToP(err.Error()),
-		Errors:          nil,
+		Meta:            nil,
 		StatusCode:      ToP(http.StatusInternalServerError),
 		IsPublicMessage: false,
 	})

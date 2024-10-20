@@ -66,6 +66,10 @@ func (w *WeekDay) UnmarshalJSON(b []byte) (err error) {
 	return utils.UnmarshalEnum(w, GetWeekDaysString(), b)
 }
 
+func FromTime(i time.Time) WeekDay {
+	return WeekDay(i.Weekday().String())
+}
+
 func GetWeekDaysString() []string {
 	return []string{
 		Monday.String(),

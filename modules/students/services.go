@@ -69,13 +69,13 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 				continue
 			}
 			if routineJ.WeekDay == routineI.WeekDay && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+				return 0, utils.NewAppErrors(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), []CreateStudentRoutinePlanDTO{routineI, routineJ}, true, http.StatusBadRequest)
 			}
 			if routineJ.WeekDay == routineI.WeekDay.Before() && utils.IsOverlapping(routineI.StartHour+constants.Hour24, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+				return 0, utils.NewAppErrors(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), []CreateStudentRoutinePlanDTO{routineI, routineJ}, true, http.StatusBadRequest)
 			}
 			if routineJ.WeekDay == routineI.WeekDay.After() && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour+constants.Hour24, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+				return 0, utils.NewAppErrors(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), []CreateStudentRoutinePlanDTO{routineI, routineJ}, true, http.StatusBadRequest)
 			}
 		}
 	}
@@ -148,13 +148,13 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 				continue
 			}
 			if routineJ.WeekDay == routineI.WeekDay && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+				return 0, utils.NewAppErrors(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), []RoutinePlan{routineI, routineJ}, true, http.StatusBadRequest)
 			}
 			if routineJ.WeekDay == routineI.WeekDay.Before() && utils.IsOverlapping(routineI.StartHour+constants.Hour24, routineI.Duration, routineJ.StartHour, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+				return 0, utils.NewAppErrors(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), []RoutinePlan{routineI, routineJ}, true, http.StatusBadRequest)
 			}
 			if routineJ.WeekDay == routineI.WeekDay.After() && utils.IsOverlapping(routineI.StartHour, routineI.Duration, routineJ.StartHour+constants.Hour24, routineJ.Duration) {
-				return 0, utils.NewAppError(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), true, http.StatusBadRequest)
+				return 0, utils.NewAppErrors(fmt.Sprintf("Routine plans at %s are overlapping.", routineI.WeekDay), []RoutinePlan{routineI, routineJ}, true, http.StatusBadRequest)
 			}
 		}
 	}

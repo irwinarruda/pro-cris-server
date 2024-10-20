@@ -278,7 +278,7 @@ func mockCreateStudentDTO2(idAccount int) students.CreateStudentDTO {
 		HouseIdentifier:      utils.ToP("Apt 2"),
 		HouseCoordinate:      &models.Coordinate{Latitude: 30, Longitude: 30},
 		Routine: []students.CreateStudentRoutinePlanDTO{
-			{WeekDay: models.Tuesday, Duration: 120, StartHour: 10, Price: 300},
+			{WeekDay: models.Tuesday, Duration: 120, StartHour: 68, Price: 300},
 		},
 	}
 }
