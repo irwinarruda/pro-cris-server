@@ -12,8 +12,8 @@ import (
 )
 
 type DbAppointment struct {
-	IDAccount    int
 	ID           int
+	IDAccount    int
 	StartHour    int
 	Duration     int
 	Price        float64
@@ -21,12 +21,12 @@ type DbAppointment struct {
 	IsPaid       bool
 	IsDeleted    bool
 	CalendarDay  time.Time
-	Name         string
-	IDStudent    int
-	DisplayColor string
-	Picture      *string
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
+	IDStudent    int
+	Name         string
+	DisplayColor string
+	Picture      *string
 }
 
 func (a *DbAppointment) FromCreateAppointmentDTO(appointment appointments.CreateAppointmentDTO) {

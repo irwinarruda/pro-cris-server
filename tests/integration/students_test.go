@@ -29,10 +29,10 @@ func TestStudentService(t *testing.T) {
 		assert.NoError(err, "Should return a student with the same ID as the one created")
 		assert.Len(student1.Routine, 2, "Student should have 2 routine plans")
 		assert.Equal(models.Male, *student1.Gender, "Should have Male gender")
-		assert.Equal(students.PaymentStyleUpfront, student1.PaymentStyle, "Should have Upfront payment style")
-		assert.Equal(students.PaymentTypeFixed, student1.PaymentType, "Should have Fixed payment type")
+		assert.Equal(models.PaymentStyleUpfront, student1.PaymentStyle, "Should have Upfront payment style")
+		assert.Equal(models.PaymentTypeFixed, student1.PaymentType, "Should have Fixed payment type")
 		assert.Equal(float64(2000), *student1.PaymentTypeValue, "Should have 2000 as payment type value")
-		assert.Equal(students.SettlementStyleAppointments, student1.SettlementStyle, "Should have Appointments settlement style")
+		assert.Equal(models.SettlementStyleAppointments, student1.SettlementStyle, "Should have Appointments settlement style")
 		assert.Equal(10, *student1.SettlementStyleValue, "Should have 10 appointments threshold")
 		assert.Nil(student1.SettlementStyleDay, "Should have no settlement day")
 		mondayRoutineId := 0
@@ -68,10 +68,10 @@ func TestStudentService(t *testing.T) {
 		assert.Equal(models.Female, *student2.Gender, "Should have Female gender")
 		assert.Equal("John Doe", *student2.ParentName, "ParentName should be updated")
 		assert.Equal("0987654321", *student2.ParentPhoneNumber, "ParentPhoneNumber should be updated")
-		assert.Equal(students.PaymentStyleLater, student2.PaymentStyle, "Should have Later payment style")
-		assert.Equal(students.PaymentTypeVariable, student2.PaymentType, "Should have Variable payment type")
+		assert.Equal(models.PaymentStyleLater, student2.PaymentStyle, "Should have Later payment style")
+		assert.Equal(models.PaymentTypeVariable, student2.PaymentType, "Should have Variable payment type")
 		assert.Nil(student2.PaymentTypeValue, "Should have nil as payment type value")
-		assert.Equal(students.SettlementStyleMonthly, student2.SettlementStyle, "Should have Monthly settlement style")
+		assert.Equal(models.SettlementStyleMonthly, student2.SettlementStyle, "Should have Monthly settlement style")
 		assert.Equal(1, *student2.SettlementStyleValue, "Should have 10 month threshold")
 		assert.Equal(5, *student2.SettlementStyleDay, "Should have day 5th as the settlement day")
 		assert.Equal("456 Main St", *student2.HouseAddress, "HouseAddress should be updated")
@@ -107,13 +107,13 @@ func TestStudentService(t *testing.T) {
 		idAccount := beforeEachStudents()
 
 		createStudentDTO := mockCreateStudentDTO(idAccount)
-		createStudentDTO.PaymentType = students.PaymentTypeFixed
+		createStudentDTO.PaymentType = models.PaymentTypeFixed
 		createStudentDTO.PaymentTypeValue = nil
 		_, err := studentService.CreateStudent(createStudentDTO)
 		assert.Error(err, "Should return an error when payment type is Fixed and value is nil")
 
-		createStudentDTO.PaymentType = students.PaymentTypeVariable
-		createStudentDTO.SettlementStyle = students.SettlementStyleMonthly
+		createStudentDTO.PaymentType = models.PaymentTypeVariable
+		createStudentDTO.SettlementStyle = models.SettlementStyleMonthly
 		createStudentDTO.SettlementStyleValue = nil
 		_, err = studentService.CreateStudent(createStudentDTO)
 		assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and value is nil")
@@ -123,14 +123,14 @@ func TestStudentService(t *testing.T) {
 		_, err = studentService.CreateStudent(createStudentDTO)
 		assert.Error(err, "Should return an error when settlement type is Monthly or Weekly and day is nil")
 
-		createStudentDTO.SettlementStyle = students.SettlementStyleAppointments
+		createStudentDTO.SettlementStyle = models.SettlementStyleAppointments
 		createStudentDTO.SettlementStyleValue = nil
 		createStudentDTO.SettlementStyleDay = nil
 		_, err = studentService.CreateStudent(createStudentDTO)
 		assert.NoError(err, "Should not return an error when settlement type is Appointments and value/day is nil")
 
 		updateStudentDTO := mockUpdateStudentDTO(idAccount, 1)
-		updateStudentDTO.PaymentType = students.PaymentTypeFixed
+		updateStudentDTO.PaymentType = models.PaymentTypeFixed
 		updateStudentDTO.PaymentTypeValue = nil
 		_, err = studentService.UpdateStudent(updateStudentDTO)
 		assert.Error(err, "Should return an error when payment type is Fixed and payment type value is nil")
@@ -234,77 +234,83 @@ func TestStudentService(t *testing.T) {
 
 func mockCreateStudentDTO(idAccount int) students.CreateStudentDTO {
 	return students.CreateStudentDTO{
-		IDAccount:            idAccount,
-		Name:                 "John Doe",
-		Gender:               utils.ToP(models.Male),
-		BirthDay:             utils.ToP("1990-01-01"),
-		DisplayColor:         "#000000",
-		Picture:              utils.ToP("http://example.com/picture.jpg"),
-		ParentName:           utils.ToP("Jane Doe"),
-		ParentPhoneNumber:    utils.ToP("1234567890"),
-		PaymentStyle:         students.PaymentStyleUpfront,
-		PaymentType:          students.PaymentTypeFixed,
-		PaymentTypeValue:     utils.ToP(2000.0),
-		SettlementStyle:      students.SettlementStyleAppointments,
-		SettlementStyleValue: utils.ToP(10),
-		SettlementStyleDay:   nil,
-		HouseAddress:         utils.ToP("123 Main St"),
-		HouseIdentifier:      utils.ToP("Apt 1"),
-		HouseCoordinate:      &models.Coordinate{Latitude: 20, Longitude: 20},
+		IDAccount:         idAccount,
+		Name:              "John Doe",
+		Gender:            utils.ToP(models.Male),
+		BirthDay:          utils.ToP("1990-01-01"),
+		DisplayColor:      "#000000",
+		Picture:           utils.ToP("http://example.com/picture.jpg"),
+		ParentName:        utils.ToP("Jane Doe"),
+		ParentPhoneNumber: utils.ToP("1234567890"),
+		HouseAddress:      utils.ToP("123 Main St"),
+		HouseIdentifier:   utils.ToP("Apt 1"),
+		HouseCoordinate:   &models.Coordinate{Latitude: 20, Longitude: 20},
 		Routine: []students.CreateStudentRoutinePlanDTO{
 			{WeekDay: models.Monday, Duration: 60, StartHour: 8, Price: 120},
 			{WeekDay: models.Tuesday, Duration: 60, StartHour: 8, Price: 100},
+		},
+		CreateStudentSettlementOptionsDTO: students.CreateStudentSettlementOptionsDTO{
+			PaymentStyle:         models.PaymentStyleUpfront,
+			PaymentType:          models.PaymentTypeFixed,
+			PaymentTypeValue:     utils.ToP(2000.0),
+			SettlementStyle:      models.SettlementStyleAppointments,
+			SettlementStyleValue: utils.ToP(10),
+			SettlementStyleDay:   nil,
 		},
 	}
 }
 
 func mockCreateStudentDTO2(idAccount int) students.CreateStudentDTO {
 	return students.CreateStudentDTO{
-		IDAccount:            idAccount,
-		Name:                 "Jane Doe Updated",
-		Gender:               utils.ToP(models.Female),
-		BirthDay:             utils.ToP("1990-01-02"),
-		DisplayColor:         "#FFFFFF",
-		Picture:              utils.ToP("http://example.com/picture2.jpg"),
-		ParentName:           utils.ToP("John Doe"),
-		ParentPhoneNumber:    utils.ToP("0987654321"),
-		PaymentStyle:         students.PaymentStyleLater,
-		PaymentType:          students.PaymentTypeVariable,
-		PaymentTypeValue:     nil,
-		SettlementStyle:      students.SettlementStyleMonthly,
-		SettlementStyleValue: utils.ToP(1),
-		SettlementStyleDay:   utils.ToP(5),
-		HouseAddress:         utils.ToP("456 Main St"),
-		HouseIdentifier:      utils.ToP("Apt 2"),
-		HouseCoordinate:      &models.Coordinate{Latitude: 30, Longitude: 30},
+		IDAccount:         idAccount,
+		Name:              "Jane Doe Updated",
+		Gender:            utils.ToP(models.Female),
+		BirthDay:          utils.ToP("1990-01-02"),
+		DisplayColor:      "#FFFFFF",
+		Picture:           utils.ToP("http://example.com/picture2.jpg"),
+		ParentName:        utils.ToP("John Doe"),
+		ParentPhoneNumber: utils.ToP("0987654321"),
+		HouseAddress:      utils.ToP("456 Main St"),
+		HouseIdentifier:   utils.ToP("Apt 2"),
+		HouseCoordinate:   &models.Coordinate{Latitude: 30, Longitude: 30},
 		Routine: []students.CreateStudentRoutinePlanDTO{
 			{WeekDay: models.Tuesday, Duration: 120, StartHour: 68, Price: 300},
+		},
+		CreateStudentSettlementOptionsDTO: students.CreateStudentSettlementOptionsDTO{
+			PaymentStyle:         models.PaymentStyleLater,
+			PaymentType:          models.PaymentTypeVariable,
+			PaymentTypeValue:     nil,
+			SettlementStyle:      models.SettlementStyleMonthly,
+			SettlementStyleValue: utils.ToP(1),
+			SettlementStyleDay:   utils.ToP(5),
 		},
 	}
 }
 
 func mockUpdateStudentDTO(idAccount, id int) students.UpdateStudentDTO {
 	return students.UpdateStudentDTO{
-		IDAccount:            idAccount,
-		ID:                   id,
-		Name:                 "Jane Doe Updated",
-		Gender:               utils.ToP(models.Female),
-		BirthDay:             utils.ToP("1990-01-02"),
-		DisplayColor:         "#FFFFFF",
-		Picture:              utils.ToP("http://example.com/picture2.jpg"),
-		ParentName:           utils.ToP("John Doe"),
-		ParentPhoneNumber:    utils.ToP("0987654321"),
-		PaymentStyle:         students.PaymentStyleLater,
-		PaymentType:          students.PaymentTypeVariable,
-		PaymentTypeValue:     nil,
-		SettlementStyle:      students.SettlementStyleMonthly,
-		SettlementStyleValue: utils.ToP(1),
-		SettlementStyleDay:   utils.ToP(5),
-		HouseAddress:         utils.ToP("456 Main St"),
-		HouseIdentifier:      utils.ToP("Apt 2"),
-		HouseCoordinate:      &models.Coordinate{Latitude: 30, Longitude: 30},
+		IDAccount:         idAccount,
+		ID:                id,
+		Name:              "Jane Doe Updated",
+		Gender:            utils.ToP(models.Female),
+		BirthDay:          utils.ToP("1990-01-02"),
+		DisplayColor:      "#FFFFFF",
+		Picture:           utils.ToP("http://example.com/picture2.jpg"),
+		ParentName:        utils.ToP("John Doe"),
+		ParentPhoneNumber: utils.ToP("0987654321"),
+		HouseAddress:      utils.ToP("456 Main St"),
+		HouseIdentifier:   utils.ToP("Apt 2"),
+		HouseCoordinate:   &models.Coordinate{Latitude: 30, Longitude: 30},
 		Routine: []students.UpdateStudentRoutinePlanDTO{
 			{ID: nil, WeekDay: utils.ToP(models.Friday), StartHour: utils.ToP(9), Duration: utils.ToP(90), Price: utils.ToP(200.0)},
+		},
+		UpdateStudentSettlementOptionsDTO: students.UpdateStudentSettlementOptionsDTO{
+			PaymentStyle:         models.PaymentStyleLater,
+			PaymentType:          models.PaymentTypeVariable,
+			PaymentTypeValue:     nil,
+			SettlementStyle:      models.SettlementStyleMonthly,
+			SettlementStyleValue: utils.ToP(1),
+			SettlementStyleDay:   utils.ToP(5),
 		},
 	}
 }

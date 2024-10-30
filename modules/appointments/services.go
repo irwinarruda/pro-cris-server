@@ -14,7 +14,7 @@ import (
 type AppointmentService struct {
 	Validate              configs.Validate         `inject:"validate"`
 	AppointmentRepository IAppointmentRepository   `inject:"appointment_repository"`
-	StudentService        students.IStudentService `inject:"students_service"`
+	StudentService        students.IStudentService `inject:"student_service"`
 }
 
 type IAppointmentService = *AppointmentService

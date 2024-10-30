@@ -22,10 +22,10 @@ type DbStudent struct {
 	Gender                   *string
 	ParentName               *string
 	ParentPhoneNumber        *string
-	PaymentStyle             students.PaymentStyle
-	PaymentType              students.PaymentType
+	PaymentStyle             models.PaymentStyle
+	PaymentType              models.PaymentType
 	PaymentTypeValue         *float64
-	SettlementStyle          students.SettlementStyle
+	SettlementStyle          models.SettlementStyle
 	SettlementStyleValue     *int
 	SettlementStyleDay       *int
 	HouseAddress             *string
@@ -104,29 +104,31 @@ func (s *DbStudent) ToStudent(dbRoutine []DbRoutinePlan) students.Student {
 		}
 	}
 	return students.Student{
-		ID:                   s.ID,
-		Name:                 s.Name,
-		BirthDay:             s.BirthDay,
-		DisplayColor:         s.DisplayColor,
-		Picture:              s.Picture,
-		Gender:               (*models.Gender)(s.Gender),
-		ParentName:           s.ParentName,
-		ParentPhoneNumber:    s.ParentPhoneNumber,
-		PaymentStyle:         s.PaymentStyle,
-		PaymentType:          s.PaymentType,
-		PaymentTypeValue:     s.PaymentTypeValue,
-		SettlementStyle:      s.SettlementStyle,
-		SettlementStyleValue: s.SettlementStyleValue,
-		SettlementStyleDay:   s.SettlementStyleDay,
-		HouseAddress:         s.HouseAddress,
-		HouseIdentifier:      s.HouseIdentifier,
-		HouseCoordinate:      coordinate,
-		IsDeleted:            s.IsDeleted,
-		CreatedAt:            s.CreatedAt,
-		UpdatedAt:            s.UpdatedAt,
+		ID:                s.ID,
+		Name:              s.Name,
+		BirthDay:          s.BirthDay,
+		DisplayColor:      s.DisplayColor,
+		Picture:           s.Picture,
+		Gender:            (*models.Gender)(s.Gender),
+		ParentName:        s.ParentName,
+		ParentPhoneNumber: s.ParentPhoneNumber,
+		HouseAddress:      s.HouseAddress,
+		HouseIdentifier:   s.HouseIdentifier,
+		HouseCoordinate:   coordinate,
+		IsDeleted:         s.IsDeleted,
+		CreatedAt:         s.CreatedAt,
+		UpdatedAt:         s.UpdatedAt,
 		Routine: utils.Map(dbRoutine, func(rp DbRoutinePlan, _ int) students.RoutinePlan {
 			return rp.ToRoutinePlan()
 		}),
+		SettlementOptions: models.SettlementOptions{
+			PaymentStyle:         s.PaymentStyle,
+			PaymentType:          s.PaymentType,
+			PaymentTypeValue:     s.PaymentTypeValue,
+			SettlementStyle:      s.SettlementStyle,
+			SettlementStyleValue: s.SettlementStyleValue,
+			SettlementStyleDay:   s.SettlementStyleDay,
+		},
 	}
 }
 

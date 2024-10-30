@@ -8,6 +8,7 @@ import (
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/constants"
+	"github.com/irwinarruda/pro-cris-server/shared/models"
 	"github.com/irwinarruda/pro-cris-server/shared/utils"
 )
 
@@ -48,19 +49,19 @@ func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	if err := s.Validate.Struct(student); err != nil {
 		return 0, err
 	}
-	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
+	if student.PaymentType == models.PaymentTypeFixed && student.PaymentTypeValue == nil {
 		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, http.StatusBadRequest)
 	}
-	if student.PaymentType != PaymentTypeFixed {
+	if student.PaymentType != models.PaymentTypeFixed {
 		student.PaymentTypeValue = nil
 	}
-	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleValue == nil {
+	if student.SettlementStyle != models.SettlementStyleAppointments && student.SettlementStyleValue == nil {
 		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
-	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleDay == nil {
+	if student.SettlementStyle != models.SettlementStyleAppointments && student.SettlementStyleDay == nil {
 		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
-	if student.SettlementStyle != SettlementStyleAppointments {
+	if student.SettlementStyle != models.SettlementStyleAppointments {
 		student.PaymentTypeValue = nil
 	}
 	for i, routineI := range student.Routine {
@@ -86,19 +87,19 @@ func (s *StudentService) UpdateStudent(student UpdateStudentDTO) (int, error) {
 	if err := s.Validate.Struct(student); err != nil {
 		return 0, err
 	}
-	if student.PaymentType == PaymentTypeFixed && student.PaymentTypeValue == nil {
+	if student.PaymentType == models.PaymentTypeFixed && student.PaymentTypeValue == nil {
 		return 0, utils.NewAppError("Payment type value is required when payment type is Fixed.", true, http.StatusBadRequest)
 	}
-	if student.PaymentType != PaymentTypeFixed {
+	if student.PaymentType != models.PaymentTypeFixed {
 		student.PaymentTypeValue = nil
 	}
-	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleValue == nil {
+	if student.SettlementStyle != models.SettlementStyleAppointments && student.SettlementStyleValue == nil {
 		return 0, utils.NewAppError("Settlement value is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
-	if student.SettlementStyle != SettlementStyleAppointments && student.SettlementStyleDay == nil {
+	if student.SettlementStyle != models.SettlementStyleAppointments && student.SettlementStyleDay == nil {
 		return 0, utils.NewAppError("Settlement day is required when settlement style is not Appointments.", true, http.StatusBadRequest)
 	}
-	if student.SettlementStyle != SettlementStyleAppointments {
+	if student.SettlementStyle != models.SettlementStyleAppointments {
 		student.PaymentTypeValue = nil
 	}
 	idStudent, err := s.StudentsRepository.UpdateStudent(student)

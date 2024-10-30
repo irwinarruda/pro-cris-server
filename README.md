@@ -46,6 +46,7 @@
   - PaymentStyle (**Fixed** or **Variable**)
   - PaymentStyleValue
   - SettlementMethod (**NumberAppointments** or **AmountOfTime** or **None**)
+  - SettlementMethodStartDate
   - SettlementMethodValue
 
 - Update Student and it's default information.
@@ -70,3 +71,32 @@
 - Notification for when you should send a recipt to a student.
 
 ## Settlement
+
+- Get student settlement type
+- Get amount already paid by month (filter)
+
+- Start Settlement based on params;
+- Stop Settlement based on params;
+- Mark Settlement as paid;
+- Generate prediction based on **Routine** and **SettlementMethod**;
+- See current Settlement statitics based on SettlementMethod;
+- See current Settlement prediction;
+- Store amount paid and when it was paid;
+
+- SettlementMethod == AmountOfTime
+
+  - Start receipt count based on SettlementMethodStartDate;
+  - Stop receipt count if SettlementMethodStartDate + SettlementMethodValue was reached;
+  - Start receipt count if no SettlementMethodStartDate;
+  - Stop receipt count if no SettlementMethodStartDate;
+  - Notificação indicating if the SettlementMethodStartDate is close to be achieved;
+
+- SettlementMethod == NumberAppointments
+
+  - Start receipt count based on SettlementMethodStartDate;
+  - Stop receipt count if SettlementMethodValue was reached;
+  - Start receipt count if no SettlementMethodStartDate;
+  - Stop receipt count if no SettlementMethodStartDate;
+  - Notificação indicating if the SettlementMethodValue is close to be achieved;
+
+- SettlementMethod == NumberAppointments && SettlementMethod == AmountOfTime

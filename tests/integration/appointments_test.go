@@ -69,13 +69,14 @@ func TestAppointmentService(t *testing.T) {
 		})
 		assert.Error(err, "Should return error because the appointment was deleted.")
 
-		date, err := time.Parse(time.DateOnly, "2024-01-09")
+		date, _ := time.Parse(time.DateOnly, "2024-01-09")
 
 		createdAppointments, err := appointmentService.CreateDailyAppointmentsByStudentsRoutine(appointments.CreateDailyAppointmentsByStudentsRoutineDTO{
 			IDAccount:   idAccount,
 			CalendarDay: date,
 		})
 		assert.NoError(err, "Should not return error creating appointments.")
+		assert.Len(createdAppointments, 2, "Should create 2 appointments from the students.")
 
 		createdAppointment1, _ := appointmentService.GetAppointmentByID(appointments.GetAppointmentDTO{
 			IDAccount: idAccount,
@@ -85,7 +86,6 @@ func TestAppointmentService(t *testing.T) {
 			IDAccount: idAccount,
 			ID:        createdAppointments[1],
 		})
-		assert.Len(createdAppointments, 2, "Should create 2 appointments from the students.")
 		assert.Equal(idStudent, createdAppointment1.Student.ID, "Should return the ID from the student routine.")
 		assert.Equal(100.0, createdAppointment1.Price, "Should return the price from the student routine.")
 		assert.Equal(60, createdAppointment1.Duration, "Should return the duration from the student routine.")
