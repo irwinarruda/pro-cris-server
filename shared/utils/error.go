@@ -26,6 +26,10 @@ func (e AppError) Error() string {
 	return e.baseMessage
 }
 
+func (e AppError) Meta() any {
+	return e.meta
+}
+
 func NewAppError(message string, isPublicMessage bool, statusCode int) AppError {
 	return AppError{
 		isPublicMessage: isPublicMessage,

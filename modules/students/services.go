@@ -37,14 +37,6 @@ func (s *StudentService) GetStudentByID(data GetStudentDTO) (Student, error) {
 	return s.StudentsRepository.GetStudentByID(data)
 }
 
-func (s *StudentService) DoesStudentExists(data DoesStudentExistsDTO) bool {
-	if err := s.Validate.Struct(data); err != nil {
-		return false
-	}
-	_, err := s.StudentsRepository.GetStudentByID(GetStudentDTO(data))
-	return err == nil
-}
-
 func (s *StudentService) CreateStudent(student CreateStudentDTO) (int, error) {
 	if err := s.Validate.Struct(student); err != nil {
 		return 0, err
@@ -173,4 +165,12 @@ func (s *StudentService) DeleteStudent(data DeleteStudentDTO) (int, error) {
 		return 0, err
 	}
 	return s.StudentsRepository.DeleteStudent(data)
+}
+
+func (s *StudentService) DoesStudentExists(data DoesStudentExistsDTO) bool {
+	if err := s.Validate.Struct(data); err != nil {
+		return false
+	}
+	_, err := s.StudentsRepository.GetStudentByID(GetStudentDTO(data))
+	return err == nil
 }

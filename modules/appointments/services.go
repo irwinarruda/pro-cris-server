@@ -2,6 +2,7 @@ package appointments
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
@@ -132,4 +133,26 @@ func (a *AppointmentService) DeleteAppointment(data DeleteAppointmentDTO) (int, 
 		return 0, err
 	}
 	return a.AppointmentRepository.DeleteAppointment(data)
+}
+
+func (a *AppointmentService) DoAppointmentsExist(data DoAppointmentsExistDTO) (bool, error) {
+	if err := a.Validate.Struct(data); err != nil {
+		return false, err
+	}
+	appointments, err := a.AppointmentRepository.GetAppointmentsByID(GetAppointmentsDTO(data))
+	meta := struct {
+		NotExistingAppointments []int `json:"notExistingAppointments"`
+	}{}
+	if err != nil {
+		return false, utils.NewAppErrors(err.Error(), meta, false, http.StatusBadGateway)
+	}
+	if len(data.IDs) == len(appointments) {
+		return true, nil
+	}
+	for _, id := range data.IDs {
+		if !slices.ContainsFunc(appointments, func(app Appointment) bool { return app.ID == id }) {
+			meta.NotExistingAppointments = append(meta.NotExistingAppointments, id)
+		}
+	}
+	return false, utils.NewAppErrors("Some appointments do not exist.", meta, true, http.StatusPartialContent)
 }

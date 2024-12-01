@@ -86,16 +86,50 @@ func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppoin
     AND ap.id_account = ?
     AND ap.is_deleted = false;
   `
-	appointmentE := []DbAppointment{}
-	result := a.Db.Raw(sql, data.ID, data.IDAccount).Scan(&appointmentE)
+	appointmentsE := []DbAppointment{}
+	result := a.Db.Raw(sql, data.ID, data.IDAccount).Scan(&appointmentsE)
 	if result.Error != nil {
 		return appointments.Appointment{}, result.Error
 	}
-	if len(appointmentE) == 0 {
+	if len(appointmentsE) == 0 {
 		return appointments.Appointment{}, utils.NewAppError("Appointment not found.", true, http.StatusNotFound)
 	}
 
-	return appointmentE[0].ToAppointment(), nil
+	return appointmentsE[0].ToAppointment(), nil
+}
+
+func (a *DbAppointmentRepository) GetAppointmentsByID(data appointments.GetAppointmentsDTO) ([]appointments.Appointment, error) {
+	appointmentIds := []interface{}{}
+	sql := fmt.Sprintf(`
+    SELECT
+      ap.*,
+      st.id_account,
+      st.name,
+      st.display_color,
+      st.picture
+    FROM "appointment" ap
+    LEFT JOIN "student" st ON ap.id_student = st.id
+    WHERE ap.id IN %v
+    AND ap.id_account = ?
+    AND ap.is_deleted = false;
+  `, utils.SqlArray(len(data.IDs), func(i int) {
+		appointmentIds = append(appointmentIds, data.IDs[i])
+	}))
+	appointmentIds = append(appointmentIds, data.IDAccount)
+
+	appointmentsE := []DbAppointment{}
+	result := a.Db.Raw(sql, appointmentIds...).Scan(&appointmentsE)
+	if result.Error != nil {
+		return []appointments.Appointment{}, result.Error
+	}
+	if len(appointmentsE) == 0 {
+		return []appointments.Appointment{}, utils.NewAppError("Appointments not found", true, http.StatusNotFound)
+	}
+	appointments := []appointments.Appointment{}
+	for _, apointmentE := range appointmentsE {
+		appointments = append(appointments, apointmentE.ToAppointment())
+	}
+	return appointments, nil
 }
 
 func (a *DbAppointmentRepository) GetAppointmentsByDateRange(data appointments.GetAppointmentsByDateRangeDTO) ([]appointments.Appointment, error) {

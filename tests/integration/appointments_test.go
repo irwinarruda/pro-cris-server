@@ -94,6 +94,14 @@ func TestAppointmentService(t *testing.T) {
 		assert.Equal(300.0, createdAppointment2.Price, "Should return the price from the student routine.")
 		assert.Equal(120, createdAppointment2.Duration, "Should return the duration from the student routine.")
 		assert.Equal(68, createdAppointment2.StartHour, "Should return the start hour from the student routine.")
+
+		exist, err := appointmentService.DoAppointmentsExist(appointments.DoAppointmentsExistDTO{
+			IDAccount: idAccount,
+			IDs:       []int{createdAppointments[0], createdAppointments[1]},
+		})
+		assert.NoError(err, "Should not return error for existing appointments.")
+		assert.True(exist, "Should return true for existing appointments.")
+
 		afterEachAppointment()
 	})
 
@@ -122,6 +130,16 @@ func TestAppointmentService(t *testing.T) {
 			ID:        idAppointment,
 		})
 		assert.Error(err, "Should return error when appointment/account does not exist.")
+
+		exist, err := appointmentService.DoAppointmentsExist(appointments.DoAppointmentsExistDTO{
+			IDAccount: idAccount,
+			IDs:       []int{idAppointment, 23, 999},
+		})
+		meta, _ := err.(utils.AppError).Meta().(struct {
+			NotExistingAppointments []int `json:"notExistingAppointments"`
+		})
+		assert.False(exist, "Should return false when one of the appointments do not exist.")
+		assert.Equal([]int{23, 999}, meta.NotExistingAppointments, "Should return the non existing appointments.")
 
 		afterEachAppointment()
 	})
