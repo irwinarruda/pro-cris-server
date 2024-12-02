@@ -67,13 +67,13 @@ func (a *AppointmentService) CreateAppointment(appointment CreateAppointmentDTO)
 		return 0, err
 	}
 	for _, appointmentRange := range appointmentsRange {
-		if appointment.CalendarDay == appointmentRange.CalendarDay && utils.IsOverlapping(appointment.StartHour, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
+		if appointment.CalendarDay == appointmentRange.CalendarDay && utils.IsOverlappingInt(appointment.StartHour, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
 			return 0, utils.NewAppErrors("Appointment is overlapping with another appointment.", appointmentRange, true, http.StatusBadRequest)
 		}
-		if appointment.CalendarDay.Before(appointmentRange.CalendarDay) && utils.IsOverlapping(appointment.StartHour, appointment.Duration, appointmentRange.StartHour+constants.Hour24, appointmentRange.Duration) {
+		if appointment.CalendarDay.Before(appointmentRange.CalendarDay) && utils.IsOverlappingInt(appointment.StartHour, appointment.Duration, appointmentRange.StartHour+constants.Hour24, appointmentRange.Duration) {
 			return 0, utils.NewAppErrors("Appointment is overlapping with another appointment.", appointmentRange, true, http.StatusBadRequest)
 		}
-		if appointment.CalendarDay.After(appointmentRange.CalendarDay) && utils.IsOverlapping(appointment.StartHour+constants.Hour24, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
+		if appointment.CalendarDay.After(appointmentRange.CalendarDay) && utils.IsOverlappingInt(appointment.StartHour+constants.Hour24, appointment.Duration, appointmentRange.StartHour, appointmentRange.Duration) {
 			return 0, utils.NewAppErrors("Appointment is overlapping with another appointment.", appointmentRange, true, http.StatusBadRequest)
 		}
 	}
