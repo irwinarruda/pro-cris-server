@@ -76,7 +76,6 @@ func (a *DbAppointmentRepository) GetAppointmentByID(data appointments.GetAppoin
 	sql := `
     SELECT
       ap.*,
-      st.id_account,
       st.name,
       st.display_color,
       st.picture
@@ -103,7 +102,6 @@ func (a *DbAppointmentRepository) GetAppointmentsByID(data appointments.GetAppoi
 	sql := fmt.Sprintf(`
     SELECT
       ap.*,
-      st.id_account,
       st.name,
       st.display_color,
       st.picture
@@ -136,7 +134,6 @@ func (a *DbAppointmentRepository) GetAppointmentsByDateRange(data appointments.G
 	sql := `
     SELECT
       ap.*,
-      st.id_account,
       st.name,
       st.display_color,
       st.picture
@@ -149,6 +146,31 @@ func (a *DbAppointmentRepository) GetAppointmentsByDateRange(data appointments.G
   `
 	appointmentsE := []DbAppointment{}
 	result := a.Db.Raw(sql, data.IDAccount, data.InitialDate, data.FinalDate).Scan(&appointmentsE)
+	if result.Error != nil {
+		return []appointments.Appointment{}, result.Error
+	}
+	appointments := []appointments.Appointment{}
+	for _, appointmentE := range appointmentsE {
+		appointments = append(appointments, appointmentE.ToAppointment())
+	}
+	return appointments, nil
+}
+
+func (a *DbAppointmentRepository) GetAppointmentsByStudent(data appointments.GetAppointmentsByStudentDTO) ([]appointments.Appointment, error) {
+	sql := `
+    SELECT
+      ap.*,
+      st.name,
+      st.display_color,
+      st.picture
+    FROM "appointment" ap
+    LEFT JOIN "student" st ON st.id = ap.id_student
+    WHERE ap.id_account = ?
+    AND ap.id_student = ?
+    AND ap.is_deleted = false;
+  `
+	appointmentsE := []DbAppointment{}
+	result := a.Db.Raw(sql, data.IDStudent, data.IDStudent).Scan(&appointmentsE)
 	if result.Error != nil {
 		return []appointments.Appointment{}, result.Error
 	}

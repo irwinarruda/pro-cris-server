@@ -29,10 +29,10 @@ func InitInjections() {
 	proinject.Register("google", providers.NewGoogleClient())
 	proinject.Register("student_repository", studentsresources.NewDbStudentRepository())
 	proinject.Register("student_service", students.NewStudentService())
-	proinject.Register("settlement_repository", settlementsresources.NewDbSettlementRepository())
-	proinject.Register("settlement_service", settlements.NewSettlementService())
 	proinject.Register("appointment_repository", appointmentsresources.NewDbAppointmentRepository())
 	proinject.Register("appointment_service", appointments.NewAppointmentService())
+	proinject.Register("settlement_repository", settlementsresources.NewDbSettlementRepository())
+	proinject.Register("settlement_service", settlements.NewSettlementService())
 	proinject.Register("auth_repository", authresources.NewDbAuthRepository())
 	proinject.Register("status_repository", statusresources.NewDbStatusRepository())
 }

@@ -38,6 +38,13 @@ func (a *AppointmentService) GetAppointmentsByDateRange(data GetAppointmentsByDa
 	return a.AppointmentRepository.GetAppointmentsByDateRange(data)
 }
 
+func (a *AppointmentService) GetAppointmentsByStudent(data GetAppointmentsByStudentDTO) ([]Appointment, error) {
+	if err := a.Validate.Struct(data); err != nil {
+		return []Appointment{}, err
+	}
+	return a.AppointmentRepository.GetAppointmentsByStudent(data)
+}
+
 func (a *AppointmentService) UpdateAppointment(appointment UpdateAppointmentDTO) (int, error) {
 	if err := a.Validate.Struct(appointment); err != nil {
 		return 0, err

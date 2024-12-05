@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
+	"github.com/irwinarruda/pro-cris-server/modules/appointments"
 	"github.com/irwinarruda/pro-cris-server/modules/students"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/models"
@@ -12,9 +13,10 @@ import (
 )
 
 type SettlementService struct {
-	SettlementRepository ISettlementRepository    `inject:"settlement_repository"`
-	StudentService       students.IStudentService `inject:"student_service"`
-	Validate             configs.Validate         `inject:"validate"`
+	SettlementRepository ISettlementRepository            `inject:"settlement_repository"`
+	StudentService       students.IStudentService         `inject:"student_service"`
+	AppointmentService   appointments.IAppointmentService `inject:"appointment_service"`
+	Validate             configs.Validate                 `inject:"validate"`
 }
 
 type ISettlementService = *SettlementService
@@ -36,10 +38,6 @@ func (s *SettlementService) GetLastSettlementByStudent(data GetLastSettlementByS
 	}
 	last := Settlement{}
 	for _, settlement := range settlements {
-		if last.ID == 0 {
-			last = settlement
-			continue
-		}
 		if settlement.StartDate.After(last.StartDate) {
 			last = settlement
 		}
@@ -67,6 +65,14 @@ func (s *SettlementService) CreateSettlement(settlement CreateSettlementDTO) (in
 		SettlementStyleDay:   student.SettlementStyleDay,
 	}
 
+	_, err = s.AppointmentService.GetAppointmentsByStudent(appointments.GetAppointmentsByStudentDTO{
+		IDAccount: settlement.IDAccount,
+		IDStudent: settlement.IDStudent,
+	})
+	if err != nil {
+		settlement.StartDate = time.Now()
+		return s.SettlementRepository.CreateSettlement(settlement)
+	}
 	lastSettlement, err := s.GetLastSettlementByStudent(GetLastSettlementByStudentDTO{
 		IDAccount: settlement.IDAccount,
 		IDStudent: settlement.IDStudent,

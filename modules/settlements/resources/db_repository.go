@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/irwinarruda/pro-cris-server/libs/proinject"
+	"github.com/irwinarruda/pro-cris-server/modules/settlements"
 	"github.com/irwinarruda/pro-cris-server/shared/configs"
 	"github.com/irwinarruda/pro-cris-server/shared/models"
 )
@@ -35,6 +36,14 @@ type DbSettlementRepository struct {
 
 func NewDbSettlementRepository() *DbSettlementRepository {
 	return proinject.Resolve(&DbSettlementRepository{})
+}
+
+func (a *DbSettlementRepository) GetSettlementsByStudent(data settlements.GetSettlementsByStudentDTO) ([]settlements.Settlement, error) {
+	return nil, nil
+}
+
+func (a *DbSettlementRepository) CreateSettlement(settlement settlements.CreateSettlementDTO) (int, error) {
+	return 0, nil
 }
 
 func (a *DbSettlementRepository) ResetSettlement() {

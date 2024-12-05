@@ -12,6 +12,11 @@ type GetAppointmentsDTO struct {
 	IDs       []int `json:"ids" validate:"required"`
 }
 
+type GetAppointmentsByStudentDTO struct {
+	IDAccount int `json:"idAccount" validate:"required"`
+	IDStudent int `json:"idStudent" validate:"required"`
+}
+
 type GetAppointmentsByDateRangeDTO struct {
 	IDAccount   int       `json:"idAccount" validate:"required"`
 	InitialDate time.Time `json:"initialDate" validate:"required"`
