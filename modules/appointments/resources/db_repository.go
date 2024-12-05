@@ -120,9 +120,6 @@ func (a *DbAppointmentRepository) GetAppointmentsByID(data appointments.GetAppoi
 	if result.Error != nil {
 		return []appointments.Appointment{}, result.Error
 	}
-	if len(appointmentsE) == 0 {
-		return []appointments.Appointment{}, utils.NewAppError("Appointments not found", true, http.StatusNotFound)
-	}
 	appointments := []appointments.Appointment{}
 	for _, apointmentE := range appointmentsE {
 		appointments = append(appointments, apointmentE.ToAppointment())
