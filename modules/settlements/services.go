@@ -65,33 +65,56 @@ func (s *SettlementService) CreateSettlement(settlement CreateSettlementDTO) (in
 		SettlementStyleDay:   student.SettlementStyleDay,
 	}
 
-	_, err = s.AppointmentService.GetAppointmentsByStudent(appointments.GetAppointmentsByStudentDTO{
-		IDAccount: settlement.IDAccount,
-		IDStudent: settlement.IDStudent,
-	})
-	if err != nil {
-		settlement.StartDate = time.Now()
-		return s.SettlementRepository.CreateSettlement(settlement)
-	}
 	lastSettlement, err := s.GetLastSettlementByStudent(GetLastSettlementByStudentDTO{
 		IDAccount: settlement.IDAccount,
 		IDStudent: settlement.IDStudent,
 	})
-	if err != nil {
-		settlement.StartDate = time.Now()
-		return s.SettlementRepository.CreateSettlement(settlement)
+	if err == nil {
+		if settlement.StartDate.Before(lastSettlement.EndDate) {
+			settlement.StartDate = lastSettlement.EndDate.AddDate(0, 0, 1)
+		}
 	}
 
-	if student.SettlementStyle == models.SettlementStyleAppointments {
-		settlement.StartDate = lastSettlement.EndDate
-		// Can use the last appointments date
-		settlement.EndDate = settlement.StartDate.AddDate(0, 0, 30)
-	} else if student.SettlementStyle == models.SettlementStyleMonthly {
-		settlement.StartDate = lastSettlement.EndDate
-		settlement.EndDate = settlement.StartDate.AddDate(0, 1, 0)
-	} else if student.SettlementStyle == models.SettlementStyleWeekly {
-		settlement.StartDate = lastSettlement.EndDate
-		settlement.EndDate = settlement.StartDate.AddDate(0, 0, 7)
+	notSettledAppointments, err := s.AppointmentService.GetNotSettledAppointmentsByStudent(appointments.GetNotSettledAppointmentsByStudentDTO{
+		IDAccount: settlement.IDAccount,
+		IDStudent: settlement.IDStudent,
+	})
+	if err != nil {
+		return 0, err
+	}
+	if len(notSettledAppointments) == 0 {
+		return 0, utils.NewAppError("Settlement cannot be created without appointments.", true, http.StatusBadRequest)
+	}
+	includedAppointments := []appointments.Appointment{}
+	if settlement.SettlementStyle == models.SettlementStyleMonthly {
+		timeNow := time.Now()
+		settlement.StartDate = time.Date(timeNow.Year(), timeNow.Month(), *settlement.SettlementStyleDay, 0, 0, 0, 0, time.Local)
+		settlement.EndDate = settlement.StartDate.AddDate(0, *settlement.SettlementStyleValue, -1)
+	} else if settlement.SettlementStyle == models.SettlementStyleWeekly {
+		settlement.EndDate = settlement.StartDate.AddDate(0, 0, *settlement.SettlementStyleValue*7)
+	}
+	if settlement.SettlementStyle == models.SettlementStyleAppointments {
+		for i := 0; i < *settlement.SettlementStyleValue; i++ {
+			if i >= len(notSettledAppointments) {
+				break
+			}
+			includedAppointments = append(includedAppointments, notSettledAppointments[i])
+		}
+	} else {
+		for _, appointment := range notSettledAppointments {
+			if !utils.IsOverlappingDate(settlement.StartDate, settlement.EndDate, appointment.CalendarDay, appointment.CalendarDay) {
+				continue
+			}
+			includedAppointments = append(includedAppointments, appointment)
+		}
+	}
+	if settlement.PaymentType == models.PaymentTypeFixed {
+		settlement.TotalAmount = *settlement.PaymentTypeValue
+	} else {
+		settlement.TotalAmount = 0
+		for _, appointment := range includedAppointments {
+			settlement.TotalAmount += appointment.Price
+		}
 	}
 
 	return 0, nil

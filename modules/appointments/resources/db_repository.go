@@ -14,6 +14,7 @@ import (
 type DbAppointment struct {
 	ID           int
 	IDAccount    int
+	IDSettlement *int
 	StartHour    int
 	Duration     int
 	Price        float64
@@ -153,7 +154,7 @@ func (a *DbAppointmentRepository) GetAppointmentsByDateRange(data appointments.G
 	return appointments, nil
 }
 
-func (a *DbAppointmentRepository) GetAppointmentsByStudent(data appointments.GetAppointmentsByStudentDTO) ([]appointments.Appointment, error) {
+func (a *DbAppointmentRepository) GetNotSettledAppointmentsByStudent(data appointments.GetNotSettledAppointmentsByStudentDTO) ([]appointments.Appointment, error) {
 	sql := `
     SELECT
       ap.*,
@@ -164,6 +165,7 @@ func (a *DbAppointmentRepository) GetAppointmentsByStudent(data appointments.Get
     LEFT JOIN "student" st ON st.id = ap.id_student
     WHERE ap.id_account = ?
     AND ap.id_student = ?
+    AND ap.is_settled = false
     AND ap.is_deleted = false;
   `
 	appointmentsE := []DbAppointment{}

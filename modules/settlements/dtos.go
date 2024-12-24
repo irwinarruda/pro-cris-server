@@ -18,10 +18,11 @@ type GetSettlementsByStudentDTO struct {
 
 type CreateSettlementDTO struct {
 	CreateSettlementOptionsDTO
-	IDAccount int       `json:"idAccount" validate:"required"`
-	IDStudent int       `json:"idStudent" validate:"required"`
-	StartDate time.Time `json:"startDate" validate:"required"`
-	EndDate   time.Time `json:"endDate" validate:"required"`
+	IDAccount   int       `json:"idAccount" validate:"required"`
+	IDStudent   int       `json:"idStudent" validate:"required"`
+	TotalAmount float64   `json:"totalAmount"`
+	StartDate   time.Time `json:"startDate" validate:"required"`
+	EndDate     time.Time `json:"endDate"`
 }
 
 type CreateSettlementOptionsDTO struct {

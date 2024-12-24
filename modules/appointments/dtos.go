@@ -12,7 +12,7 @@ type GetAppointmentsDTO struct {
 	IDs       []int `json:"ids" validate:"required"`
 }
 
-type GetAppointmentsByStudentDTO struct {
+type GetNotSettledAppointmentsByStudentDTO struct {
 	IDAccount int `json:"idAccount" validate:"required"`
 	IDStudent int `json:"idStudent" validate:"required"`
 }

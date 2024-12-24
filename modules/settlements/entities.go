@@ -15,6 +15,7 @@ type Settlement struct {
 	EndDate      time.Time                  `json:"endDate"`
 	IsSettled    bool                       `json:"isSettled"`
 	IsDeleted    bool                       `json:"isDeleted"`
+	TotalAmount  float64                    `json:"totalAmount"`
 	CreatedAt    time.Time                  `json:"createdAt"`
 	UpdatedAt    time.Time                  `json:"updatedAt"`
 	Appointments []appointments.Appointment `json:"appointments"`
